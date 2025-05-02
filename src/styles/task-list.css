@@ -1,0 +1,21 @@
+/* Task list container styles */
+.task-list-container {
+  overflow-y: auto;
+  height: 500px;
+  padding-bottom: 8px;
+  
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.task-list-container::after {
+  content: "";
+  display: block;
+  height: 80px; /* Extra padding at the bottom */
+}

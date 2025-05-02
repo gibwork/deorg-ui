@@ -1,0 +1,12 @@
+/* Add this to your CSS */
+.task-list-container {
+  overflow-y: auto;
+  height: 500px;
+  padding-bottom: 8px;
+}
+
+.task-list-container::after {
+  content: "";
+  display: block;
+  height: 40px; /* Extra padding at the bottom */
+}
