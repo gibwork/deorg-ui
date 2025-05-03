@@ -50,7 +50,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { nominateContributor } from "../../actions/members/nominate-contributor";
+import { createContributorProposal } from "../../actions/members/create-proposal-contributor";
 import { proposeContributorRequest } from "@/actions/post/propsose-contributor-request";
 import { Transaction } from "@solana/web3.js";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -80,7 +80,7 @@ export function OrganizationMembers({
     try {
       const { success, error } = await proposeContributorRequest(
         organizationId,
-        member.id
+        member.user.walletAddress
       );
       if (error) {
         toast.error("Failed to propose contributor request");
@@ -94,7 +94,7 @@ export function OrganizationMembers({
 
       const serializedTx = await signTransaction(retreivedTx);
 
-      const transactionResponse = await nominateContributor({
+      const transactionResponse = await createContributorProposal({
         organizationId,
         transactionId: success.transactionId,
         serializedTransaction: serializedTx?.serialize().toString("base64"),

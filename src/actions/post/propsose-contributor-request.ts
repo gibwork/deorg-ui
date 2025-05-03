@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import axios from "axios";
 
-export const proposeContributorRequest = async (organizationId: string, candidateId: string) => {
+export const proposeContributorRequest = async (organizationId: string, candidateWallet: string) => {
   try {
     const { getToken } = auth();
     const token = await getToken();
@@ -12,7 +12,7 @@ export const proposeContributorRequest = async (organizationId: string, candidat
       `${process.env.API_URL}/transactions/proposals/contributor`,
       {
         organizationId,
-        candidateId,
+        candidateWallet,
       },
       {
         headers: {
@@ -22,8 +22,8 @@ export const proposeContributorRequest = async (organizationId: string, candidat
       } 
     );
     return { success: data };
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error(error.response.data);
     return { error: "Failed to propose contributor request" };
   }
 };
