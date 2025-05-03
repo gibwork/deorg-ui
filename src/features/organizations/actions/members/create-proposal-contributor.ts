@@ -4,13 +4,13 @@ import axios, { AxiosError } from "axios";
 import { auth } from "@clerk/nextjs/server";
 import { ErrorResponse } from "@/types/types.error";
 
-export const nominateContributor = async ({organizationId,   transactionId, serializedTransaction}: {organizationId: string, transactionId: string, serializedTransaction: string}) => {
+export const createContributorProposal = async ({organizationId,   transactionId, serializedTransaction}: {organizationId: string, transactionId: string, serializedTransaction: string}) => {
     try {
         const { getToken, orgId } = auth();
         const token = await getToken();
 
         const { data } = await axios.post(
-            `${process.env.API_URL}/organizations/${organizationId}/contributors/nominate`,
+            `${process.env.API_URL}/organizations/${organizationId}/proposals/contributor`,
             { transactionId, serializedTransaction },
             {
                 headers: {
