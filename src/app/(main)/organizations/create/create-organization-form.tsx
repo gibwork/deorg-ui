@@ -39,6 +39,7 @@ import {
   createOrganization,
   prepareCreateOrganization,
 } from "@/features/organizations/actions/create-organization";
+import { useTransactionStore } from "@/features/transaction-toast/use-transaction-store";
 
 const createOrganizationSchema = z.object({
   name: z
@@ -114,6 +115,14 @@ export function CreateOrganizationForm() {
   const { userId } = useAuth();
   const { publicKey, signTransaction } = useWallet();
   const walletModal = useWalletModal();
+  const {
+    startTransaction,
+    updateStep,
+    setTxHash,
+    updateStatus,
+    addWarning,
+    resetTransaction,
+  } = useTransactionStore.getState();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -196,7 +205,10 @@ export function CreateOrganizationForm() {
     setIsLoading(true);
     try {
       if (!publicKey || !signTransaction) return;
+      toast.dismiss();
+      const transactionId = startTransaction(`Create organization`);
 
+      updateStep(1, "loading", "Preparing transaction details...");
       const prepareCreateOrganizationResponse = await prepareCreateOrganization(
         {
           name: data.name,
@@ -214,6 +226,9 @@ export function CreateOrganizationForm() {
       if (prepareCreateOrganizationResponse.error) {
         throw new Error(prepareCreateOrganizationResponse.error.message);
       }
+
+      updateStep(1, "success");
+      updateStep(2, "loading", "Please sign the transaction in your wallet");
       const retreivedTx = Transaction.from(
         Buffer.from(
           prepareCreateOrganizationResponse.success.serializedTransaction,
@@ -237,18 +252,47 @@ export function CreateOrganizationForm() {
         description: data?.description,
         token: requiredTokenData,
       };
+
+      updateStep(2, "success");
+      updateStep(3, "loading", "Submitting transaction to the network...");
+
       const createOrganizationResponse = await createOrganization(
         confirmTxPayload
       );
+
+      updateStep(3, "success");
+      updateStep(4, "loading", "Confirming deposit...");
+
       // console.log(createOrganizationResponse);
       if (createOrganizationResponse.error) {
         throw new Error(createOrganizationResponse.error.message);
-      } else {
-        toast.success("Organization created successfully!");
-        router.push(`/organizations/${createOrganizationResponse.success.id}`);
       }
+      updateStep(4, "success");
+      updateStatus("success");
+      router.push(`/organizations/${createOrganizationResponse.success.id}`);
     } catch (error) {
-      toast.error("Failed to create organization. Please try again.");
+      const errorMessage =
+        error instanceof Error ? error.message : "Please try again later";
+
+      // Find the current step that failed
+      const currentStep =
+        [1, 2, 3, 4].find((step) => {
+          const activeTransaction =
+            useTransactionStore.getState().activeTransaction;
+          return (
+            activeTransaction?.steps.find((s) => s.id === step)?.status ===
+            "loading"
+          );
+        }) || 2;
+
+      // Update the failed step with error message
+      updateStep(currentStep, "error", errorMessage);
+      updateStatus("error");
+
+      // Add warning if it's a specific type of error
+      if (error instanceof Error && error.message.includes("insufficient")) {
+        addWarning("Insufficient balance for transaction");
+      }
     } finally {
       setIsLoading(false);
     }
