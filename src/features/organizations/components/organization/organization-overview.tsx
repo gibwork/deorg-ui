@@ -21,9 +21,7 @@ import { ProjectDetailModal } from "./project-detail-modal";
 import { useOrganization } from "../../hooks/use-organization";
 import { useQuery } from "@tanstack/react-query";
 import { getOrganizationOverview } from "../../actions/get-organization-overview";
-import { Organization } from "@/types/types.organization";
-import { OrganizationHeader } from "./organization-header";
-import { useAuth } from "@clerk/nextjs";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
@@ -43,7 +41,6 @@ export function OrganizationOverview({
 }: {
   organizationId: string;
 }) {
-  const { isSignedIn } = useAuth();
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [showProjectDetail, setShowProjectDetail] = useState(false);
 
@@ -81,20 +78,6 @@ export function OrganizationOverview({
     setSelectedProject(project);
     setShowProjectDetail(true);
   };
-
-  if (!isSignedIn) {
-    return (
-      <div className="space-y-6">
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Authentication Required</AlertTitle>
-          <AlertDescription>
-            Please connect your wallet and sign in to view organization details.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
 
   if (error) {
     return (

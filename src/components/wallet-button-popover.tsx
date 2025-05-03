@@ -87,7 +87,7 @@ export function WalletButtonPopover({ userData }: { userData?: User }) {
                 onClick={() => {
                   disconnect();
                   if (userData?.primaryWallet) {
-                    signOut({ redirectUrl: "/?tab=task" });
+                    signOut();
                   }
                 }}
               >

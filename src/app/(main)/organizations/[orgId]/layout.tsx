@@ -6,6 +6,13 @@ import Sidebar from "@/components/layout/sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { OrganizationSidebar } from "@/features/organizations/components/organization-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { auth } from "@clerk/nextjs/server";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Unauthorized } from "./unathorized";
+
 function OrganizationLayout({
   children,
   params,
@@ -13,6 +20,8 @@ function OrganizationLayout({
   children: React.ReactNode;
   params: { orgId: string };
 }) {
+  const { userId } = auth();
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-gray-50 dark:bg-gray-900">
@@ -23,7 +32,11 @@ function OrganizationLayout({
             <OrganizationHeader organizationId={params.orgId} />
             <div className="h-[calc(100vh-1rem)]">
               <ScrollArea className="h-full">
-                <div className="mt-6 w-full">{children}</div>
+                {userId ? (
+                  <div className="mt-6 w-full">{children}</div>
+                ) : (
+                  <Unauthorized />
+                )}
               </ScrollArea>
             </div>
           </div>

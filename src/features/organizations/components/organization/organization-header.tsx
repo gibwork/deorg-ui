@@ -90,12 +90,8 @@ export function OrganizationHeader({
             <Button variant="default" size="sm">
               Fund Treasury
             </Button> */}
-          <SignedIn>
-            <PriorityFeePopover />
-          </SignedIn>
-          <SignedIn>
-            <WalletButton userData={data} />
-          </SignedIn>
+          <PriorityFeePopover />
+          <WalletButton userData={data} />
         </div>
       </div>
 
