@@ -8,9 +8,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Organization } from "@/types/types.organization";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Calendar, Users } from "lucide-react";
+import { AlertCircle, Calendar, Users, WalletIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useOrganizationList, useUser } from "@clerk/nextjs";
+import {
+  useAuth,
+  useOrganizationList,
+  useSignIn,
+  useUser,
+} from "@clerk/nextjs";
 import { UserMembershipParams } from "@/lib/organizations";
 import { useState } from "react";
 import { JoinOrganizationDialog } from "./join-organization-dialog";
@@ -18,9 +23,14 @@ import { Card } from "@/components/ui/card";
 import { formatDate } from "date-fns";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { LoaderButton } from "@/components/loader-button";
+import { useWalletAuth } from "@/features/auth/lib/wallet-auth";
+import { WalletButton } from "@/components/wallet-button";
 
 const OrganizationsList = () => {
   const router = useRouter();
+  const { isSignedIn } = useAuth();
+  const { isLoading: isWalletAuthLoading, handleSignIn } = useWalletAuth();
   const { userMemberships, setActive } =
     useOrganizationList(UserMembershipParams);
   const [selectedOrganization, setSelectedOrganization] =
@@ -80,8 +90,11 @@ const OrganizationsList = () => {
   return (
     <section>
       {/* header here */}
-      <div className="p-4">
+      <div className="flex items-center justify-between p-4">
         <h1 className="text-3xl font-bold">DeOrg</h1>
+        <div className="flex items-center justify-end gap-2">
+          <WalletButton />
+        </div>
       </div>
       <div className="container py-8">
         <div className="flex justify-between items-center mb-8">
@@ -89,10 +102,7 @@ const OrganizationsList = () => {
           {organizations?.length > 0 && (
             <Link
               href="/organizations/create"
-              className={cn(
-                buttonVariants({ variant: "default" }),
-                "hidden md:block"
-              )}
+              className={cn(buttonVariants({ variant: "default" }))}
             >
               Create Organization
             </Link>
@@ -111,7 +121,7 @@ const OrganizationsList = () => {
             ))}
           </div>
         ) : organizations.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {organizations.map((org: Organization) => (
               <Card
                 key={org.id}
@@ -146,7 +156,7 @@ const OrganizationsList = () => {
                   Created {formatDate(org.createdAt, "MMM d, yyyy")}
                 </div>
 
-                <div className="flex gap-2 mt-4">
+                <div className="hidden  gap-2 mt-4">
                   {isUserMember(org.externalId) ? (
                     <Button
                       className="flex-1"
@@ -187,12 +197,25 @@ const OrganizationsList = () => {
                 Create your first organization to get started.
               </p>
               <div className="mt-6">
-                <Link
-                  href="/organizations/create"
-                  className={cn(buttonVariants({ variant: "default" }))}
-                >
-                  Create Organization
-                </Link>
+                {!isSignedIn ? (
+                  <div className="flex justify-center">
+                    <LoaderButton
+                      isLoading={isWalletAuthLoading}
+                      variant="outline"
+                      onClick={handleSignIn}
+                    >
+                      <WalletIcon className="size-4 mr-2" />
+                      Connect Wallet
+                    </LoaderButton>
+                  </div>
+                ) : (
+                  <Link
+                    href="/organizations/create"
+                    className={cn(buttonVariants({ variant: "default" }))}
+                  >
+                    Create Organization
+                  </Link>
+                )}
               </div>
             </div>
           </Card>

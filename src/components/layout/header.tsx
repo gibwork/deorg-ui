@@ -43,17 +43,17 @@ function Header() {
   });
 
   const { data: walletTokensData } = useWalletTokenBalances({
-    enabled: !!data && !!data?.primaryWallet,
+    enabled: !!data && !!data?.walletAddress,
   });
 
   const { data: walletNFTData } = useWalletNFTBalances({
-    enabled: !!data && !!data?.primaryWallet,
+    enabled: !!data && !!data?.walletAddress,
   });
 
   // console.log(walletTokensData)
 
   useEffect(() => {
-    if (publicKey && !data?.primaryWallet) {
+    if (publicKey && !data?.walletAddress) {
       handleVerify();
     }
 
@@ -102,7 +102,7 @@ function Header() {
             <PriorityFeePopover />
           </SignedIn>
           <SignedIn>
-            <WalletButton userData={data} />
+            <WalletButton />
           </SignedIn>
           <ClerkLoading>
             <Loader className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -149,7 +149,7 @@ function Header() {
             <PriorityFeePopover />
           </SignedIn>
           <SignedIn>
-            <WalletButton userData={data} />
+            <WalletButton />
           </SignedIn>
           <div className={cn("block lg:!hidden")}>
             <MobileSidebar />

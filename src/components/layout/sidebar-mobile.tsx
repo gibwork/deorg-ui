@@ -120,7 +120,7 @@ export function MobileSidebar({ className }: SidebarProps) {
 
                   {/* Account notification prompts */}
                   <div className="mt-auto">
-                    {!userData?.primaryWallet ? (
+                    {!userData?.walletAddress ? (
                       <div className="m-3 p-3 bg-purple-50 dark:bg-[#8151fd]/10 border border-purple-200 dark:border-[#8151fd]/25 rounded-md shadow-sm relative">
                         <p className="text-xs text-purple-700 dark:text-purple-300 mt-1 mb-1 pl-3">
                           Add a wallet to collect payment and rewards.

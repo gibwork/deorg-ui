@@ -21,11 +21,7 @@ export async function POST(
 ) {
   const body = await request.json();
 
-  const { error } = await walletSignIn(
-    body.account,
-    body.signature,
-    true
-  );
+  const { error } = await walletSignIn(body.account, body.signature, true);
 
   if (error) {
     const res = await axios.get(
@@ -61,7 +57,7 @@ export async function POST(
 
   const res = await axios.get(`${process.env.API_URL}/tasks/${params.taskId}`);
 
-  const owner = res.data.user.primaryWallet === body.account;
+  const owner = res.data.user.walletAddress === body.account;
 
   const content = removeMarkdown(res.data.content);
   const contentText = content.replace(/\\/g, "");
@@ -90,7 +86,7 @@ export async function POST(
   }
 
   const submission = res.data.taskSubmissions.find(
-    (submission: any) => submission.user.primaryWallet === body.account
+    (submission: any) => submission.user.walletAddress === body.account
   );
 
   if (!submission) {
@@ -107,7 +103,7 @@ export async function POST(
           },
         ],
       },
-    ]
+    ];
 
     if (!res.data.isOpen) {
       actions = [
@@ -116,7 +112,7 @@ export async function POST(
           href: `/api/actions/tasks/${params.taskId}/sign`,
           label: res.data.isOpen ? "Connect Wallet" : "Task Completed",
         },
-      ]
+      ];
     }
 
     const response: ActionGetResponse = {
@@ -127,7 +123,7 @@ export async function POST(
       disabled: res.data.isOpen ? false : true,
       label: "Action payment",
       links: {
-        actions
+        actions,
       },
     };
 
@@ -171,9 +167,10 @@ export async function POST(
         actions: [
           {
             type: "post",
-            label: `Claim ${Number(submission.asset.amount) /
+            label: `Claim ${
+              Number(submission.asset.amount) /
               Math.pow(10, submission.asset.decimals)
-              } ${submission.asset.symbol}`,
+            } ${submission.asset.symbol}`,
             href: `/api/actions/tasks/${params.taskId}/claim?signature=${body.signature}`,
           },
         ],
@@ -201,7 +198,7 @@ export async function POST(
           href: `/api/actions/tasks/${params.taskId}/sign`,
           label: res.data.isOpen ? "Connect Wallet" : "Task Completed",
         },
-      ]
+      ];
     }
 
     const response: ActionGetResponse = {
@@ -212,7 +209,7 @@ export async function POST(
       label: "Action payment",
       disabled: true,
       links: {
-        actions
+        actions,
       },
     };
 
@@ -244,4 +241,3 @@ export async function POST(
 }
 
 export const OPTIONS = GET;
-

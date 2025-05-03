@@ -134,6 +134,7 @@ export function CreateOrganizationForm() {
   const currentValues = watch();
 
   const userData = queryClient.getQueryData<User>([`user-${userId}`]);
+
   const {
     selectedPriority,
     maxPriorityFee,
@@ -147,7 +148,7 @@ export function CreateOrganizationForm() {
     refetch,
     isRefetching: isWalletTokensRefetching,
   } = useWalletTokenBalances({
-    enabled: !!userData && !!userData?.primaryWallet,
+    enabled: !!userData && !!userData?.walletAddress,
   });
 
   const {

@@ -41,16 +41,6 @@ export function OrganizationHeader({
     error,
   } = useOrganization(organizationId);
 
-  const { data } = useQuery<User>({
-    queryKey: [`user-${userId}`],
-    queryFn: async () => {
-      const userData = await getUserData();
-      if (userData.error) throw new Error(userData.error);
-      if (userData.success) return userData.success;
-    },
-    enabled: !!userId,
-  });
-
   const handleCopyMultisigAddress = () => {
     try {
       navigator.clipboard.writeText("5xT...");
@@ -91,7 +81,7 @@ export function OrganizationHeader({
               Fund Treasury
             </Button> */}
           <PriorityFeePopover />
-          <WalletButton userData={data} />
+          <WalletButton />
         </div>
       </div>
 
