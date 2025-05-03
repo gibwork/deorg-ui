@@ -27,7 +27,7 @@ async function Organizations() {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <OrganizationsList />;
+      <OrganizationsList />
     </HydrationBoundary>
   );
 }
