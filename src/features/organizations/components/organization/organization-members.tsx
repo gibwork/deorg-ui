@@ -241,11 +241,11 @@ export function OrganizationMembers({
       </div>
 
       <Tabs defaultValue="members" className="w-full">
-        <TabsList>
+        {/* <TabsList>
           <TabsTrigger value="members">Members</TabsTrigger>
           <TabsTrigger value="payroll">Payroll</TabsTrigger>
           <TabsTrigger value="history">Payment History</TabsTrigger>
-        </TabsList>
+        </TabsList> */}
 
         <TabsContent value="members" className="mt-6">
           <div className="grid gap-4">

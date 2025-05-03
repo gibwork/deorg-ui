@@ -72,12 +72,12 @@ export const OrganizationNavbarItems = [
     value: "projects",
     href: (orgId: string) => `/organizations/${orgId}/projects`,
   },
-  {
-    label: "Tasks",
-    icon: ListChecks,
-    value: "tasks",
-    href: (orgId: string) => `/organizations/${orgId}/tasks`,
-  },
+  // {
+  //   label: "Tasks",
+  //   icon: ListChecks,
+  //   value: "tasks",
+  //   href: (orgId: string) => `/organizations/${orgId}/tasks`,
+  // },
   {
     label: "Members",
     icon: Users,

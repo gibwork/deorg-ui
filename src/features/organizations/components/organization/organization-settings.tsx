@@ -27,6 +27,7 @@ import {
 import { AlertCircle, Save } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useOrganization } from "../../hooks/use-organization";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function OrganizationSettings({
   organizationId,
@@ -58,7 +59,7 @@ export function OrganizationSettings({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-y-auto pb-10">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
         <p className="text-muted-foreground">
@@ -69,7 +70,7 @@ export function OrganizationSettings({
       <Tabs defaultValue="general" className="w-full">
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="governance">Governance</TabsTrigger>
+          {/* <TabsTrigger value="governance">Governance</TabsTrigger> */}
           <TabsTrigger value="advanced">Advanced</TabsTrigger>
         </TabsList>
 
@@ -109,6 +110,61 @@ export function OrganizationSettings({
                   />
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="votingThreshold">
+                    Voting Approval Threshold (%)
+                  </Label>
+                  <Input
+                    id="votingThreshold"
+                    type="number"
+                    min="1"
+                    max="100"
+                    // value={orgData.votingThreshold}
+                    value="60"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Percentage of votes needed for a proposal to pass.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="votingPeriod">Voting Period (days)</Label>
+                  <Input
+                    id="votingPeriod"
+                    type="number"
+                    min="1"
+                    // value={orgData.votingPeriod}
+                    value="3"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    How long proposals remain open for voting.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="rolePromotion">
+                    Role Promotion Requirements
+                  </Label>
+                  <Select defaultValue="majority">
+                    <SelectTrigger id="rolePromotion">
+                      <SelectValue placeholder="Select requirement" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="majority">
+                        Simple Majority (50%+)
+                      </SelectItem>
+                      <SelectItem value="supermajority">
+                        Super Majority (66%+)
+                      </SelectItem>
+                      <SelectItem value="consensus">
+                        Full Consensus (100%)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Voting threshold for promoting members to new roles.
+                  </p>
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="website">Website</Label>
                   <Input
@@ -174,79 +230,25 @@ export function OrganizationSettings({
           </form>
         </TabsContent>
 
-        <TabsContent value="governance" className="space-y-4 mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Governance Settings</CardTitle>
-              <CardDescription>
-                Configure how proposals and voting work in your organization.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="votingThreshold">
-                  Voting Approval Threshold (%)
-                </Label>
-                <Input
-                  id="votingThreshold"
-                  type="number"
-                  min="1"
-                  max="100"
-                  // value={orgData.votingThreshold}
-                  value="60"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Percentage of votes needed for a proposal to pass.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="votingPeriod">Voting Period (days)</Label>
-                <Input
-                  id="votingPeriod"
-                  type="number"
-                  min="1"
-                  // value={orgData.votingPeriod}
-                  value="3"
-                />
-                <p className="text-xs text-muted-foreground">
-                  How long proposals remain open for voting.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="rolePromotion">
-                  Role Promotion Requirements
-                </Label>
-                <Select defaultValue="majority">
-                  <SelectTrigger id="rolePromotion">
-                    <SelectValue placeholder="Select requirement" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="majority">
-                      Simple Majority (50%+)
-                    </SelectItem>
-                    <SelectItem value="supermajority">
-                      Super Majority (66%+)
-                    </SelectItem>
-                    <SelectItem value="consensus">
-                      Full Consensus (100%)
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  Voting threshold for promoting members to new roles.
-                </p>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button>
-                <Save className="mr-2 h-4 w-4" />
-                Save Governance Settings
-              </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
+        {/* <TabsContent value="governance" className="space-y-4 mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Governance Settings</CardTitle>
+                  <CardDescription>
+                    Configure how proposals and voting work in your organization.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                
+                </CardContent>
+                <CardFooter>
+                  <Button>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Governance Settings
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent> */}
 
         <TabsContent value="advanced" className="space-y-4 mt-6">
           <Card>

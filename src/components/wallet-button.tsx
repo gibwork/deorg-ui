@@ -43,7 +43,7 @@ export function WalletButton({ userData }: { userData?: User }) {
       if (pubKey !== userData?.primaryWallet) {
         disconnect();
         if (!isManualChange) {
-          signOut({ redirectUrl: "/?tab=task" });
+          signOut({ redirectUrl: "/" });
         } else {
           toast.warning("Please connect your primary wallet to continue!", {
             id: pubKey,
@@ -53,7 +53,7 @@ export function WalletButton({ userData }: { userData?: User }) {
       toggleManualChange(false);
     } else if (!publicKey && userData?.primaryWallet && !isFirstRender) {
       if (!isManualChange) {
-        signOut({ redirectUrl: "/?tab=task" });
+        signOut({ redirectUrl: "/" });
       }
     }
 

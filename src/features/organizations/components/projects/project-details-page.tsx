@@ -1,1143 +1,736 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useEffect, useState, useMemo } from "react";
-import { TaskModal } from "@/components/tasks/TaskModal";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  OrganizationTask,
-  TaskComment,
-  ProjectDetails,
-  Vote,
-} from "@/types/types.organization";
-import { ProjectActivityFeed } from "@/components/tasks/ProjectActivityFeed";
-import { ProjectActivityService } from "@/services/project-activity.service";
-import { useTaskModal } from "@/hooks/use-task-modal";
-import {
-  ChevronLeft,
-  Users,
-  Clock,
-  Calendar,
   CheckCircle2,
-  Circle,
-  AlertCircle,
-  Plus,
-  MoreHorizontal,
-  ArrowUpRight,
-  MessageSquare,
-  BarChart2,
-  FolderKanban,
-  Settings,
-  DollarSign,
+  Clock,
+  PlusCircle,
+  ThumbsDown,
+  ThumbsUp,
+  Users,
+  LayoutGrid,
+  LayoutList,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getProjectDetails } from "../../actions/projects/get-project-details";
-import DateComponent from "@/components/date-component";
-import Content from "@/components/tiptap/content";
-import VoteProjectButton from "./vote-project-button";
-import { useUser } from "@clerk/nextjs";
-export default function ProjectDetailsPage() {
+// import { KanbanBoard } from "@/components/organization/kanban-board";
+
+export default function ProjectDetailsPage({
+  orgId,
+  projectId,
+}: {
+  orgId: string;
+  projectId: string;
+}) {
   const router = useRouter();
-  const params = useParams();
-  const projectId = params?.projectId as string;
-  const organizationId = params?.id as string;
+  const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
 
-  const { user } = useUser();
-
-  const [project, setProject] = useState<ProjectDetails | null>(null);
-  const [members, setMembers] = useState<any>([]);
-  const [loading, setLoading] = useState(true);
-  const [newTaskTitle, setNewTaskTitle] = useState("");
-  const [taskFilter, setTaskFilter] = useState<string>("all");
-
-  const {
-    data: projectData,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["project", projectId],
-    queryFn: async () => {
-      const project = await getProjectDetails(organizationId, projectId);
-      if (project.error) throw new Error(project.error.message);
-      return project!.success;
+  // Mock data for project details
+  const project = {
+    id: projectId,
+    title:
+      projectId === "frontend-redesign"
+        ? "Frontend Redesign"
+        : "Smart Contract Audit",
+    description:
+      projectId === "frontend-redesign"
+        ? "Redesign the frontend UI to improve user experience and conversion rates."
+        : "Comprehensive audit of all smart contracts to ensure security and efficiency.",
+    status:
+      projectId === "frontend-redesign" ? "in_progress" : "pending_approval",
+    progress: projectId === "frontend-redesign" ? 45 : 0,
+    budget: projectId === "frontend-redesign" ? 1200 : 2000,
+    spent: projectId === "frontend-redesign" ? 540 : 0,
+    startDate: projectId === "frontend-redesign" ? "2023-06-01" : "2023-07-01",
+    endDate: projectId === "frontend-redesign" ? "2023-07-15" : "2023-08-15",
+    contributors:
+      projectId === "frontend-redesign"
+        ? [
+            { name: "Alice", avatar: "/placeholder.svg?height=32&width=32" },
+            { name: "Bob", avatar: "/placeholder.svg?height=32&width=32" },
+          ]
+        : [],
+    milestones:
+      projectId === "frontend-redesign"
+        ? [
+            {
+              title: "Design Phase",
+              status: "completed",
+              dueDate: "2023-06-15",
+            },
+            {
+              title: "Implementation",
+              status: "in_progress",
+              dueDate: "2023-07-01",
+            },
+            {
+              title: "Testing & Launch",
+              status: "not_started",
+              dueDate: "2023-07-15",
+            },
+          ]
+        : [
+            {
+              title: "Initial Review",
+              status: "not_started",
+              dueDate: "2023-07-15",
+            },
+            {
+              title: "Vulnerability Testing",
+              status: "not_started",
+              dueDate: "2023-08-01",
+            },
+            {
+              title: "Final Report",
+              status: "not_started",
+              dueDate: "2023-08-15",
+            },
+          ],
+    tasks: {
+      total: projectId === "frontend-redesign" ? 12 : 8,
+      completed: projectId === "frontend-redesign" ? 5 : 0,
     },
-  });
-
-  const handleStatusChange = async (
-    taskId: string,
-    newStatus: OrganizationTask["status"]
-  ) => {
-    if (!project) return;
-
-    const timestamp = new Date().toISOString();
-    const taskToUpdate = project.tasks.find((task) => task.id === taskId);
-
-    if (!taskToUpdate) return;
-
-    // Check if task has reached quorum (has enough votes and is funded)
-    // If not, it cannot be moved from todo
-    if (!taskToUpdate.funded && newStatus !== "todo") {
-      alert(
-        "This task has not reached quorum yet. It cannot be moved from 'To Do' until it gets enough votes and is funded."
-      );
-      return;
-    }
-
-    const updatedTasks = project.tasks.map((task) => {
-      if (task.id === taskId) {
-        return {
-          ...task,
-          status: newStatus,
-          completedAt: newStatus === "completed" ? timestamp : undefined,
-        };
-      }
-      return task;
-    });
-
-    // Create a new activity for status change
-    const statusDescription =
-      newStatus === "completed"
-        ? "Marked"
-        : newStatus === "in-progress"
-        ? "Started working on"
-        : newStatus === "blocked"
-        ? "Marked as blocked"
-        : "Updated status of";
-
-    // Create activity through the service
-    const activityData = {
-      type: "status_changed" as const,
-      timestamp,
-      userId: "1", // Assuming current user is Jane Doe
-      taskId,
-      description: `${statusDescription} '${taskToUpdate.title}' ${
-        newStatus === "completed" ? "as completed" : ""
-      }`,
-    };
-
-    try {
-      const newActivity = await ProjectActivityService.createActivity(
-        projectId,
-        activityData
-      );
-
-      setProject({
-        ...project,
-        tasks: updatedTasks,
-        activities: project.activities
-          ? [newActivity, ...project.activities]
-          : [newActivity],
-      });
-    } catch (error) {
-      console.error("Failed to create activity:", error);
-
-      // Still update the tasks even if activity creation fails
-      setProject({
-        ...project,
-        tasks: updatedTasks,
-      });
-    }
-  };
-
-  const handleAddComment = async (taskId: string, comment: string) => {
-    if (!project) return;
-
-    const timestamp = new Date().toISOString();
-    const taskToUpdate = project.tasks.find((task) => task.id === taskId);
-
-    if (!taskToUpdate) return;
-
-    const newComment: TaskComment = {
-      id: `comment${Date.now()}`,
-      content: comment,
-      authorId: "1", // Assuming current user is Jane Doe
-      createdAt: timestamp,
-    };
-
-    const updatedTasks = project.tasks.map((task) => {
-      if (task.id === taskId) {
-        return {
-          ...task,
-          comments: task.comments
-            ? [...task.comments, newComment]
-            : [newComment],
-        };
-      }
-      return task;
-    });
-
-    // Create activity through the service
-    const activityData = {
-      type: "comment_added" as const,
-      timestamp,
-      userId: "1", // Assuming current user is Jane Doe
-      taskId,
-      description: `Commented on '${taskToUpdate.title}'`,
-    };
-
-    try {
-      const newActivity = await ProjectActivityService.createActivity(
-        projectId,
-        activityData
-      );
-
-      setProject({
-        ...project,
-        tasks: updatedTasks,
-        activities: project.activities
-          ? [newActivity, ...project.activities]
-          : [newActivity],
-      });
-    } catch (error) {
-      console.error("Failed to create activity:", error);
-
-      // Still update the tasks even if activity creation fails
-      setProject({
-        ...project,
-        tasks: updatedTasks,
-      });
-    }
-  };
-
-  // Function to handle voting on a task
-  const handleVoteTask = async (
-    taskId: string,
-    voteType: "yes" | "no" = "yes"
-  ) => {
-    if (!project) return;
-
-    const timestamp = new Date().toISOString();
-    const taskToUpdate = project.tasks.find((task) => task.id === taskId);
-
-    if (!taskToUpdate) return;
-
-    // Get the current user ID (for demo purposes, we assume the user is Jane Doe with ID "1")
-    const currentUserId = "1";
-
-    // Check if the user has already voted
-    const existingVoteIndex = taskToUpdate.votes?.findIndex(
-      (vote) => vote.memberId === currentUserId
-    );
-
-    let newVotes: Vote[] = [];
-
-    if (existingVoteIndex !== undefined && existingVoteIndex >= 0) {
-      // User has already voted, update their vote
-      newVotes = [...(taskToUpdate.votes || [])];
-      newVotes[existingVoteIndex] = {
-        id: `vote_${Date.now()}_${currentUserId}`,
-        memberId: currentUserId,
-        type: voteType,
-        timestamp,
-      };
-    } else {
-      // Add new vote
-      newVotes = [
-        ...(taskToUpdate.votes || []),
-        {
-          id: `vote_${Date.now()}_${currentUserId}`,
-          memberId: currentUserId,
-          type: voteType,
-          timestamp,
+    votingStatus: {
+      status: projectId === "frontend-redesign" ? "approved" : "voting",
+      votesFor: projectId === "frontend-redesign" ? 5 : 3,
+      votesAgainst: projectId === "frontend-redesign" ? 0 : 1,
+      totalVotes: 5,
+      endTime: projectId === "frontend-redesign" ? undefined : "June 15, 2023",
+    },
+    votes: [
+      {
+        voter: { name: "Alice", avatar: "/placeholder.svg?height=32&width=32" },
+        vote: "for",
+        timestamp: "June 10, 2023 14:32",
+        comment: "This is a critical feature we need to implement.",
+      },
+      {
+        voter: { name: "Bob", avatar: "/placeholder.svg?height=32&width=32" },
+        vote: "for",
+        timestamp: "June 10, 2023 15:45",
+      },
+      {
+        voter: {
+          name: "Charlie",
+          avatar: "/placeholder.svg?height=32&width=32",
         },
-      ];
-    }
-
-    // Count yes votes
-    const yesVotes = newVotes.filter((vote) => vote.type === "yes").length;
-
-    // Check if quorum is reached (more than half of team members voted yes)
-    const isQuorumReached = yesVotes >= Math.ceil(project.team.length / 2);
-
-    // If quorum is reached and task was not funded before, mark it as funded
-    let fundedAt = taskToUpdate.fundedAt;
-    let funded = taskToUpdate.funded;
-
-    if (isQuorumReached && !taskToUpdate.funded) {
-      funded = true;
-      fundedAt = timestamp;
-    } else if (!isQuorumReached && taskToUpdate.funded) {
-      // If quorum is no longer reached (due to changed votes), mark as unfunded
-      funded = false;
-      fundedAt = undefined;
-    }
-
-    // Update the task
-    const updatedTasks = project.tasks.map((task) => {
-      if (task.id === taskId) {
-        return {
-          ...task,
-          votes: newVotes,
-          funded,
-          fundedAt,
-        };
-      }
-      return task;
-    });
-
-    // Create activity for the vote
-    const activityData = {
-      type: "comment_added" as const, // Using comment_added type for now as we don't have a vote type
-      timestamp,
-      userId: currentUserId,
-      taskId,
-      description: `Voted for task '${taskToUpdate.title}'${
-        isQuorumReached && !taskToUpdate.funded ? " and reached quorum" : ""
-      }`,
-    };
-
-    try {
-      const newActivity = await ProjectActivityService.createActivity(
-        projectId,
-        activityData
-      );
-
-      setProject({
-        ...project,
-        tasks: updatedTasks,
-        activities: project.activities
-          ? [newActivity, ...project.activities]
-          : [newActivity],
-      });
-    } catch (error) {
-      console.error("Failed to create activity:", error);
-
-      // Still update the tasks even if activity creation fails
-      setProject({
-        ...project,
-        tasks: updatedTasks,
-      });
-    }
+        vote: "against",
+        timestamp: "June 11, 2023 09:10",
+        comment: "I think we should prioritize other features first.",
+      },
+      {
+        voter: { name: "Dave", avatar: "/placeholder.svg?height=32&width=32" },
+        vote: "for",
+        timestamp: "June 11, 2023 11:25",
+      },
+    ],
   };
 
-  const {
-    isOpen: isTaskModalOpen,
-    activeTask,
-    openTaskModal,
-    closeTaskModal,
-    handleStatusChange: taskModalStatusChange,
-    handleCommentAdd: taskModalCommentAdd,
-  } = useTaskModal({
-    onStatusChange: handleStatusChange,
-    onCommentAdd: handleAddComment,
-    onVoteTask: handleVoteTask,
-  });
+  // Mock data for tasks
+  const tasks = [
+    {
+      id: 1,
+      title: "Design UI Mockups",
+      description: "Create mockups for the new UI design",
+      status: "completed",
+      assignee: {
+        name: "Alice",
+        avatar: "/placeholder.svg?height=32&width=32",
+      },
+      dueDate: "2023-06-15",
+      reward: 50,
+    },
+    {
+      id: 2,
+      title: "Implement Header Component",
+      description: "Create the new header component based on the design",
+      status: "in_progress",
+      assignee: {
+        name: "Bob",
+        avatar: "/placeholder.svg?height=32&width=32",
+      },
+      dueDate: "2023-06-25",
+      reward: 75,
+    },
+    {
+      id: 3,
+      title: "Implement Footer Component",
+      description: "Create the new footer component based on the design",
+      status: "to_do",
+      assignee: null,
+      dueDate: "2023-07-05",
+      reward: 60,
+    },
+    {
+      id: 4,
+      title: "Implement Navigation Menu",
+      description: "Create the navigation menu component based on the design",
+      status: "to_do",
+      assignee: null,
+      dueDate: "2023-07-10",
+      reward: 80,
+    },
+    {
+      id: 5,
+      title: "Implement Responsive Design",
+      description: "Ensure the design works well on all screen sizes",
+      status: "to_do",
+      assignee: null,
+      dueDate: "2023-07-12",
+      reward: 90,
+    },
+  ];
 
-  useEffect(() => {
-    // In a real application, this would fetch data from an API
-    // For now, we'll simulate it with mock data
-    const fetchData = async () => {
-      setLoading(true);
-
-      // Mock members data
-      const mockMembers = [
-        {
-          id: "1",
-          name: "Jane Doe",
-          role: "Admin",
-          avatar: "/images/avatars/jane-doe.jpg",
-        },
-        {
-          id: "2",
-          name: "John Smith",
-          role: "Member",
-          avatar: "/images/avatars/john-smith.jpg",
-        },
-        {
-          id: "3",
-          name: "Alice Johnson",
-          role: "Member",
-          avatar: "/images/avatars/alice-johnson.jpg",
-        },
-      ];
-
-      // Fetch activities from the service
-      const activitiesResponse =
-        await ProjectActivityService.getProjectActivities(projectId);
-
-      // Mock project data
-      const mockProject: ProjectDetails = {
-        id: projectId,
-        name: `Project ${projectId}`,
-        description:
-          "This is a detailed description of the project. It includes the goals, timeline, and expected outcomes.",
-        status: "In Progress",
-        startDate: "2025-04-01",
-        dueDate: "2025-06-30",
-        organizationId,
-        team: ["1", "2", "3"],
-        activities: activitiesResponse.activities,
-        tasks: [
-          {
-            id: "task1",
-            title: "Research competitors",
-            description:
-              "Analyze top 5 competitors in the market and create a report",
-            status: "completed",
-            priority: "high",
-            assignedTo: "1",
-            createdBy: "1",
-            createdAt: "2025-04-02",
-            dueDate: "2025-04-10",
-            completedAt: "2025-04-09",
-            effortMinutes: 240, // 4 hours
-            votes: [
-              {
-                id: "vote1",
-                memberId: "1",
-                type: "yes",
-                timestamp: "2025-04-03T10:00:00Z",
-              },
-              {
-                id: "vote2",
-                memberId: "2",
-                type: "yes",
-                timestamp: "2025-04-03T11:30:00Z",
-              },
-              {
-                id: "vote3",
-                memberId: "3",
-                type: "yes",
-                timestamp: "2025-04-03T14:15:00Z",
-              },
-            ], // All members voted yes
-            funded: true,
-            fundedAt: "2025-04-04",
-            comments: [
-              {
-                id: "comment1",
-                content:
-                  "I've started the research, focusing on the top 3 first.",
-                authorId: "1",
-                createdAt: "2025-04-03",
-              },
-              {
-                id: "comment2",
-                content: "Great progress! Let me know if you need any help.",
-                authorId: "2",
-                createdAt: "2025-04-04",
-              },
-            ],
-          },
-          {
-            id: "task2",
-            title: "Create wireframes",
-            description: "Design initial wireframes for the main pages",
-            status: "in-progress",
-            priority: "medium",
-            assignedTo: "2",
-            createdBy: "1",
-            createdAt: "2025-04-05",
-            dueDate: "2025-04-15",
-            effortMinutes: 180, // 3 hours
-            votes: [
-              {
-                id: "vote4",
-                memberId: "1",
-                type: "yes",
-                timestamp: "2025-04-05T15:30:00Z",
-              },
-              {
-                id: "vote5",
-                memberId: "3",
-                type: "yes",
-                timestamp: "2025-04-05T16:45:00Z",
-              },
-            ], // 2 out of 3 members voted
-            funded: true,
-            fundedAt: "2025-04-06",
-          },
-          {
-            id: "task3",
-            title: "Setup development environment",
-            description:
-              "Configure development tools and environments for the team",
-            status: "todo",
-            priority: "high",
-            assignedTo: "3",
-            createdBy: "1",
-            createdAt: "2025-04-07",
-            dueDate: "2025-04-12",
-            effortMinutes: 120, // 2 hours
-            votes: [
-              {
-                id: "vote6",
-                memberId: "1",
-                type: "yes",
-                timestamp: "2025-04-07T13:20:00Z",
-              },
-            ], // 1 out of 3 members voted
-            funded: false,
-          },
-          {
-            id: "task4",
-            title: "Create project documentation",
-            description:
-              "Document project architecture, APIs, and coding standards",
-            status: "todo",
-            priority: "medium",
-            assignedTo: "1",
-            createdBy: "1",
-            createdAt: "2025-04-08",
-            dueDate: "2025-04-20",
-            effortMinutes: 300, // 5 hours
-            votes: [], // No votes yet
-            funded: false,
-          },
-          {
-            id: "task5",
-            title: "Implement authentication",
-            description: "Develop user authentication and authorization system",
-            status: "blocked",
-            priority: "high",
-            assignedTo: "2",
-            createdBy: "1",
-            createdAt: "2025-04-10",
-            dueDate: "2025-04-25",
-            effortMinutes: 480, // 8 hours
-            votes: [
-              {
-                id: "vote7",
-                memberId: "1",
-                type: "yes",
-                timestamp: "2025-04-11T09:15:00Z",
-              },
-              {
-                id: "vote8",
-                memberId: "2",
-                type: "yes",
-                timestamp: "2025-04-11T14:30:00Z",
-              },
-            ], // 2 out of 3 members voted
-            funded: true,
-            fundedAt: "2025-04-12",
-            comments: [
-              {
-                id: "comment3",
-                content:
-                  "Blocked due to pending API access. Will follow up with the team.",
-                authorId: "2",
-                createdAt: "2025-04-11",
-              },
-            ],
-          },
-        ],
-      };
-
-      setMembers(mockMembers);
-      setProject(mockProject);
-      setLoading(false);
-    };
-
-    fetchData();
-  }, [projectId, organizationId]);
-
-  const handleCreateTask = async () => {
-    if (!newTaskTitle.trim() || !project) return;
-
-    const timestamp = new Date().toISOString();
-    const newTaskId = `task${project.tasks.length + 1}`;
-
-    const newTask: OrganizationTask = {
-      id: newTaskId,
-      title: newTaskTitle,
-      status: "todo",
-      priority: "medium",
-      createdBy: "1", // Assuming current user is Jane Doe
-      createdAt: timestamp,
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week from now
-      effortMinutes: 120, // Default to 2 hours effort
-    };
-
-    // Create activity through the service
-    const activityData = {
-      type: "task_created" as const,
-      timestamp,
-      userId: "1", // Assuming current user is Jane Doe
-      taskId: newTaskId,
-      description: `Created task '${newTaskTitle}'`,
-    };
-
-    try {
-      const newActivity = await ProjectActivityService.createActivity(
-        projectId,
-        activityData
-      );
-
-      setProject({
-        ...project,
-        tasks: [...project.tasks, newTask],
-        activities: project.activities
-          ? [newActivity, ...project.activities]
-          : [newActivity],
-      });
-    } catch (error) {
-      console.error("Failed to create activity:", error);
-
-      // Still update the tasks even if activity creation fails
-      setProject({
-        ...project,
-        tasks: [...project.tasks, newTask],
-      });
-    }
-
-    setNewTaskTitle("");
+  // Group tasks by status for kanban view
+  const tasksByStatus = {
+    to_do: tasks.filter((task) => task.status === "to_do"),
+    in_progress: tasks.filter((task) => task.status === "in_progress"),
+    completed: tasks.filter((task) => task.status === "completed"),
   };
-
-  // Generate a consistent random hourly rate for each member
-  const getMemberHourlyRate = (memberId: string) => {
-    // Use the member ID to generate a consistent random rate between $50 and $150
-    const hash = memberId
-      .split("")
-      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return 50 + (hash % 100); // Range: $50 to $150
-  };
-
-  // Calculate payment amount for a task
-  const calculateTaskPayment = (task: OrganizationTask) => {
-    if (!task.assignedTo || !task.effortMinutes) return 0;
-
-    const hourlyRate = getMemberHourlyRate(task.assignedTo);
-    return ((hourlyRate * task.effortMinutes) / 60).toFixed(2);
-  };
-
-  const getMemberById = (id?: string) => {
-    if (!id) return null;
-    return members.find((member: any) => member.id === id) || null;
-  };
-
-  const getFilteredTasks = () => {
-    if (!project) return [];
-
-    if (taskFilter === "all") return project.tasks;
-
-    return project.tasks.filter((task) => task.status === taskFilter);
-  };
-
-  const getTaskStatusIcon = (task: OrganizationTask) => {
-    // For tasks in "todo" status that haven't reached quorum yet, show voting arrows
-    if (task.status === "todo" && !task.funded) {
-      // Check if current user (Jane Doe with ID "1") has already voted
-      const hasVoted = task.votes?.some((vote) => vote.memberId === "1");
-      const voteType = task.votes?.find((vote) => vote.memberId === "1")?.type;
-
-      return (
-        <div className="flex flex-col gap-1">
-          <ArrowUpRight
-            className={`h-4 w-4 cursor-pointer ${
-              hasVoted && voteType === "yes"
-                ? "text-green-500 fill-green-500"
-                : "text-gray-400"
-            }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleVoteTask(task.id, "yes");
-            }}
-          />
-          <ArrowUpRight
-            className={`h-4 w-4 rotate-180 cursor-pointer ${
-              hasVoted && voteType === "no"
-                ? "text-red-500 fill-red-500"
-                : "text-gray-400"
-            }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleVoteTask(task.id, "no");
-            }}
-          />
-        </div>
-      );
-    }
-
-    // For other statuses, use the original icons
-    switch (task.status) {
-      case "completed":
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-      case "in-progress":
-        return <Circle className="h-5 w-5 text-blue-500" />;
-      case "blocked":
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
-      default:
-        return <Circle className="h-5 w-5 text-gray-400" />;
-    }
-  };
-
-  const getPriorityBadge = (priority: OrganizationTask["priority"]) => {
-    switch (priority) {
-      case "high":
-        return <Badge variant="destructive">High</Badge>;
-      case "medium":
-        return <Badge variant="default">Medium</Badge>;
-      case "low":
-        return <Badge variant="outline">Low</Badge>;
-    }
-  };
-
-  const getCompletionPercentage = () => {
-    if (!project) return 0;
-
-    const completedTasks = project.tasks.filter(
-      (task) => task.status === "completed"
-    ).length;
-    return Math.round((completedTasks / project.tasks.length) * 100);
-  };
-
-  // Helper function to format minutes into a human-readable format
-  const formatEffortTime = (minutes: number | undefined) => {
-    if (!minutes) return "Not estimated";
-
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-
-    if (hours === 0) {
-      return `${remainingMinutes} min`;
-    } else if (remainingMinutes === 0) {
-      return `${hours} ${hours === 1 ? "hour" : "hours"}`;
-    } else {
-      return `${hours} ${
-        hours === 1 ? "hour" : "hours"
-      } ${remainingMinutes} min`;
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="container py-8 flex justify-center items-center min-h-[40vh]">
-        <div className="animate-pulse text-xl">Loading project details...</div>
-      </div>
-    );
-  }
-
-  if (error || !projectData) {
-    return (
-      <div className="container py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Project not found</h1>
-          <Button
-            onClick={() => router.push(`/organizations/${organizationId}`)}
-          >
-            Back to Organization
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="w-full py-0 min-h-screen flex flex-col">
-      {/* Organization Navigation */}
+    <div className="space-y-6 w-full">
+      <div className="flex justify-between items-center">
+        <div>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/organizations/${orgId}/projects`}
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              Projects
+            </Link>
+            <span className="text-sm text-muted-foreground">/</span>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {project.title}
+            </h1>
+            <ProjectStatusBadge
+              status={project.status}
+              votingStatus={project.votingStatus}
+            />
+          </div>
+          <p className="text-muted-foreground mt-1">{project.description}</p>
+        </div>
 
-      <Tabs defaultValue="projects" className="w-full">
-        {/* Project Content */}
-        <TabsContent value="projects" className="mt-0 flex-1 overflow-auto">
-          <div className="py-6 px-6">
-            {/* Project Header */}
-            <div className="mb-8">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h1 className="text-3xl font-bold mb-2">
-                    {projectData?.name}
-                  </h1>
-                  <p className="text-muted-foreground mb-4">
-                    {projectData?.description}
-                  </p>
+        {project.status !== "pending_approval" && (
+          <Button asChild>
+            <Link
+              href={`/organizations/${orgId}/projects/${projectId}/tasks/new`}
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              New Task
+            </Link>
+          </Button>
+        )}
+      </div>
 
-                  <div className="flex flex-col gap-2 pb-5">
-                    <p className="font-semibold text-lg">Project Details</p>
-                    <div className=" w-full max-w-[90vw]">
-                      <Content content={projectData?.description} />
+      {project.status !== "pending_approval" && (
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span>Overall Progress</span>
+            <span>{project.progress}%</span>
+          </div>
+          <Progress value={project.progress} className="h-2" />
+        </div>
+      )}
+
+      <div className="md:hidden grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Budget</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <span>Total Budget:</span>
+                <span className="font-bold">{project.budget} SOL</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Spent:</span>
+                <span>{project.spent} SOL</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Remaining:</span>
+                <span className="text-green-600 dark:text-green-400">
+                  {project.budget - project.spent} SOL
+                </span>
+              </div>
+              <Progress
+                value={(project.spent / project.budget) * 100}
+                className="h-2"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Timeline</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <span>Start Date:</span>
+                <span>{formatDate(project.startDate)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>End Date:</span>
+                <span>{formatDate(project.endDate)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Days Remaining:</span>
+                <span>{getDaysRemaining(project.endDate)}</span>
+              </div>
+              <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden dark:bg-gray-800">
+                <div
+                  className="h-full bg-blue-500 rounded-full dark:bg-blue-600"
+                  style={{
+                    width: `${getTimelineProgress(
+                      project.startDate,
+                      project.endDate
+                    )}%`,
+                  }}
+                ></div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Contributors</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {project.contributors.length > 0 ? (
+              <div className="space-y-4">
+                {project.contributors.map((contributor: any, i: number) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarImage
+                        src={contributor.avatar || "/placeholder.svg"}
+                        alt={contributor.name}
+                      />
+                      <AvatarFallback>
+                        {contributor.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{contributor.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Contributor
+                      </p>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-4 mb-6">
-                    <Badge
-                      variant={
-                        projectData?.status === "VOTING" ? "default" : "outline"
-                      }
-                    >
-                      {projectData?.status}
-                    </Badge>
-
-                    {projectData?.status === "VOTING" ? (
-                      <span className="text-sm text-muted-foreground">
-                        Voting ends in{" "}
-                        <DateComponent
-                          datetime={projectData?.votingDeadline}
-                          type="toDate"
-                        />
-                      </span>
-                    ) : (
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        <span>
-                          {new Date(
-                            projectData?.createdAt
-                          ).toLocaleDateString()}{" "}
-                          -
-                          {projectData?.projectDeadline
-                            ? new Date(
-                                projectData?.projectDeadline
-                              ).toLocaleDateString()
-                            : "Ongoing"}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-4 mb-6">
-                    {projectData?.status === "VOTING" ? (
-                      <div className="flex items-center gap-4">
-                        {projectData?.votes?.some(
-                          (vote: any) => vote.voter.user.externalId === user?.id
-                        ) ? (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <CheckCircle2 className="h-4 w-4" />
-                            <span>You have already voted on this project</span>
-                          </div>
-                        ) : (
-                          <VoteProjectButton project={projectData} />
-                        )}
-
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Users className="h-4 w-4" />
-                          <span>{projectData?.votes?.length || 0} votes</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-sm text-muted-foreground">
-                        Voting is currently closed for this project
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* <div className="flex flex-col items-end">
-                  <div className="flex -space-x-2 mb-2">
-                    {projectData?.team.map((memberId) => {
-                      const member = getMemberById(memberId);
-                      return (
-                        <div
-                          key={memberId}
-                          className="h-8 w-8 rounded-full overflow-hidden border-2 border-background"
-                        >
-                          {member?.avatar ? (
-                            <div className="relative h-full w-full">
-                              <Image
-                                src={member.avatar}
-                                alt={`${member.name}'s avatar`}
-                                fill
-                                className="object-cover"
-                                onError={(e) => {
-                                  // Fallback to initials if image fails to load
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = "none";
-                                  const parent = target.parentElement;
-                                  if (parent) {
-                                    parent.classList.add(
-                                      "bg-primary/10",
-                                      "flex",
-                                      "items-center",
-                                      "justify-center"
-                                    );
-                                    const fallback =
-                                      document.createElement("span");
-                                    fallback.className =
-                                      "text-primary font-medium";
-                                    fallback.textContent =
-                                      member.name.charAt(0);
-                                    parent.appendChild(fallback);
-                                  }
-                                }}
-                              />
-                            </div>
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center bg-primary/10 text-primary font-medium">
-                              {member?.name.charAt(0) || "?"}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <Button variant="outline" size="sm">
-                    <Users className="h-4 w-4 mr-1" />
-                    Manage Team
-                  </Button>
-                </div> */}
+                ))}
+                <Button variant="outline" size="sm" className="w-full">
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Apply to Join
+                </Button>
               </div>
+            ) : (
+              <div className="text-center py-6">
+                <Users className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                <p className="text-muted-foreground mb-4">
+                  No contributors yet
+                </p>
+                <Button>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Apply to Join
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
-              {/* Progress Bar */}
-              {projectData?.status === "IN_PROGRESS" && (
-                <div className="mt-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium">Progress</span>
-                    <span className="text-sm font-medium">
-                      {getCompletionPercentage()}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2.5">
-                    <div
-                      className="bg-primary h-2.5 rounded-full"
-                      style={{ width: `${getCompletionPercentage()}%` }}
-                    ></div>
-                  </div>
+      <Tabs defaultValue="tasks" className="w-full">
+        {/* <TabsList>
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="milestones">Milestones</TabsTrigger>
+          <TabsTrigger value="voting">Voting</TabsTrigger>
+        </TabsList> */}
+
+        <TabsContent value="tasks" className="mt-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium">Project Tasks</h3>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+              >
+                <LayoutList className="h-4 w-4 mr-2" />
+                List
+              </Button>
+              <Button
+                variant={viewMode === "kanban" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("kanban")}
+              >
+                <LayoutGrid className="h-4 w-4 mr-2" />
+                Kanban
+              </Button>
+            </div>
+          </div>
+
+          {viewMode === "list" ? (
+            <div className="space-y-4">
+              {tasks.length > 0 ? (
+                tasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    orgId={orgId}
+                    projectId={projectId}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-10 border rounded-lg">
+                  <p className="text-muted-foreground">No tasks created yet</p>
                 </div>
               )}
             </div>
+          ) : (
+            // <KanbanBoard
+            //   columns={tasksByStatus}
+            //   orgId={params.orgId}
+            //   projectId={params.projectId}
+            // />
+            <></>
+          )}
+        </TabsContent>
 
-            {/* Task Management */}
-            {projectData.status !== "VOTING" && (
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                {/* Left Column - Task List */}
-                <div className="lg:col-span-3 flex flex-col h-full overflow-auto">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-semibold">Tasks</h2>
-                    <div className="flex gap-2">
-                      <Tabs defaultValue="all" className="w-[400px]">
-                        <TabsList>
-                          <TabsTrigger
-                            value="all"
-                            onClick={() => setTaskFilter("all")}
-                          >
-                            All
-                          </TabsTrigger>
-                          <TabsTrigger
-                            value="todo"
-                            onClick={() => setTaskFilter("todo")}
-                          >
-                            To Do
-                          </TabsTrigger>
-                          <TabsTrigger
-                            value="in-progress"
-                            onClick={() => setTaskFilter("in-progress")}
-                          >
-                            In Progress
-                          </TabsTrigger>
-                          <TabsTrigger
-                            value="completed"
-                            onClick={() => setTaskFilter("completed")}
-                          >
-                            Completed
-                          </TabsTrigger>
-                          <TabsTrigger
-                            value="blocked"
-                            onClick={() => setTaskFilter("blocked")}
-                          >
-                            Blocked
-                          </TabsTrigger>
-                        </TabsList>
-                      </Tabs>
+        <TabsContent value="milestones" className="mt-6">
+          <h3 className="text-lg font-medium mb-4">Project Milestones</h3>
+          <div className="space-y-4">
+            {project.milestones.map((milestone: any, index: number) => (
+              <Card key={index}>
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`rounded-full p-2 
+                        ${
+                          milestone.status === "completed"
+                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                            : milestone.status === "in_progress"
+                            ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                            : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                        }
+                      `}
+                    >
+                      {milestone.status === "completed" ? (
+                        <CheckCircle2 className="h-5 w-5" />
+                      ) : (
+                        <Clock className="h-5 w-5" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium">{milestone.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Due {formatDate(milestone.dueDate)}
+                      </p>
                     </div>
                   </div>
+                  <MilestoneStatusBadge status={milestone.status} />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
 
-                  {/* Add Task Form */}
-                  <div className="flex gap-2 mb-6">
-                    <Input
-                      placeholder="Add a new task..."
-                      value={newTaskTitle}
-                      onChange={(e) => setNewTaskTitle(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleCreateTask();
-                      }}
-                    />
-                    <Button onClick={handleCreateTask}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Task
+        <TabsContent value="voting" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Voting Status</CardTitle>
+              <CardDescription>
+                {project.votingStatus.status === "voting"
+                  ? "This project is currently being voted on by contributors."
+                  : project.votingStatus.status === "approved"
+                  ? "This project has been approved by contributors."
+                  : "This project has been rejected by contributors."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span>Approval Rate:</span>
+                  <span className="font-bold">
+                    {Math.round(
+                      (project.votingStatus.votesFor /
+                        project.votingStatus.totalVotes) *
+                        100
+                    )}
+                    %
+                  </span>
+                </div>
+                <Progress
+                  value={
+                    (project.votingStatus.votesFor /
+                      project.votingStatus.totalVotes) *
+                    100
+                  }
+                  className="h-2"
+                />
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>{project.votingStatus.votesFor} For</span>
+                  <span>{project.votingStatus.votesAgainst} Against</span>
+                  <span>
+                    {project.votingStatus.totalVotes -
+                      project.votingStatus.votesFor -
+                      project.votingStatus.votesAgainst}{" "}
+                    Remaining
+                  </span>
+                </div>
+
+                {project.votingStatus.status === "voting" && (
+                  <div className="flex gap-2 mt-4">
+                    <Button variant="outline" className="w-1/2">
+                      <ThumbsDown className="mr-2 h-4 w-4" />
+                      Vote Against
+                    </Button>
+                    <Button className="w-1/2">
+                      <ThumbsUp className="mr-2 h-4 w-4" />
+                      Vote For
                     </Button>
                   </div>
-
-                  {/* Task List */}
-                  <div className="space-y-4 task-list-container">
-                    {getFilteredTasks().map((task) => (
-                      <Card
-                        key={task.id}
-                        className={`cursor-pointer hover:border-primary/50 transition-colors ${
-                          activeTask?.id === task.id ? "border-primary" : ""
-                        }`}
-                        onClick={() => openTaskModal(task)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start">
-                            <div className="flex items-start gap-3">
-                              <button
-                                className="mt-1"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleStatusChange(
-                                    task.id,
-                                    task.status === "completed"
-                                      ? "todo"
-                                      : "completed"
-                                  );
-                                }}
-                              >
-                                {getTaskStatusIcon(task)}
-                              </button>
-                              <div>
-                                <h3
-                                  className={`font-medium ${
-                                    task.status === "completed"
-                                      ? "line-through text-muted-foreground"
-                                      : ""
-                                  }`}
-                                >
-                                  {task.title}
-                                </h3>
-                                {task.description && (
-                                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                                    {task.description}
-                                  </p>
-                                )}
-                                <div className="flex items-center gap-3 mt-2 flex-wrap">
-                                  {task.dueDate && (
-                                    <div className="flex items-center text-xs text-muted-foreground">
-                                      <Clock className="h-3 w-3 mr-1" />
-                                      <span>
-                                        Due{" "}
-                                        {new Date(
-                                          task.dueDate
-                                        ).toLocaleDateString()}
-                                      </span>
-                                    </div>
-                                  )}
-
-                                  {/* Show effort estimate */}
-                                  <div className="flex items-center text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-0.5 rounded-full">
-                                    <span>
-                                      {formatEffortTime(task.effortMinutes)}
-                                    </span>
-                                  </div>
-
-                                  {/* Show voting status */}
-                                  <div
-                                    className={`flex items-center text-xs px-2 py-0.5 rounded-full ${
-                                      task.funded
-                                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                                        : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
-                                    }`}
-                                  >
-                                    <span>
-                                      {task.votes?.length || 0}/
-                                      {projectData?.team.length} votes
-                                      {task.funded ? " • Funded" : ""}
-                                    </span>
-                                  </div>
-
-                                  {/* USDC Payment Amount - only show for funded tasks */}
-                                  {task.funded &&
-                                    task.assignedTo &&
-                                    task.effortMinutes && (
-                                      <div className="flex items-center text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 px-2 py-0.5 rounded-full">
-                                        <div className="relative h-3 w-3 mr-1">
-                                          <Image
-                                            src="/images/usdc-icon.png"
-                                            alt="USDC"
-                                            fill
-                                            className="object-contain"
-                                          />
-                                        </div>
-                                        <span>
-                                          ${calculateTaskPayment(task)}
-                                        </span>
-                                      </div>
-                                    )}
-
-                                  {task.comments &&
-                                    task.comments.length > 0 && (
-                                      <div className="flex items-center text-xs text-muted-foreground">
-                                        <MessageSquare className="h-3 w-3 mr-1" />
-                                        <span>{task.comments.length}</span>
-                                      </div>
-                                    )}
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex flex-col items-end">
-                              {task.assignedTo && (
-                                <div className="h-8 w-8 rounded-full overflow-hidden">
-                                  {getMemberById(task.assignedTo)?.avatar ? (
-                                    <div className="relative h-full w-full">
-                                      <Image
-                                        src={
-                                          getMemberById(task.assignedTo)
-                                            ?.avatar || ""
-                                        }
-                                        alt="Assignee avatar"
-                                        fill
-                                        className="object-cover"
-                                        onError={(e) => {
-                                          // Fallback to initials if image fails to load
-                                          const target =
-                                            e.target as HTMLImageElement;
-                                          target.style.display = "none";
-                                          const parent = target.parentElement;
-                                          if (parent) {
-                                            parent.classList.add(
-                                              "bg-primary/10",
-                                              "flex",
-                                              "items-center",
-                                              "justify-center"
-                                            );
-                                            const fallback =
-                                              document.createElement("span");
-                                            fallback.className =
-                                              "text-primary font-medium";
-                                            fallback.textContent =
-                                              getMemberById(
-                                                task.assignedTo
-                                              )?.name.charAt(0) || "?";
-                                            parent.appendChild(fallback);
-                                          }
-                                        }}
-                                      />
-                                    </div>
-                                  ) : (
-                                    <div className="h-full w-full flex items-center justify-center bg-primary/10 text-primary font-medium">
-                                      {getMemberById(
-                                        task.assignedTo
-                                      )?.name.charAt(0) || "?"}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-
-                    {getFilteredTasks().length === 0 && (
-                      <div className="text-center py-8 text-muted-foreground">
-                        No tasks found. Create a new task to get started.
-                      </div>
-                    )}
-                  </div>
-                </div>
+                )}
               </div>
-            )}
+            </CardContent>
+          </Card>
+
+          <div className="space-y-4 mt-6">
+            <h3 className="text-lg font-medium">Votes & Comments</h3>
+            {project.votes.map((vote, index) => (
+              <Card key={index}>
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={vote.voter.avatar || "/placeholder.svg"}
+                        alt={vote.voter.name}
+                      />
+                      <AvatarFallback>
+                        {vote.voter.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center">
+                        <p className="font-medium">{vote.voter.name}</p>
+                        <Badge
+                          variant="outline"
+                          className={`
+                            ${
+                              vote.vote === "for"
+                                ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
+                                : "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800"
+                            }
+                          `}
+                        >
+                          {vote.vote === "for" ? "Voted For" : "Voted Against"}
+                        </Badge>
+                      </div>
+                      <p className="text-sm mt-1">{vote.comment}</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {vote.timestamp}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </TabsContent>
       </Tabs>
-
-      {/* Task Modal */}
-      {activeTask && (
-        <TaskModal
-          task={activeTask}
-          isOpen={isTaskModalOpen}
-          onClose={closeTaskModal}
-          members={members}
-          onStatusChange={handleStatusChange}
-          onCommentAdd={handleAddComment}
-          onVoteTask={handleVoteTask}
-        />
-      )}
     </div>
   );
+}
+
+interface TaskCardProps {
+  task: any;
+  orgId: string;
+  projectId: string;
+}
+
+function TaskCard({ task, orgId, projectId }: TaskCardProps) {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex justify-between">
+          <CardTitle className="text-base">{task.title}</CardTitle>
+          <TaskStatusBadge status={task.status} />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm mb-4">{task.description}</p>
+        <div className="flex flex-wrap justify-between items-center">
+          <div className="flex items-center gap-2">
+            {task.assignee ? (
+              <div className="flex items-center gap-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage
+                    src={task.assignee.avatar || "/placeholder.svg"}
+                    alt={task.assignee.name}
+                  />
+                  <AvatarFallback>
+                    {task.assignee.name.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm">{task.assignee.name}</span>
+              </div>
+            ) : (
+              <Badge variant="outline">Unassigned</Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <Clock className="h-4 w-4" />
+              <span>Due {formatDate(task.dueDate)}</span>
+            </div>
+            <div className="text-sm font-medium">{task.reward} SOL</div>
+          </div>
+        </div>
+      </CardContent>
+      <div className="px-6 pb-4 flex justify-end">
+        <Button variant="outline" size="sm" asChild>
+          <Link
+            href={`/organizations/${orgId}/projects/${projectId}/tasks/${task.id}`}
+          >
+            View Details
+          </Link>
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
+function TaskStatusBadge({ status }: { status: string }) {
+  let className = "px-2.5 py-0.5 text-xs font-medium rounded-full ";
+
+  switch (status) {
+    case "to_do":
+      className +=
+        "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+      break;
+    case "in_progress":
+      className +=
+        "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400";
+      break;
+    case "completed":
+      className +=
+        "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+      break;
+    default:
+      className +=
+        "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+  }
+
+  const statusMap: Record<string, string> = {
+    to_do: "To Do",
+    in_progress: "In Progress",
+    completed: "Completed",
+  };
+
+  return <Badge className={className}>{statusMap[status] || status}</Badge>;
+}
+
+function MilestoneStatusBadge({ status }: { status: string }) {
+  let className = "px-2.5 py-0.5 text-xs font-medium rounded-full ";
+
+  switch (status) {
+    case "not_started":
+      className +=
+        "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+      break;
+    case "in_progress":
+      className +=
+        "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+      break;
+    case "completed":
+      className +=
+        "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+      break;
+    default:
+      className +=
+        "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+  }
+
+  const statusMap: Record<string, string> = {
+    not_started: "Not Started",
+    in_progress: "In Progress",
+    completed: "Completed",
+  };
+
+  return <Badge className={className}>{statusMap[status] || status}</Badge>;
+}
+
+function ProjectStatusBadge({
+  status,
+  votingStatus,
+}: {
+  status: string;
+  votingStatus?: any;
+}) {
+  let className = "px-2.5 py-0.5 text-xs font-medium rounded-full ";
+
+  if (status === "pending_approval") {
+    className +=
+      "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400";
+  } else if (status === "in_progress") {
+    className +=
+      "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+  } else if (status === "completed") {
+    className +=
+      "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+  } else {
+    className +=
+      "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+  }
+
+  const statusMap: Record<string, string> = {
+    pending_approval: "Pending Approval",
+    in_progress: "In Progress",
+    completed: "Completed",
+  };
+
+  return <Badge className={className}>{statusMap[status] || status}</Badge>;
+}
+
+// Helper function to format dates
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+// Helper function to calculate days remaining
+function getDaysRemaining(endDateString: string) {
+  const endDate = new Date(endDateString);
+  const today = new Date();
+  const diffTime = endDate.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays > 0 ? diffDays : 0;
+}
+
+// Helper function to calculate timeline progress
+function getTimelineProgress(startDateString: string, endDateString: string) {
+  const startDate = new Date(startDateString).getTime();
+  const endDate = new Date(endDateString).getTime();
+  const today = new Date().getTime();
+
+  if (today <= startDate) return 0;
+  if (today >= endDate) return 100;
+
+  const totalDuration = endDate - startDate;
+  const elapsed = today - startDate;
+  return Math.round((elapsed / totalDuration) * 100);
 }

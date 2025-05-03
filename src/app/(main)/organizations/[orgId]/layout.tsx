@@ -15,16 +15,17 @@ function OrganizationLayout({
 }) {
   return (
     <SidebarProvider>
-      <div className="w-full flex min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex min-h-screen w-full bg-gray-50 dark:bg-gray-900">
         <OrganizationSidebar orgId={params.orgId} />
 
-        <div className="flex-1">
-          <div className="container py-6 px-4 md:px-6">
-            {/* <Suspense fallback={<Skeleton className="h-24 w-full" />}>
-              <OrganizationHeader organizationId={params.orgId} />
-            </Suspense> */}
-
-            <div className="">{children}</div>
+        <div className="flex-1 w-full">
+          <div className="container py-3 px-4 md:px-6">
+            <OrganizationHeader organizationId={params.orgId} />
+            <div className="h-[calc(100vh-1rem)]">
+              <ScrollArea className="h-full">
+                <div className="mt-6 w-full">{children}</div>
+              </ScrollArea>
+            </div>
           </div>
         </div>
       </div>

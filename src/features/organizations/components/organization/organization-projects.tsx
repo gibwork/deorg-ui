@@ -25,6 +25,8 @@ import { CreateProjectModal } from "./create-project-modal";
 import { ProjectDetailModal } from "./project-detail-modal";
 import { getOrganizationProjects } from "../../actions/projects/get-organization-projects";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export function OrganizationProjects({
   organizationId,
@@ -125,6 +127,8 @@ interface ProjectCardProps {
 }
 
 function ProjectCard({ project, onViewProject }: ProjectCardProps) {
+  const params = useParams();
+  const orgId = params.orgId;
   return (
     <Card>
       <CardHeader>
@@ -238,13 +242,11 @@ function ProjectCard({ project, onViewProject }: ProjectCardProps) {
           {project.tasks.completed} of {project.tasks.total} tasks completed
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onViewProject(project)}
-        >
-          View Details
-          <ArrowRight className="ml-2 h-4 w-4" />
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/organizations/${orgId}/projects/${project.id}`}>
+            View Details
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
         </Button>
       </CardFooter>
     </Card>

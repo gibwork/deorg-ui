@@ -1,10 +1,10 @@
 import ProjectDetailsPage from "@/features/organizations/components/projects/project-details-page";
 import React from "react";
 
-function page() {
+function page({ params }: { params: { orgId: string; projectId: string } }) {
   return (
     <div>
-      <ProjectDetailsPage />
+      <ProjectDetailsPage orgId={params.orgId} projectId={params.projectId} />
     </div>
   );
 }

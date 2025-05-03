@@ -8,33 +8,15 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import {
-  LogIn,
-  MenuIcon,
-  X,
-  BarChart2,
-  Users,
-  FolderKanban,
-  DollarSign,
-  Clock,
-  Settings,
-  FileText,
-} from "lucide-react";
-import { useState } from "react";
+import { MenuIcon, X } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { SidebarNavItems } from "@/components/layout/sidebar-nav-items";
-import { gibworkTotalVolume, OrganizationNavbarItems } from "@/constants/data";
+import { OrganizationNavbarItems } from "@/constants/data";
 import { ClerkLoading, ClerkLoaded, useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import { SideBarLoading } from "@/components/layout/sidebar";
-import { useQueryClient } from "@tanstack/react-query";
-import { User } from "@/types/user.types";
-import { useParams, usePathname, useSearchParams } from "next/navigation";
-
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+import { useParams, usePathname } from "next/navigation";
 
 export function OrganizationSidebarMobile({
   isOpen,
@@ -43,25 +25,15 @@ export function OrganizationSidebarMobile({
   isOpen: boolean;
   setOpen: (open: boolean) => void;
 }) {
-  const queryClient = useQueryClient();
   const params = useParams();
   const organizationId = params.orgId as string;
   const pathname = usePathname();
 
   const activeTab = pathname.split("?")[1]?.split("=")[1] || "overview";
 
-  console.log(activeTab);
-  const { user, isLoaded } = useUser();
+  const { user } = useUser();
 
-  let usdcAmountUserHasEarned = "$0.00";
-
-  const userData = queryClient.getQueryData<User>([`user-${user?.id}`]);
-
-  if (userData?.totalAmountEarned && !isNaN(userData.totalAmountEarned)) {
-    usdcAmountUserHasEarned = "$" + userData.totalAmountEarned.toFixed(2);
-  }
-
-  if (!user?.id) {
+  if (!user?.id || !isOpen) {
     return null;
   }
 
@@ -113,7 +85,7 @@ export function OrganizationSidebarMobile({
                         activeTab === item.value && "bg-accent"
                       )}
                     >
-                      <span className="group rounded-lg text-[1rem] font-medium flex items-center px-3 py-1.5 hover:bg-accent hover:text-accent-foreground duration-300 ease-in-out">
+                      <span className="group rounded-lg text-[1rem] font-medium flex items-center px-3 py-2 hover:bg-accent hover:text-accent-foreground duration-300 ease-in-out">
                         <item.icon className="h-4 w-4 mr-2" />
                         <span>{item.label}</span>
                       </span>

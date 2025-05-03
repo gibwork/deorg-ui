@@ -5,6 +5,7 @@ import { getOrganizationProposals } from "@/features/organizations/actions/propo
 import { getQueryClient } from "@/components/providers/query";
 import { HydrationBoundary } from "@tanstack/react-query";
 import { dehydrate } from "@tanstack/react-query";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function page({ params }: { params: { orgId: string } }) {
   return (
@@ -36,7 +37,11 @@ async function OrganizationProposalsPage({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <OrganizationProposals organizationId={params.orgId} />
+      <div className="h-[calc(100vh-4rem)]">
+        <ScrollArea className="h-full">
+          <OrganizationProposals organizationId={params.orgId} />
+        </ScrollArea>
+      </div>
     </HydrationBoundary>
   );
 }

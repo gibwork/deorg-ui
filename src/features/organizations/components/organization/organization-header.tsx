@@ -1,5 +1,7 @@
 "use client";
 
+import { HardDrive, AlertTriangle } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Copy, ExternalLink, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +10,12 @@ import { toast } from "sonner";
 import { useOrganization } from "../../hooks/use-organization";
 import { truncate } from "@/lib/utils";
 import Link from "next/link";
+import { SignedIn, useAuth } from "@clerk/nextjs";
+import { PriorityFeePopover } from "@/features/priority-fee/components/priority-fee-popover";
+import { WalletButton } from "@/components/wallet-button";
+import { getUserData } from "@/actions/get/get-user-data";
+import { User } from "@/types/user.types";
+import { useQuery } from "@tanstack/react-query";
 
 interface OrganizationHeaderProps {
   organization: {
@@ -25,11 +33,23 @@ export function OrganizationHeader({
 }: {
   organizationId: string;
 }) {
+  const { userId, getToken } = useAuth();
+
   const {
     data: organization,
     isLoading,
     error,
   } = useOrganization(organizationId);
+
+  const { data } = useQuery<User>({
+    queryKey: [`user-${userId}`],
+    queryFn: async () => {
+      const userData = await getUserData();
+      if (userData.error) throw new Error(userData.error);
+      if (userData.success) return userData.success;
+    },
+    enabled: !!userId,
+  });
 
   const handleCopyMultisigAddress = () => {
     try {
@@ -40,15 +60,10 @@ export function OrganizationHeader({
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-
-
-  if (organization)
-    return (
-      <div className="space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
+  return (
+    <div className="space-y-4 ">
+      <div className="flex flex-col md:flex-row md:items-start justify-end gap-4">
+        {/* <div className="space-y-1">
             <div className="flex items-center justify-center gap-2">
               <Avatar className="h-10 w-10">
                 <AvatarImage
@@ -65,26 +80,32 @@ export function OrganizationHeader({
               </h1>
             </div>
             <p className="text-muted-foreground">{organization.description}</p>
-          </div>
+          </div> */}
 
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+        <div className="flex items-center gap-3">
+          {/* <Button variant="outline" size="sm">
               <Users className="h-4 w-4 mr-2" />
               Invite Members
             </Button>
             <Button variant="default" size="sm">
               Fund Treasury
-            </Button>
-          </div>
+            </Button> */}
+          <SignedIn>
+            <PriorityFeePopover />
+          </SignedIn>
+          <SignedIn>
+            <WalletButton userData={data} />
+          </SignedIn>
         </div>
+      </div>
 
-        <div className="flex flex-wrap gap-4 pt-2 border-t">
+      {/* <div className=" flex flex-wrap gap-4 pt-2 border-t">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-muted-foreground">
               Multisig:
             </span>
             <code className="bg-muted px-1 py-0.5 rounded text-sm font-mono">
-              {truncate(organization.multisigWallet,6,4)}
+              {truncate(organization.multisigWallet, 6, 4)}
             </code>
             <Button
               variant="ghost"
@@ -126,7 +147,7 @@ export function OrganizationHeader({
               </Badge>
             </div>
           </div>
-        </div>
-      </div>
-    );
+        </div> */}
+    </div>
+  );
 }

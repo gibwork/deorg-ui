@@ -23,6 +23,9 @@ import { useQuery } from "@tanstack/react-query";
 import { getOrganizationOverview } from "../../actions/get-organization-overview";
 import { Organization } from "@/types/types.organization";
 import { OrganizationHeader } from "./organization-header";
+import { useAuth } from "@clerk/nextjs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface OrganizationOverviewProps {
   organization: {
@@ -40,6 +43,7 @@ export function OrganizationOverview({
 }: {
   organizationId: string;
 }) {
+  const { isSignedIn } = useAuth();
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [showProjectDetail, setShowProjectDetail] = useState(false);
 
@@ -52,12 +56,12 @@ export function OrganizationOverview({
   const stats = [
     { label: "Active Proposals", value: 3, icon: FileText },
     { label: "Open Tasks", value: 12, icon: ListChecks },
-    { label: "Members", value: organization?.members.length, icon: Users },
-    {
-      label: "Treasury Balance",
-      value: `${organization?.token?.amount} SOL`,
-      icon: BarChart3,
-    },
+    { label: "Contributors", value: organization?.members.length, icon: Users },
+    // {
+    //   label: "Treasury Balance",
+    //   value: `${organization?.token?.amount} SOL`,
+    //   icon: BarChart3,
+    // },
   ];
 
   const {
@@ -78,10 +82,38 @@ export function OrganizationOverview({
     setShowProjectDetail(true);
   };
 
+  if (!isSignedIn) {
+    return (
+      <div className="space-y-6">
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Authentication Required</AlertTitle>
+          <AlertDescription>
+            Please connect your wallet and sign in to view organization details.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            Failed to load organization details. Please try again later.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <OrganizationHeader organizationId={organizationId} />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* <OrganizationHeader organizationId={organizationId} /> */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat, i) => (
           <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
