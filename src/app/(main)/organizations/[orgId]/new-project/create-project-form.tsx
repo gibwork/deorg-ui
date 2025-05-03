@@ -147,22 +147,22 @@ export default function CreateProjectForm() {
           "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
         amount: data.budget!,
       };
-      const response = await createProject({
-        name: data.name,
-        description: data.description || "",
-        content: data.content,
-        token: requiredTokenData,
-        votingDeadline: data.votingDeadline.toISOString(),
-        projectDeadline: data.estimatedCompletionDate.toISOString(),
-        organizationId: params.id as string,
-      });
+      // const response = await createProject({
+      //   name: data.name,
+      //   description: data.description || "",
+      //   content: data.content,
+      //   token: requiredTokenData,
+      //   votingDeadline: data.votingDeadline.toISOString(),
+      //   projectDeadline: data.estimatedCompletionDate.toISOString(),
+      //   organizationId: params.id as string,
+      // });
 
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
+      // if (response.error) {
+      //   throw new Error(response.error.message);
+      // }
 
-      toast.success("Project created successfully!");
-      router.push(`/organizations/${params.id}?tab=projects`);
+      // toast.success("Project created successfully!");
+      // router.push(`/organizations/${params.id}?tab=projects`);
     } catch (error) {
       toast.error("Failed to create project. Please try again.");
     } finally {

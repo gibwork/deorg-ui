@@ -1,27 +1,26 @@
 "use server";
 
-import { ErrorResponse } from "@/types/types.error";
-import { Token } from "@/types/types.work";
 import { auth } from "@clerk/nextjs/server";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { revalidatePath } from "next/cache";
-interface CreateProjectPayload {
-  name: string;
-  description: string;
-  content: string;
-  token: Token;
-  votingDeadline: string;
-  projectDeadline: string;
+import { ErrorResponse } from "@/types/types.error";
+import { AxiosError } from "axios";
+
+export type CreateProjectTransactionPayload = {
   organizationId: string;
+  name: string
+  members: string[]
+  projectProposalThreshold: number
+  projectProposalValidityPeriod: number
 }
 
-export async function createProject(payload: CreateProjectPayload) {
+export async function createProjectTransaction(payload: CreateProjectTransactionPayload) {
   const { getToken } = auth();
   const token = await getToken();
 
   try {
     const { data } = await axios.post(
-      `${process.env.API_URL}/organizations/${payload.organizationId}/projects`,
+      `${process.env.API_URL}/Transactions/proposals/projects`,
       payload,
       {
         headers: {

@@ -15,20 +15,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertCircle, Loader2, Plus, Trash2 } from "lucide-react";
+import { AlertCircle, Loader2, Plus, Trash2, Users } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useOrganizationMembers } from "../../hooks/use-organization-members";
+import { Member } from "@/types/types.organization";
 
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: any) => void;
+  organizationId: string;
 }
 
 export function CreateProjectModal({
   isOpen,
   onClose,
   onSubmit,
+  organizationId,
 }: CreateProjectModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -36,8 +42,12 @@ export function CreateProjectModal({
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [milestones, setMilestones] = useState([{ title: "", dueDate: "" }]);
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { data: members, isLoading: isLoadingMembers } =
+    useOrganizationMembers(organizationId);
 
   const addMilestone = () => {
     setMilestones([...milestones, { title: "", dueDate: "" }]);
@@ -56,6 +66,14 @@ export function CreateProjectModal({
       dueDate: string;
     };
     setMilestones(newMilestones);
+  };
+
+  const toggleMemberSelection = (member: Member) => {
+    setSelectedMembers((prev) =>
+      prev.includes(member.user.walletAddress)
+        ? prev.filter((address) => address !== member.user.walletAddress)
+        : [...prev, member.user.walletAddress]
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,6 +96,11 @@ export function CreateProjectModal({
 
     if (!endDate) {
       setError("End date is required");
+      return;
+    }
+
+    if (selectedMembers.length === 0) {
+      setError("Please select at least one team member");
       return;
     }
 
@@ -105,6 +128,7 @@ export function CreateProjectModal({
         startDate,
         endDate,
         milestones: validMilestones,
+        members: selectedMembers,
       });
     } catch (err) {
       setError("Failed to create project. Please try again.");
@@ -189,6 +213,62 @@ export function CreateProjectModal({
                 onChange={(e) => setEndDate(e.target.value)}
                 disabled={isSubmitting}
               />
+            </div>
+          </div>
+
+          <Separator className="my-4" />
+
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <Label>Team Members</Label>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Users className="h-4 w-4" />
+                {selectedMembers.length} selected
+              </div>
+            </div>
+
+            <div className="space-y-2 max-h-[200px] overflow-y-auto p-2 border rounded-md">
+              {isLoadingMembers ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              ) : (
+                members?.map((member) => (
+                  <div
+                    key={member.id}
+                    className="flex items-center gap-4 p-2 hover:bg-muted rounded-md"
+                  >
+                    <Checkbox
+                      id={`member-${member.id}`}
+                      checked={selectedMembers.includes(
+                        member.user.walletAddress
+                      )}
+                      onCheckedChange={() => toggleMemberSelection(member)}
+                      disabled={isSubmitting}
+                    />
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={member.user.profilePicture || "/placeholder.svg"}
+                        alt={member.user.username}
+                      />
+                      <AvatarFallback>
+                        {member.user.username.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <Label
+                        htmlFor={`member-${member.id}`}
+                        className="font-medium"
+                      >
+                        {member.user.username}
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        {member.role}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
