@@ -28,7 +28,7 @@ export function Unauthorized({ orgId, children }: UnauthorizedProps) {
   const { data: organization, isLoading: isOrganizationLoading } =
     useOrganization(orgId);
   const { data: membershipData, isLoading: isMembershipLoading } =
-    useCheckMembership(orgId);
+    useCheckMembership(orgId, { enabled: !!userId });
 
   const handleJoinSuccess = () => {
     if (!organization) return;
