@@ -87,7 +87,10 @@ export function WalletButtonPopover({ userData }: { userData?: User }) {
                 onClick={() => {
                   disconnect();
 
-                  signOut({ redirectUrl: "/organizations" });
+                  if (userData?.walletAddress) {
+                    signOut();
+                  }
+
                 }}
               >
                 <UnplugIcon className="h-4 w-4" />

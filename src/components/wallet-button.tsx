@@ -42,12 +42,13 @@ export function WalletButton() {
 
   const [isFirstRender, setIsFirstRender] = useState<boolean>(true);
   useEffect(() => {
+
     if (!userData) return; // Don't do anything if userData is not loaded yet
 
     if (publicKey && userData?.walletAddress) {
       const pubKey = publicKey.toString();
       if (pubKey !== userData?.walletAddress) {
-        console.log("disconnecting");
+
         disconnect();
         if (!isManualChange) {
           signOut();
