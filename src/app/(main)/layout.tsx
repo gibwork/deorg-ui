@@ -6,7 +6,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import usersService from "@/services/user.service";
 import { getUserWalletBalance } from "@/actions/get/get-wallet-token-balances";
 import useNetwork from "@/hooks/use-network";
-
+import { getUserData } from "@/actions/get/get-user-data";
 export default async function MainLayout({
   children,
 }: Readonly<{
@@ -18,12 +18,9 @@ export default async function MainLayout({
     await queryClient.prefetchQuery({
       queryKey: [`user-${userId}`],
       queryFn: async () => {
-        const { success, data } = await usersService.getUserData();
-        if (!success) {
-          throw new Error(data.message);
-        } else {
-          return data;
-        }
+        const { success, error } = await getUserData();
+        if (error) throw new Error(error);
+        return success;
       },
     });
 

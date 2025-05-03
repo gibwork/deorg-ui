@@ -102,7 +102,7 @@ function Header() {
             <PriorityFeePopover />
           </SignedIn>
           <SignedIn>
-            <WalletButton userData={data} />
+            <WalletButton />
           </SignedIn>
           <ClerkLoading>
             <Loader className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -149,7 +149,7 @@ function Header() {
             <PriorityFeePopover />
           </SignedIn>
           <SignedIn>
-            <WalletButton userData={data} />
+            <WalletButton />
           </SignedIn>
           <div className={cn("block lg:!hidden")}>
             <MobileSidebar />

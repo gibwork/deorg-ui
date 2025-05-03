@@ -87,7 +87,7 @@ export function ProfilePopover() {
         <DropdownMenuItem
           onClick={() => {
             disconnect();
-            signOut({ redirectUrl: "/?tab=task" });
+            signOut({ redirectUrl: "/organizations" });
           }}
         >
           Log out

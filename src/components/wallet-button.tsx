@@ -22,8 +22,9 @@ import { useWalletChange } from "@/features/auth/lib/use-wallet-change";
 import { verifyPrimaryWallet } from "@/actions/post/verify-primary-wallet";
 import { useVerifyWallet } from "@/features/auth/lib/verify-wallet";
 import { WalletButtonPopover } from "./wallet-button-popover";
+import { useUserData } from "@/hooks/use-user-data";
 
-export function WalletButton({ userData }: { userData?: User }) {
+export function WalletButton() {
   const { isManualChange, toggleManualChange, isVerifying, toggleVerifying } =
     useWalletChange();
   const { userId, signOut } = useAuth();
@@ -36,16 +37,23 @@ export function WalletButton({ userData }: { userData?: User }) {
     wallet,
   } = useWallet();
   const walletModal = useWalletModal();
+
+  const { data: userData } = useUserData();
+
   const [isFirstRender, setIsFirstRender] = useState<boolean>(true);
   useEffect(() => {
+
+    if (!userData) return; // Don't do anything if userData is not loaded yet
+
     if (publicKey && userData?.walletAddress) {
       const pubKey = publicKey.toString();
       if (pubKey !== userData?.walletAddress) {
+
         disconnect();
         if (!isManualChange) {
-          signOut({ redirectUrl: "/" });
+          signOut();
         } else {
-          toast.warning("Please connect your primary wallet to continue!", {
+          toast.warning("Please connect wallet to continue!", {
             id: pubKey,
           });
         }
@@ -53,7 +61,7 @@ export function WalletButton({ userData }: { userData?: User }) {
       toggleManualChange(false);
     } else if (!publicKey && userData?.walletAddress && !isFirstRender) {
       if (!isManualChange) {
-        signOut({ redirectUrl: "/" });
+        signOut();
       }
     }
 
@@ -83,7 +91,7 @@ export function WalletButton({ userData }: { userData?: User }) {
         <span className="hidden md:block">
           {" "}
           {/* {isLoading ? "Connecting..." : "Connect"} */}
-          Connect
+          Connect Wallet
         </span>
       </Button>
     );

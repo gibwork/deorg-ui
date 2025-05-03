@@ -60,6 +60,7 @@ export function JoinOrganizationDialog({
       onSuccess();
     },
     onError: (error) => {
+      console.log(error);
       toast.error(error.message);
     },
   });

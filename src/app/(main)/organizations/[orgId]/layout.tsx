@@ -7,10 +7,6 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { OrganizationSidebar } from "@/features/organizations/components/organization-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { auth } from "@clerk/nextjs/server";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { Unauthorized } from "./unathorized";
 
 function OrganizationLayout({
@@ -32,11 +28,9 @@ function OrganizationLayout({
             <OrganizationHeader organizationId={params.orgId} />
             <div className="h-[calc(100vh-1rem)]">
               <ScrollArea className="h-full">
-                {userId ? (
-                  <div className="mt-6 w-full">{children}</div>
-                ) : (
-                  <Unauthorized />
-                )}
+                <div className="mt-6 w-full">
+                  <Unauthorized orgId={params.orgId}>{children}</Unauthorized>
+                </div>
               </ScrollArea>
             </div>
           </div>
