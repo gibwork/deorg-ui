@@ -114,12 +114,12 @@ const OrganizationsList = () => {
                       <li className="text-sm text-black font-medium inline-flex items-center bg-stone-100 px-2 py-1 rounded-md cursor-pointer hover:bg-stone-100">
                         <Home size={14} className="mr-2" /> Explore
                       </li>
-                      <li className="text-sm text-gray-500 font-medium inline-flex items-center px-2 py-1 rounded-md cursor-pointer hover:bg-stone-100 hover:text-black">
+                      <li>
                         <Link
                           href="/organizations/create"
-                          className={cn(buttonVariants({ variant: "link", className: "p-0 hover:no-underline hover:text-black text-sm text-gray-500 h-5" }))}
+                          className="text-sm text-gray-500 font-medium inline-flex items-center px-2 py-1 rounded-md cursor-pointer hover:bg-stone-100 hover:text-black w-full"
                         >
-                          <Plus size={14} className="mr-2" />  Create
+                          <Plus size={14} className="mr-2" /> Create
                         </Link>
                       </li>
                       <li className="text-sm text-gray-500 font-medium inline-flex items-center px-2 py-1 rounded-md cursor-pointer hover:bg-stone-100 hover:text-black">
