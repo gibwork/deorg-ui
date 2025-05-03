@@ -76,7 +76,7 @@ export function JoinOrganizationDialog({
     isRefetching: isWalletTokensRefetching,
     refetch: walletTokenRefetch,
   } = useWalletTokenBalances({
-    enabled: !!userData && !!userData?.primaryWallet,
+    enabled: !!userData && !!userData?.walletAddress,
   });
 
   const isTokenRestricted = useMemo(() => {
@@ -99,7 +99,7 @@ export function JoinOrganizationDialog({
       return "Checking token balance...";
     }
 
-    if (!userData?.primaryWallet) {
+    if (!userData?.walletAddress) {
       return "Please connect your wallet to join this organization.";
     }
 
@@ -114,7 +114,7 @@ export function JoinOrganizationDialog({
   const isJoinDisabled =
     joinOrgMutaion.isPending ||
     isTokenRestricted ||
-    !userData?.primaryWallet ||
+    !userData?.walletAddress ||
     walletTokensLoading;
 
   const Content = () => (

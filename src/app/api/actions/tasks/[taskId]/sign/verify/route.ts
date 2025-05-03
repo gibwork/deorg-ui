@@ -61,7 +61,7 @@ export async function POST(
 
   const res = await axios.get(`${process.env.API_URL}/tasks/${params.taskId}`);
 
-  const owner = res.data.user.primaryWallet === body.account;
+  const owner = res.data.user.walletAddress === body.account;
 
   const content = removeMarkdown(res.data.content);
   const contentText = content.replace(/\\/g, "");
@@ -90,7 +90,7 @@ export async function POST(
   }
 
   const submission = res.data.taskSubmissions.find(
-    (submission: any) => submission.user.primaryWallet === body.account
+    (submission: any) => submission.user.walletAddress === body.account
   );
 
   if (!submission) {

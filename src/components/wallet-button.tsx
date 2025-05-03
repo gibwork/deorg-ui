@@ -38,9 +38,9 @@ export function WalletButton({ userData }: { userData?: User }) {
   const walletModal = useWalletModal();
   const [isFirstRender, setIsFirstRender] = useState<boolean>(true);
   useEffect(() => {
-    if (publicKey && userData?.primaryWallet) {
+    if (publicKey && userData?.walletAddress) {
       const pubKey = publicKey.toString();
-      if (pubKey !== userData?.primaryWallet) {
+      if (pubKey !== userData?.walletAddress) {
         disconnect();
         if (!isManualChange) {
           signOut({ redirectUrl: "/" });
@@ -51,7 +51,7 @@ export function WalletButton({ userData }: { userData?: User }) {
         }
       }
       toggleManualChange(false);
-    } else if (!publicKey && userData?.primaryWallet && !isFirstRender) {
+    } else if (!publicKey && userData?.walletAddress && !isFirstRender) {
       if (!isManualChange) {
         signOut({ redirectUrl: "/" });
       }

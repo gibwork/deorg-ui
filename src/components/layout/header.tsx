@@ -43,17 +43,17 @@ function Header() {
   });
 
   const { data: walletTokensData } = useWalletTokenBalances({
-    enabled: !!data && !!data?.primaryWallet,
+    enabled: !!data && !!data?.walletAddress,
   });
 
   const { data: walletNFTData } = useWalletNFTBalances({
-    enabled: !!data && !!data?.primaryWallet,
+    enabled: !!data && !!data?.walletAddress,
   });
 
   // console.log(walletTokensData)
 
   useEffect(() => {
-    if (publicKey && !data?.primaryWallet) {
+    if (publicKey && !data?.walletAddress) {
       handleVerify();
     }
 

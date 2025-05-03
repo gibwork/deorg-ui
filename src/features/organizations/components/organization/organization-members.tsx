@@ -279,7 +279,7 @@ export function OrganizationMembers({
                         <div>
                           <p className="font-medium">{member.user.username}</p>
                           <p className="text-sm text-muted-foreground">
-                            {truncate(member.user.primaryWallet, 4, 4)}
+                            {truncate(member.user.walletAddress, 4, 4)}
                           </p>
                         </div>
                       </div>
@@ -552,7 +552,7 @@ export function OrganizationMembers({
                 <div>
                   <p className="font-medium">{selectedMember.user.username}</p>
                   <p className="text-sm text-muted-foreground">
-                    {truncate(selectedMember.user.primaryWallet, 4, 4)}
+                    {truncate(selectedMember.user.walletAddress, 4, 4)}
                   </p>
                 </div>
               </div>

@@ -86,7 +86,7 @@ export function WalletButtonPopover({ userData }: { userData?: User }) {
                 className="flex items-center gap-1"
                 onClick={() => {
                   disconnect();
-                  if (userData?.primaryWallet) {
+                  if (userData?.walletAddress) {
                     signOut();
                   }
                 }}

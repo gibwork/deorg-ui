@@ -15,6 +15,6 @@ export interface User {
   xAccount: string;
   xAccountVerified: boolean;
   decafSolWallet: string;
-  primaryWallet: string;
+  walletAddress: string;
   totalReferrals: number;
 }

@@ -147,7 +147,7 @@ export function CreateOrganizationForm() {
     refetch,
     isRefetching: isWalletTokensRefetching,
   } = useWalletTokenBalances({
-    enabled: !!userData && !!userData?.primaryWallet,
+    enabled: !!userData && !!userData?.walletAddress,
   });
 
   const {

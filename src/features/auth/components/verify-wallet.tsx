@@ -80,7 +80,7 @@ const VerifyWallet = ({ className, ...props }: CardProps) => {
       <CardHeader className="!px-5">
         <CardTitle>Primary Wallet</CardTitle>
         <CardDescription>
-          {!userData?.primaryWallet
+          {!userData?.walletAddress
             ? `To continue using your account with our new wallet authentication,
           please link your primary Solana wallet here.This will allow you to
           sign in effortlessly using your wallet and access all features
@@ -90,11 +90,11 @@ const VerifyWallet = ({ className, ...props }: CardProps) => {
       </CardHeader>
       <CardContent className="grid gap-4">
         <div>
-          {userData?.primaryWallet ? (
+          {userData?.walletAddress ? (
             <div>
               <Input
                 readOnly
-                value={userData.primaryWallet}
+                value={userData.walletAddress}
                 className="max-w-lg text-muted-foreground bg-stone-50 dark:bg-border opacity-90"
               />
               <p className="text-xs sm:text-sm text-muted-foreground p-1">

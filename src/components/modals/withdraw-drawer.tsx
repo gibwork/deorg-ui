@@ -205,7 +205,7 @@ const WithdrawComponent = ({
     refetch,
     isRefetching: isWalletTokensRefetching,
   } = useWalletTokenBalances({
-    enabled: !!userData && !!userData?.primaryWallet,
+    enabled: !!userData && !!userData?.walletAddress,
   });
 
   const solBalance = useMemo(() => {
