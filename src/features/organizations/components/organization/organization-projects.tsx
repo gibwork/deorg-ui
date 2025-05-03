@@ -27,6 +27,13 @@ import { getOrganizationProjects } from "../../actions/projects/get-organization
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import {
+  CreateProjectTransactionPayload,
+  createProjectTransaction,
+} from "../../actions/projects/create-project-transaction";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { Transaction } from "@solana/web3.js";
+import { createProject } from "../../actions/projects/create-project";
 
 export function OrganizationProjects({
   organizationId,
@@ -36,10 +43,53 @@ export function OrganizationProjects({
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
+  const { signTransaction } = useWallet();
 
   const handleViewProject = (project: any) => {
     setSelectedProject(project);
     setShowDetailModal(true);
+  };
+
+  const handleCreateProject = async (project: any) => {
+    if (!signTransaction) return;
+    try {
+      const payload: CreateProjectTransactionPayload = {
+        organizationId,
+        name: project.title,
+        members: project.members,
+        projectProposalThreshold: 1,
+        projectProposalValidityPeriod: 1,
+      };
+
+      const response = await createProjectTransaction(payload);
+
+      console.log(response);
+
+      const transaction = Transaction.from(
+        Buffer.from(response.success.serializedTransaction, "base64")
+      );
+
+      const signature = await signTransaction(transaction);
+
+      if (!signature) {
+        throw new Error("Failed to sign transaction");
+      }
+
+      const serializedSignedTransaction = signature
+        ?.serialize()
+        .toString("base64");
+
+      const createProjectResponse = await createProject({
+        transactionId: response.success.transactionId,
+        serializedTransaction: serializedSignedTransaction,
+      });
+
+      console.log(createProjectResponse);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setShowCreateModal(false);
+    }
   };
 
   const { data: projects, isLoading } = useQuery({
@@ -103,10 +153,10 @@ export function OrganizationProjects({
 
       <CreateProjectModal
         isOpen={showCreateModal}
+        organizationId={organizationId}
         onClose={() => setShowCreateModal(false)}
-        onSubmit={(data) => {
-          console.log("Creating project with data:", data);
-          setShowCreateModal(false);
+        onSubmit={async (data) => {
+          handleCreateProject(data);
         }}
       />
 
