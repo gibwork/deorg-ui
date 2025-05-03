@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -55,6 +55,7 @@ import { proposeContributorRequest } from "@/actions/post/propsose-contributor-r
 import { Transaction } from "@solana/web3.js";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useOrganizationMembers } from "../../hooks/use-organization-members";
+import { useTransactionStore } from "@/features/transaction-toast/use-transaction-store";
 export function OrganizationMembers({
   organizationId,
 }: {
@@ -67,8 +68,19 @@ export function OrganizationMembers({
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const { publicKey, signTransaction } = useWallet();
-
+  const {
+    startTransaction,
+    updateStep,
+    setTxHash,
+    updateStatus,
+    addWarning,
+    resetTransaction,
+  } = useTransactionStore.getState();
   const { data: members, isLoading } = useOrganizationMembers(organizationId);
+
+  const currentUserRole = useMemo(() => {
+    return members?.find((member) => member.user.externalId === user?.id)?.role;
+  }, [members, user]);
 
   const handleRoleChange = (member: Member) => {
     setSelectedMember(member);
@@ -78,13 +90,22 @@ export function OrganizationMembers({
   const handleNominateAsContributor = async (member: Member) => {
     if (!publicKey || !signTransaction) return;
     try {
+      toast.dismiss();
+      const transactionId = startTransaction(
+        `Nominate ${member.user.username} as contributor`
+      );
+
+      updateStep(1, "loading", "Preparing transaction details...");
       const { success, error } = await proposeContributorRequest(
         organizationId,
         member.user.walletAddress
       );
       if (error) {
-        toast.error("Failed to propose contributor request");
+        throw new Error(error);
       }
+
+      updateStep(1, "success");
+      updateStep(2, "loading", "Please sign the transaction in your wallet");
 
       const retreivedTx = Transaction.from(
         Buffer.from(success.serializedTransaction, "base64")
@@ -94,129 +115,58 @@ export function OrganizationMembers({
 
       const serializedTx = await signTransaction(retreivedTx);
 
+      updateStep(2, "success");
+      updateStep(3, "loading", "Submitting transaction to the network...");
+
       const transactionResponse = await createContributorProposal({
         organizationId,
         transactionId: success.transactionId,
         serializedTransaction: serializedTx?.serialize().toString("base64"),
       });
 
+      updateStep(3, "success");
+      updateStep(4, "loading", "Confirming transaction...");
+
       if (transactionResponse.error) {
-        toast.error(
-          transactionResponse.error.message || "Failed to nominate member"
-        );
+        throw new Error(transactionResponse.error.message);
       }
 
-      toast.success("Contributor request proposed");
+      queryClient.invalidateQueries({
+        queryKey: ["organization_members", organizationId],
+      });
+
+      updateStep(4, "success");
+
+      updateStatus("success");
     } catch (error) {
       console.error(error);
-      toast.error("Failed to propose contributor request");
+      const errorMessage =
+        error instanceof Error ? error.message : "Please try again later";
+
+      // Find the current step that failed
+      const currentStep =
+        [1, 2, 3, 4].find((step) => {
+          const activeTransaction =
+            useTransactionStore.getState().activeTransaction;
+          return (
+            activeTransaction?.steps.find((s) => s.id === step)?.status ===
+            "loading"
+          );
+        }) || 2;
+
+      // Update the failed step with error message
+      updateStep(currentStep, "error", errorMessage);
+      updateStatus("error");
+
+      // Add warning if it's a specific type of error
+      if (error instanceof Error && error.message.includes("insufficient")) {
+        addWarning("Insufficient balance for transaction");
+      }
     }
   };
 
-  // const nominateContributorMutation = useMutation({
-  //   mutationFn: nominateContributor,
-  //   onSuccess: (data) => {
-  //     if (data.error) {
-  //       toast.error(data.error.message || "Failed to nominate member", {
-  //         position: "top-right",
-  //       });
-  //       return;
-  //     }
+  console.log(members);
 
-  //     queryClient.invalidateQueries({
-  //       queryKey: ["organization", organizationId],
-  //     });
-
-  //     // Successfully nominated
-  //     toast.success("Member nominated as contributor");
-  //   },
-  //   onError: (error) => {
-  //     console.error(error);
-  //     toast.error("An unexpected error occurred while nominating the member");
-  //   },
-  //   onSettled: () => {
-  //     toast.dismiss();
-  //   },
-  // });
-
-  // const handleNominateMember = async () => {
-  //   if (selectedMember) {
-  //     toast.loading("Nominating member...");
-  //     nominateContributorMutation.mutate({
-  //       organizationId,
-  //       candidateId: selectedMember.id,
-  //     });
-  //     setShowRoleModal(false);
-  //     setSelectedMember(null);
-  //   }
-  // };
-  // Mock data for contributors
-  const contributors = [
-    {
-      id: 1,
-      name: "Alice",
-      address: "alice.sol",
-      avatar: "/placeholder.svg?height=40&width=40",
-      role: "admin",
-      rateType: "hourly",
-      rate: 50,
-      totalEarned: 1250,
-      lastPaid: "June 1, 2023",
-    },
-    {
-      id: 2,
-      name: "Bob",
-      address: "bob.sol",
-      avatar: "/placeholder.svg?height=40&width=40",
-      role: "contributor",
-      rateType: "fixed",
-      rate: 500,
-      totalEarned: 2000,
-      lastPaid: "June 5, 2023",
-    },
-    {
-      id: 3,
-      name: "Charlie",
-      address: "charlie.sol",
-      avatar: "/placeholder.svg?height=40&width=40",
-      role: "contributor",
-      rateType: "hourly",
-      rate: 40,
-      totalEarned: 800,
-      lastPaid: "June 10, 2023",
-    },
-  ];
-
-  // Mock data for payment history
-  const paymentHistory = [
-    {
-      id: 1,
-      recipient: "Alice",
-      recipientAddress: "alice.sol",
-      amount: 250,
-      date: "June 1, 2023",
-      status: "completed",
-      txHash: "5xT...",
-    },
-    {
-      id: 2,
-      recipient: "Bob",
-      recipientAddress: "bob.sol",
-      amount: 500,
-      date: "June 5, 2023",
-      status: "completed",
-      txHash: "7zR...",
-    },
-    {
-      id: 3,
-      recipient: "Charlie",
-      recipientAddress: "charlie.sol",
-      amount: 200,
-      date: "June 10, 2023",
-      status: "completed",
-      txHash: "9qP...",
-    },
-  ];
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
@@ -227,68 +177,51 @@ export function OrganizationMembers({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Members</h2>
-          <p className="text-muted-foreground">
-            Manage members and their roles in your organization.
-          </p>
-        </div>
-        <Button onClick={() => setShowInviteModal(true)}>
-          <UserPlus className="mr-2 h-4 w-4" />
-          Invite Member
-        </Button>
-      </div>
+      <div className="grid gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Organization Members</span>{" "}
+              {/* <Button onClick={() => setShowInviteModal(true)}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Invite Member
+              </Button> */}
+            </CardTitle>
+            {/* <CardDescription>
+              Your organization has {members?.length} members with various
+              roles.
+            </CardDescription> */}
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {members?.map((member) => (
+                <div
+                  key={member.id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        src={member.user.profilePicture || "/placeholder.svg"}
+                        alt={member.user.username}
+                      />
+                      <AvatarFallback>
+                        {member.user.username.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{member.user.username}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {truncate(member.user.walletAddress, 4, 4)}
+                      </p>
+                    </div>
+                  </div>
 
-      <Tabs defaultValue="members" className="w-full">
-        {/* <TabsList>
-          <TabsTrigger value="members">Members</TabsTrigger>
-          <TabsTrigger value="payroll">Payroll</TabsTrigger>
-          <TabsTrigger value="history">Payment History</TabsTrigger>
-        </TabsList> */}
-
-        <TabsContent value="members" className="mt-6">
-          <div className="grid gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Organization Members</CardTitle>
-                <CardDescription>
-                  Your organization has {members?.length} members with various
-                  roles.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {members?.map((member) => (
-                    <div
-                      key={member.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div className="flex items-center gap-4">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage
-                            src={
-                              member.user.profilePicture || "/placeholder.svg"
-                            }
-                            alt={member.user.username}
-                          />
-                          <AvatarFallback>
-                            {member.user.username.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{member.user.username}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {truncate(member.user.walletAddress, 4, 4)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <Badge
-                            variant="outline"
-                            className={`
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={`
                         ${
                           member.role === "ADMIN"
                             ? "border-purple-200 text-purple-700 dark:border-purple-800 dark:text-purple-400"
@@ -305,186 +238,64 @@ export function OrganizationMembers({
                             : ""
                         }
                       `}
-                          >
-                            {member.role.charAt(0).toUpperCase() +
-                              member.role.slice(1)}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            Joined on{" "}
-                            <DateComponent datetime={member.createdAt} />
-                          </span>
-                        </div>
+                      >
+                        {member.role.charAt(0).toUpperCase() +
+                          member.role.slice(1)}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        Joined on <DateComponent datetime={member.createdAt} />
+                      </span>
+                    </div>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => handleRoleChange(member)}
-                            >
-                              Change Role
-                            </DropdownMenuItem>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {/* <DropdownMenuItem
+                          onClick={() => handleRoleChange(member)}
+                        >
+                          Change Role
+                        </DropdownMenuItem> */}
 
-                            {member.role !== "CONTRIBUTOR" && (
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleNominateAsContributor(member)
-                                }
-                              >
-                                Nominate as Contributor
-                              </DropdownMenuItem>
-                            )}
-
+                        {member.role !== "CONTRIBUTOR" &&
+                          currentUserRole === "CONTRIBUTOR" && (
                             <DropdownMenuItem
                               onClick={() =>
-                                router.push(`/p/${member.user.username}`)
+                                handleNominateAsContributor(member)
                               }
                             >
-                              View Profile
+                              Nominate as Contributor
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              disabled={user?.id === member.user.externalId}
-                              className="text-red-600 dark:text-red-400"
-                            >
-                              Remove Member
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  ))}
+                          )}
+
+                        <DropdownMenuItem
+                          onClick={() =>
+                            router.push(`/p/${member.user.username}`)
+                          }
+                        >
+                          View Profile
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          disabled={
+                            user?.id === member.user.externalId ||
+                            currentUserRole !== "CONTRIBUTOR"
+                          }
+                          className="text-red-600 dark:text-red-400"
+                        >
+                          Remove Member
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="payroll" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Contributor Rates</CardTitle>
-              <CardDescription>
-                View and manage rates for all contributors in the organization.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {contributors.map((contributor) => (
-                  <div
-                    key={contributor.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          src={contributor.avatar || "/placeholder.svg"}
-                          alt={contributor.name}
-                        />
-                        <AvatarFallback>
-                          {contributor.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{contributor.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {contributor.address}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                      <div className="text-right">
-                        <p className="font-medium">
-                          {contributor.rate} SOL{" "}
-                          {contributor.rateType === "hourly"
-                            ? "/ hour"
-                            : "/ project"}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {contributor.rateType.charAt(0).toUpperCase() +
-                            contributor.rateType.slice(1)}{" "}
-                          rate
-                        </p>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="font-medium">
-                          {contributor.totalEarned} SOL
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Total earned
-                        </p>
-                      </div>
-
-                      <Button variant="outline" size="sm">
-                        Pay Now
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="history" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment History</CardTitle>
-              <CardDescription>
-                View all payments made to contributors.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {paymentHistory.map((payment) => (
-                  <div
-                    key={payment.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="rounded-full p-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                        <DollarSign className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{payment.recipient}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {payment.recipientAddress}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                      <div className="text-right">
-                        <p className="font-medium">{payment.amount} SOL</p>
-                        <p className="text-sm text-muted-foreground">
-                          <Clock className="h-3 w-3 inline mr-1" />
-                          {payment.date}
-                        </p>
-                      </div>
-
-                      <Badge
-                        variant="outline"
-                        className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
-                      >
-                        {payment.status.charAt(0).toUpperCase() +
-                          payment.status.slice(1)}
-                      </Badge>
-
-                      <Button variant="ghost" size="sm" className="text-xs">
-                        View Tx
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Invite Member Modal */}
       <Dialog open={showInviteModal} onOpenChange={setShowInviteModal}>

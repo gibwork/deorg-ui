@@ -119,6 +119,7 @@ export function Unauthorized({ orgId, children }: UnauthorizedProps) {
     );
   }
 
-  // Show children if user is authenticated and a member
-  return <>{children}</>;
+  if (membershipData?.isMember) {
+    return <>{children}</>;
+  }
 }
