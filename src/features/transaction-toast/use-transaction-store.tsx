@@ -51,7 +51,7 @@ const DEFAULT_STEPS: TransactionStep[] = [
   },
   {
     id: 4,
-    title: "Confirming deposit",
+    title: "Confirming transaction",
     status: "pending" as StepStatus,
   },
 ];
@@ -167,7 +167,14 @@ export const useTransactionStore = create<TransactionStore>((set, get) => ({
         };
         return <TransactionToast {...props} />;
       },
-      { id, duration: Number.POSITIVE_INFINITY }
+      {
+        id,
+        duration: Number.POSITIVE_INFINITY,
+        classNames: {
+          toast:
+            "transform-none hover:transform-none data-lifted:transform-none",
+        },
+      }
     );
     return id;
   },
@@ -218,5 +225,8 @@ function updateToast(transaction: TransactionData) {
   toast.custom((t) => <TransactionToast {...props} />, {
     id: transaction.id,
     duration: Number.POSITIVE_INFINITY,
+    classNames: {
+      toast: "transform-none hover:transform-none",
+    },
   });
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -34,6 +34,7 @@ import {
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import { createProject } from "../../actions/projects/create-project";
+import { cn } from "@/lib/utils";
 
 export function OrganizationProjects({
   organizationId,
@@ -114,10 +115,16 @@ export function OrganizationProjects({
             Create and manage projects for your organization.
           </p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)}>
+        <Link
+          href={`/organizations/${organizationId}/projects/new`}
+          className={cn(
+            buttonVariants({ variant: "default" }),
+            "flex items-center gap-2"
+          )}
+        >
           <PlusCircle className="mr-2 h-4 w-4" />
           New Project
-        </Button>
+        </Link>
       </div>
 
       <Tabs defaultValue="active" className="w-full">
