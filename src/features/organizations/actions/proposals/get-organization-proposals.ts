@@ -5,7 +5,7 @@ import axios, { AxiosError } from "axios";
 import { ErrorResponse } from "@/types/types.error";
 
 export interface ProposalType {
-  proposalAddress: string;
+  accountAddress: string;
   organization?: string;
   candidate?: string;
   proposer: string;
@@ -23,7 +23,6 @@ export interface ProposalType {
   organizationId?: string;
   createdBy?: string;
   requestedAmount?: Record<string, any>;
-  proposalAccountAddress: string;
   updatedAt?: string;
 }
 

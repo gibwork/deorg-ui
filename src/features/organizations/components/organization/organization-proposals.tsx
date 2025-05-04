@@ -206,7 +206,7 @@ function ProposalCard({
       updateStep(1, "loading", "Preparing transaction details...");
 
       const { success: createProposalTx, error } = await createProposalVote(
-        proposal.proposalAccountAddress,
+        proposal.accountAddress,
         vote,
         organizationId
       );
@@ -230,14 +230,14 @@ function ProposalCard({
         .toString("base64");
 
       console.log({
-        proposalId: proposal.id,
+        proposalId: proposal,
         organizationId,
         transactionId: createProposalTx.transactionId,
         serializedTransaction: serializedSignedTransaction,
       });
 
       const voteResponse = await voteProposal(
-        proposal.proposalAccountAddress,
+        proposal.accountAddress,
         organizationId,
         createProposalTx.transactionId,
         serializedSignedTransaction
@@ -292,7 +292,7 @@ function ProposalCard({
           <div>
             <CardTitle>{proposal.title || "Untitled"}</CardTitle>
             <CardDescription className="mt-1">
-              <p className="text-sm mb-4">{proposal.proposalAddress}</p>
+              <p className="text-sm mb-4">{proposal.accountAddress}</p>
               Proposed by {proposal.proposer}
             </CardDescription>
           </div>
