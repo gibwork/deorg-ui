@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/popover";
 import { truncate } from "@/lib/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Copy, UnplugIcon, WalletMinimalIcon } from "lucide-react";
+import { Copy, UnplugIcon, WalletMinimalIcon, Lock, Wallet2, Wallet } from "lucide-react";
 import { Separator } from "./ui/separator";
 import Link from "next/link";
 import { Icons } from "./icons";
@@ -27,11 +27,11 @@ export function WalletButtonPopover({ userData }: { userData?: User }) {
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            variant="outline"
+            variant="default"
             className="text-sm h-7 md:h-9 flex items-center !p-1 md:!px-4 md:gap-2"
           >
-            <WalletMinimalIcon className="p-1" />
-            <span className="hidden md:block">
+            <Wallet size={30} className="p-1" />
+            <span className="hidden md:block text-base">
               {" "}
               {truncate(publicKey.toString(), 5, 3)}
             </span>
