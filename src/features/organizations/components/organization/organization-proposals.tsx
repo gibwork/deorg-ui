@@ -163,7 +163,7 @@ function ProposalCard({
     }
 
     const response = await createProposalVote(
-      proposal.id,
+      proposal.proposalAddress,
       vote,
       organizationId
     );
