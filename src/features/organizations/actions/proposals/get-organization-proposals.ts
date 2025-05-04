@@ -23,7 +23,7 @@ export interface ProposalType {
   organizationId?: string;
   createdBy?: string;
   requestedAmount?: Record<string, any>;
-  proposalAccountAddress?: string;
+  proposalAccountAddress: string;
   updatedAt?: string;
 }
 

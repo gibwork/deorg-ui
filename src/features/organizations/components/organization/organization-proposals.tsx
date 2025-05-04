@@ -203,11 +203,10 @@ function ProposalCard({
         `Vote ${vote ? "For" : "Against"} `
       );
 
-
       updateStep(1, "loading", "Preparing transaction details...");
 
       const { success: createProposalTx, error } = await createProposalVote(
-        proposal.id,
+        proposal.proposalAccountAddress,
         vote,
         organizationId
       );
@@ -238,7 +237,7 @@ function ProposalCard({
       });
 
       const voteResponse = await voteProposal(
-        proposal.id,
+        proposal.proposalAccountAddress,
         organizationId,
         createProposalTx.transactionId,
         serializedSignedTransaction
