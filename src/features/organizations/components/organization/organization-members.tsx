@@ -111,8 +111,6 @@ export function OrganizationMembers({
         Buffer.from(success.serializedTransaction, "base64")
       );
 
-      console.log(success.serializedTransaction);
-
       const serializedTx = await signTransaction(retreivedTx);
 
       updateStep(2, "success");

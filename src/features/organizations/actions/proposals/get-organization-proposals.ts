@@ -31,7 +31,10 @@ export async function getOrganizationProposals(
   organizationId: string,
   page: number,
   status: string
-): Promise<{ success?: { activeProposals: ProposalType[], pastProposals: ProposalType[] }, error?: ErrorResponse }> {
+): Promise<{
+  success?: { activeProposals: ProposalType[]; pastProposals: ProposalType[] };
+  error?: ErrorResponse;
+}> {
   const { getToken } = auth();
   const token = await getToken();
 
@@ -45,9 +48,14 @@ export async function getOrganizationProposals(
         },
       }
     );
+    const activeProposals = data.filter(
+      (p: ProposalType) => p.status === "active"
+    );
+    const pastProposals = data.filter(
+      (p: ProposalType) => p.status !== "active"
+    );
 
-    return { success: { activeProposals: data, pastProposals: [] } };
-
+    return { success: { activeProposals, pastProposals } };
   } catch (error) {
     const errorData = (error as AxiosError).response?.data as ErrorResponse;
     return { error: errorData };
