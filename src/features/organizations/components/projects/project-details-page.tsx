@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,6 +28,7 @@ import {
 import { CreateTaskButton } from "./create-task-button";
 import { listTasks, Task } from "../../actions/tasks/list-tasks";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useOrganizationMembers } from "../../hooks/use-organization-members";
 
 export default function ProjectDetailsPage({
   orgId,
@@ -38,6 +39,7 @@ export default function ProjectDetailsPage({
 }) {
   const router = useRouter();
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+  const { data: members } = useOrganizationMembers(orgId);
 
   // Mock data for project details
   const project = {
@@ -57,38 +59,6 @@ export default function ProjectDetailsPage({
     spent: projectId === "frontend-redesign" ? 540 : 0,
     startDate: projectId === "frontend-redesign" ? "2023-06-01" : "2023-07-01",
     endDate: projectId === "frontend-redesign" ? "2023-07-15" : "2023-08-15",
-    members: [
-      {
-        id: "349d6a22-0d85-4a58-ac38-bfa66faac0d4",
-        externalId: "user_2wVuKljf3oI3C1ZPrNpE5OyFr1A",
-        username: "fryexu",
-        walletAddress: "FRyeXUJWxCnBLcrdgfP1KzsCCmPWRxDmEMM31zno3LtV",
-        profilePicture:
-          "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yd1ZyYWdzb2JOSHJaRDJNMHlYUHpKbW5pWloiLCJyaWQiOiJ1c2VyXzJ3VnVLbGpmM29JM0MxWlByTnBFNU95RnIxQSIsImluaXRpYWxzIjoiRlcifQ",
-        createdAt: "2025-05-02T03:52:55.571Z",
-        updatedAt: "2025-05-02T03:52:55.571Z",
-      },
-      {
-        id: "db087f89-104f-438a-8df5-95c8d410a02e",
-        externalId: "user_2wW9Zw3USCkq5LRZKNnwobk5cB8",
-        username: "hd1wav",
-        walletAddress: "Hd1wAVXrpvpTjbK5KMYS5ZXBKAzBpST7HAQXtXXtUATj",
-        profilePicture:
-          "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yd1ZyYWdzb2JOSHJaRDJNMHlYUHpKbW5pWloiLCJyaWQiOiJ1c2VyXzJ3VzladzNVU0NrcTVMUlpLTm53b2JrNWNCOCIsImluaXRpYWxzIjoiSFcifQ",
-        createdAt: "2025-05-02T03:54:06.468Z",
-        updatedAt: "2025-05-02T03:54:06.468Z",
-      },
-      {
-        id: "a0a7360e-0ba2-4739-8afd-1fd3eee598c1",
-        externalId: "user_2wZKq9FZGE0iqv9699YGkb5AjU3",
-        username: "evdeba",
-        walletAddress: "EvdEbaFHenWYsyp11LRksdVpB6DgsJXQVaNEZjRbQHy7",
-        profilePicture:
-          "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yd1ZyYWdzb2JOSHJaRDJNMHlYUHpKbW5pWloiLCJyaWQiOiJ1c2VyXzJ3WktxOUZaR0UwaXF2OTY5OVlHa2I1QWpVMyIsImluaXRpYWxzIjoiRVcifQ",
-        createdAt: "2025-05-03T06:44:03.486Z",
-        updatedAt: "2025-05-03T06:44:03.486Z",
-      },
-    ],
     contributors:
       projectId === "frontend-redesign"
         ? [
@@ -172,60 +142,7 @@ export default function ProjectDetailsPage({
     ],
   };
 
-  // Mock data for tasks
-  // const tasks = [
-  //   {
-  //     id: 1,
-  //     title: "Design UI Mockups",
-  //     description: "Create mockups for the new UI design",
-  //     status: "completed",
-  //     assignee: {
-  //       name: "Alice",
-  //       avatar: "/placeholder.svg?height=32&width=32",
-  //     },
-  //     dueDate: "2023-06-15",
-  //     reward: 50,
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Implement Header Component",
-  //     description: "Create the new header component based on the design",
-  //     status: "in_progress",
-  //     assignee: {
-  //       name: "Bob",
-  //       avatar: "/placeholder.svg?height=32&width=32",
-  //     },
-  //     dueDate: "2023-06-25",
-  //     reward: 75,
-  //   },
-  //   {
-  //     id: 3,
-  //     title: "Implement Footer Component",
-  //     description: "Create the new footer component based on the design",
-  //     status: "to_do",
-  //     assignee: null,
-  //     dueDate: "2023-07-05",
-  //     reward: 60,
-  //   },
-  //   {
-  //     id: 4,
-  //     title: "Implement Navigation Menu",
-  //     description: "Create the navigation menu component based on the design",
-  //     status: "to_do",
-  //     assignee: null,
-  //     dueDate: "2023-07-10",
-  //     reward: 80,
-  //   },
-  //   {
-  //     id: 5,
-  //     title: "Implement Responsive Design",
-  //     description: "Ensure the design works well on all screen sizes",
-  //     status: "to_do",
-  //     assignee: null,
-  //     dueDate: "2023-07-12",
-  //     reward: 90,
-  //   },
-  // ];
+  console.log(members);
 
   const {
     data,
@@ -274,8 +191,12 @@ export default function ProjectDetailsPage({
           </div>
           <p className="text-muted-foreground mt-1">{project.description}</p>
         </div>
-
-        <CreateTaskButton members={project.members} projectId={projectId} />
+        {members && (
+          <CreateTaskButton
+            members={members.filter((member) => member.role === "CONTRIBUTOR")}
+            projectId={projectId}
+          />
+        )}
       </div>
 
       {project.status !== "pending_approval" && (
