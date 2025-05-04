@@ -7,11 +7,27 @@ export type Task = {
   project: string;
   title: string;
   paymentAmount: number;
-  assignee: string;
+  assignee: {
+    id: string;
+    externalId: string;
+    username: string;
+    walletAddress: string;
+    profilePicture: string;
+    createdAt: string;
+    updatedAt: string;
+  };
   votesFor: number;
   votesAgainst: number;
   status: string;
-  voters: string[];
+  voters: {
+    id: string;
+    externalId: string;
+    username: string;
+    walletAddress: string;
+    profilePicture: string;
+    createdAt: string;
+    updatedAt: string;
+  }[];
   transferProposal: string;
   vault: string;
 };

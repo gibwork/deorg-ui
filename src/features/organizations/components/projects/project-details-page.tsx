@@ -621,13 +621,15 @@ function TaskCard({ task, orgId, projectId }: TaskCardProps) {
             {task.assignee ? (
               <div className="flex items-center gap-2">
                 <Avatar className="h-6 w-6">
-                  {/* <AvatarImage
-                    src={task.assignee.avatar || "/placeholder.svg"}
-                    alt={task.assignee.name}
-                  /> */}
-                  <AvatarFallback>{task.assignee.charAt(0)}</AvatarFallback>
+                  <AvatarImage
+                    src={task.assignee.profilePicture || "/placeholder.svg"}
+                    alt={task.assignee.username}
+                  />
+                  <AvatarFallback>
+                    {task.assignee.username.charAt(0)}
+                  </AvatarFallback>
                 </Avatar>
-                <span className="text-sm">{task.assignee}</span>
+                <span className="text-sm">{task.assignee.username}</span>
               </div>
             ) : (
               <Badge variant="outline">Unassigned</Badge>
