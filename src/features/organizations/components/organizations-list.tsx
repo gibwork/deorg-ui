@@ -41,6 +41,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { PopoverPortal } from "@radix-ui/react-popover";
+import Image from "next/image";
 
 const OrganizationsList = () => {
   const router = useRouter();
@@ -195,10 +196,62 @@ const OrganizationsList = () => {
           <WalletButton />
         </div>
       </div>
-      <div className="mx-auto w-full max-w-screen-lg px-4 sm:px-8 md:px-10 mt-6 flex items-center gap-5 md:mt-9">
-        <div className="container mt-10">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">Explore</h1>
+
+      <div className="flex flex-row gap-5 border-b-2 border-gray-200 justify-between mt-2">
+        <div className="mx-auto w-full max-w-screen-lg flex items-center gap-5 ">
+          <div className="flex justify-between">
+            <div className="w-full sm:w-2/4 p-4 mt-10">
+              <h1 className="text-3xl font-bold">
+                Where Token Communities Thrive
+              </h1>
+              <p className="text-gray-500 mt-4">
+                DeOrg makes it easy to create, manage, and grow your token
+                community with{" "}
+                <span className="font-medium text-black">
+                  actionable governance
+                </span>
+                .
+              </p>
+              <Link
+                href="/organizations/create"
+                className={cn(
+                  buttonVariants({ variant: "default", className: "mt-4" })
+                )}
+              >
+                <Plus size={14} className="mr-2" />
+                Create Organization
+              </Link>
+            </div>
+            <Image
+              className="h-68 hidden sm:block"
+              src="https://cdn.gib.work/images/44.png"
+              width={480}
+              height={330}
+              alt="DeOrg cartoon monkeys illustration"
+            />
+          </div>
+        </div>
+      </div>
+      <div className="mx-auto w-full max-w-screen-lg flex items-center gap-5 ">
+        <div className="container">
+          <div className="flex flex-col mb-8  mt-10">
+            <h1 className="text-2xl font-bold">Communities</h1>
+            <div className="flex flex-row gap-2 mt-4">
+              <Badge
+                variant="default"
+                className="rounded-sm bg-stone-200 px-4 text-stone-600 hover:bg-stone-100 gap-1 text-lg"
+              >
+                Explore
+              </Badge>
+              {isSignedIn && (
+                <Badge
+                  variant="default"
+                  className="rounded-sm bg-stone-50 px-4 text-stone-600 hover:bg-stone-100 gap-1 text-lg"
+                >
+                  Yours
+                </Badge>
+              )}
+            </div>
           </div>
 
           {isLoading ? (
@@ -231,7 +284,11 @@ const OrganizationsList = () => {
                     </Avatar>
                     <div>
                       <h3 className="text-lg font-bold text-gray-900">
-                        {org.name}
+                        {org.name.length >= 30
+                          ? org.name
+                              .substring(0, org.name.length - 30)
+                              .toUpperCase()
+                          : org.name}
                       </h3>
                       <div className="flex items-center text-gray-500 mt-1">
                         <Badge
