@@ -9,7 +9,7 @@ import { getOrganizationMembers } from "@/features/organizations/actions/members
 export default function page({ params }: { params: { orgId: string } }) {
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <OrganizationMembers organizationId={params.orgId} />
+      <OrganizationMembersPage params={params} />
     </Suspense>
   );
 }
