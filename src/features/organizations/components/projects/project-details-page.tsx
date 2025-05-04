@@ -25,7 +25,9 @@ import {
   LayoutGrid,
   LayoutList,
 } from "lucide-react";
-// import { KanbanBoard } from "@/components/organization/kanban-board";
+import { CreateTaskButton } from "./create-task-button";
+import { listTasks, Task } from "../../actions/tasks/list-tasks";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 export default function ProjectDetailsPage({
   orgId,
@@ -55,6 +57,38 @@ export default function ProjectDetailsPage({
     spent: projectId === "frontend-redesign" ? 540 : 0,
     startDate: projectId === "frontend-redesign" ? "2023-06-01" : "2023-07-01",
     endDate: projectId === "frontend-redesign" ? "2023-07-15" : "2023-08-15",
+    members: [
+      {
+        id: "349d6a22-0d85-4a58-ac38-bfa66faac0d4",
+        externalId: "user_2wVuKljf3oI3C1ZPrNpE5OyFr1A",
+        username: "fryexu",
+        walletAddress: "FRyeXUJWxCnBLcrdgfP1KzsCCmPWRxDmEMM31zno3LtV",
+        profilePicture:
+          "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yd1ZyYWdzb2JOSHJaRDJNMHlYUHpKbW5pWloiLCJyaWQiOiJ1c2VyXzJ3VnVLbGpmM29JM0MxWlByTnBFNU95RnIxQSIsImluaXRpYWxzIjoiRlcifQ",
+        createdAt: "2025-05-02T03:52:55.571Z",
+        updatedAt: "2025-05-02T03:52:55.571Z",
+      },
+      {
+        id: "db087f89-104f-438a-8df5-95c8d410a02e",
+        externalId: "user_2wW9Zw3USCkq5LRZKNnwobk5cB8",
+        username: "hd1wav",
+        walletAddress: "Hd1wAVXrpvpTjbK5KMYS5ZXBKAzBpST7HAQXtXXtUATj",
+        profilePicture:
+          "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yd1ZyYWdzb2JOSHJaRDJNMHlYUHpKbW5pWloiLCJyaWQiOiJ1c2VyXzJ3VzladzNVU0NrcTVMUlpLTm53b2JrNWNCOCIsImluaXRpYWxzIjoiSFcifQ",
+        createdAt: "2025-05-02T03:54:06.468Z",
+        updatedAt: "2025-05-02T03:54:06.468Z",
+      },
+      {
+        id: "a0a7360e-0ba2-4739-8afd-1fd3eee598c1",
+        externalId: "user_2wZKq9FZGE0iqv9699YGkb5AjU3",
+        username: "evdeba",
+        walletAddress: "EvdEbaFHenWYsyp11LRksdVpB6DgsJXQVaNEZjRbQHy7",
+        profilePicture:
+          "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yd1ZyYWdzb2JOSHJaRDJNMHlYUHpKbW5pWloiLCJyaWQiOiJ1c2VyXzJ3WktxOUZaR0UwaXF2OTY5OVlHa2I1QWpVMyIsImluaXRpYWxzIjoiRVcifQ",
+        createdAt: "2025-05-03T06:44:03.486Z",
+        updatedAt: "2025-05-03T06:44:03.486Z",
+      },
+    ],
     contributors:
       projectId === "frontend-redesign"
         ? [
@@ -139,66 +173,84 @@ export default function ProjectDetailsPage({
   };
 
   // Mock data for tasks
-  const tasks = [
-    {
-      id: 1,
-      title: "Design UI Mockups",
-      description: "Create mockups for the new UI design",
-      status: "completed",
-      assignee: {
-        name: "Alice",
-        avatar: "/placeholder.svg?height=32&width=32",
-      },
-      dueDate: "2023-06-15",
-      reward: 50,
-    },
-    {
-      id: 2,
-      title: "Implement Header Component",
-      description: "Create the new header component based on the design",
-      status: "in_progress",
-      assignee: {
-        name: "Bob",
-        avatar: "/placeholder.svg?height=32&width=32",
-      },
-      dueDate: "2023-06-25",
-      reward: 75,
-    },
-    {
-      id: 3,
-      title: "Implement Footer Component",
-      description: "Create the new footer component based on the design",
-      status: "to_do",
-      assignee: null,
-      dueDate: "2023-07-05",
-      reward: 60,
-    },
-    {
-      id: 4,
-      title: "Implement Navigation Menu",
-      description: "Create the navigation menu component based on the design",
-      status: "to_do",
-      assignee: null,
-      dueDate: "2023-07-10",
-      reward: 80,
-    },
-    {
-      id: 5,
-      title: "Implement Responsive Design",
-      description: "Ensure the design works well on all screen sizes",
-      status: "to_do",
-      assignee: null,
-      dueDate: "2023-07-12",
-      reward: 90,
-    },
-  ];
+  // const tasks = [
+  //   {
+  //     id: 1,
+  //     title: "Design UI Mockups",
+  //     description: "Create mockups for the new UI design",
+  //     status: "completed",
+  //     assignee: {
+  //       name: "Alice",
+  //       avatar: "/placeholder.svg?height=32&width=32",
+  //     },
+  //     dueDate: "2023-06-15",
+  //     reward: 50,
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Implement Header Component",
+  //     description: "Create the new header component based on the design",
+  //     status: "in_progress",
+  //     assignee: {
+  //       name: "Bob",
+  //       avatar: "/placeholder.svg?height=32&width=32",
+  //     },
+  //     dueDate: "2023-06-25",
+  //     reward: 75,
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Implement Footer Component",
+  //     description: "Create the new footer component based on the design",
+  //     status: "to_do",
+  //     assignee: null,
+  //     dueDate: "2023-07-05",
+  //     reward: 60,
+  //   },
+  //   {
+  //     id: 4,
+  //     title: "Implement Navigation Menu",
+  //     description: "Create the navigation menu component based on the design",
+  //     status: "to_do",
+  //     assignee: null,
+  //     dueDate: "2023-07-10",
+  //     reward: 80,
+  //   },
+  //   {
+  //     id: 5,
+  //     title: "Implement Responsive Design",
+  //     description: "Ensure the design works well on all screen sizes",
+  //     status: "to_do",
+  //     assignee: null,
+  //     dueDate: "2023-07-12",
+  //     reward: 90,
+  //   },
+  // ];
 
-  // Group tasks by status for kanban view
-  const tasksByStatus = {
-    to_do: tasks.filter((task) => task.status === "to_do"),
-    in_progress: tasks.filter((task) => task.status === "in_progress"),
-    completed: tasks.filter((task) => task.status === "completed"),
-  };
+  const {
+    data,
+    error,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["project_tasks", projectId],
+    initialPageParam: 1,
+    queryFn: async ({ pageParam }) => {
+      const tasks = await listTasks(projectId);
+      return tasks;
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      // return undefined;
+      //CREATES Dupplicates?
+      if (lastPage?.length === 0) return undefined;
+      return allPages?.length + 1;
+    },
+  });
+
+  const tasks = data?.pages?.flatMap((page) => page) || [];
 
   return (
     <div className="space-y-6 w-full">
@@ -223,16 +275,7 @@ export default function ProjectDetailsPage({
           <p className="text-muted-foreground mt-1">{project.description}</p>
         </div>
 
-        {project.status !== "pending_approval" && (
-          <Button asChild>
-            <Link
-              href={`/organizations/${orgId}/projects/${projectId}/tasks/new`}
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              New Task
-            </Link>
-          </Button>
-        )}
+        <CreateTaskButton members={project.members} projectId={projectId} />
       </div>
 
       {project.status !== "pending_approval" && (
@@ -389,7 +432,7 @@ export default function ProjectDetailsPage({
               {tasks.length > 0 ? (
                 tasks.map((task) => (
                   <TaskCard
-                    key={task.id}
+                    key={task.transferProposal}
                     task={task}
                     orgId={orgId}
                     projectId={projectId}
@@ -557,7 +600,7 @@ export default function ProjectDetailsPage({
 }
 
 interface TaskCardProps {
-  task: any;
+  task: Task;
   orgId: string;
   projectId: string;
 }
@@ -572,21 +615,21 @@ function TaskCard({ task, orgId, projectId }: TaskCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-sm mb-4">{task.description}</p>
+        <p className="text-sm mb-4">Mock description</p>
         <div className="flex flex-wrap justify-between items-center">
           <div className="flex items-center gap-2">
             {task.assignee ? (
               <div className="flex items-center gap-2">
                 <Avatar className="h-6 w-6">
                   <AvatarImage
-                    src={task.assignee.avatar || "/placeholder.svg"}
-                    alt={task.assignee.name}
+                    src={task.assignee.profilePicture || "/placeholder.svg"}
+                    alt={task.assignee.username}
                   />
                   <AvatarFallback>
-                    {task.assignee.name.charAt(0)}
+                    {task.assignee.username.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm">{task.assignee.name}</span>
+                <span className="text-sm">{task.assignee.username}</span>
               </div>
             ) : (
               <Badge variant="outline">Unassigned</Badge>
@@ -595,16 +638,16 @@ function TaskCard({ task, orgId, projectId }: TaskCardProps) {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
-              <span>Due {formatDate(task.dueDate)}</span>
+              {/* <span>Due {formatDate(task.dueDate)}</span> */}
             </div>
-            <div className="text-sm font-medium">{task.reward} SOL</div>
+            <div className="text-sm font-medium">{task.paymentAmount} SOL</div>
           </div>
         </div>
       </CardContent>
       <div className="px-6 pb-4 flex justify-end">
         <Button variant="outline" size="sm" asChild>
           <Link
-            href={`/organizations/${orgId}/projects/${projectId}/tasks/${task.id}`}
+            href={`/organizations/${orgId}/projects/${projectId}/tasks/${task.transferProposal}`}
           >
             View Details
           </Link>

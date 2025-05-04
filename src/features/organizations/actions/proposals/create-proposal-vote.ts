@@ -11,12 +11,12 @@ export interface CreateProposalVoteResponse {
   error?: string;
 }
 
-export async function createProposalVote(proposalId: string, vote: boolean, organizationId: string): Promise<CreateProposalVoteResponse> {
+export async function createProposalVote(proposalAccountAddress: string, vote: boolean, organizationId: string): Promise<CreateProposalVoteResponse> {
   try {
     const { getToken } = auth();
     const token = await getToken();
 
-    const response = await axios.post(`${process.env.API_URL}/transactions/proposals/${proposalId}/vote`, {
+    const response = await axios.post(`${process.env.API_URL}/transactions/proposals/${proposalAccountAddress}/vote`, {
       vote,
       organizationId,
     }, {

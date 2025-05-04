@@ -40,6 +40,7 @@ import {
   prepareCreateOrganization,
 } from "@/features/organizations/actions/create-organization";
 import { useTransactionStore } from "@/features/transaction-toast/use-transaction-store";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const createOrganizationSchema = z.object({
   name: z
@@ -83,18 +84,18 @@ type Step = {
 
 const FORM_STEPS: Step[] = [
   {
-    id: "Organization Details",
-    name: "Organization Details",
+    id: "Create a Organization",
+    name: "Create a Organization",
     fields: ["name", "description"],
   },
   {
-    id: "Token Configuration",
-    name: "Token Configuration",
+    id: "Specify Token",
+    name: "Specify Token",
     fields: ["tokenAddress", "requiredTokenAmount"],
   },
   {
-    id: "Voting Configuration",
-    name: "Voting Configuration",
+    id: "Setup Voting",
+    name: "Setup Voting",
     fields: [
       "votingApprovalThreshold",
       "votingPeriod",
@@ -103,8 +104,8 @@ const FORM_STEPS: Step[] = [
     ],
   },
   {
-    id: "Review",
-    name: "Review",
+    id: "Submit",
+    name: "Submit",
     fields: [],
   },
 ];
@@ -269,7 +270,9 @@ export function CreateOrganizationForm() {
       }
       updateStep(4, "success");
       updateStatus("success");
-      router.push(`/organizations/${createOrganizationResponse.success.id}`);
+      router.push(
+        `/organizations/${createOrganizationResponse.success.accountAddress}`
+      );
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Please try again later";
@@ -378,18 +381,17 @@ export function CreateOrganizationForm() {
         </div>
       </div>
 
-      <div className="bg-card border rounded-lg p-6">
+      <div className=" rounded-lg p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {currentStep === 0 && (
               <div className="space-y-6">
-                <div className="text-center">
-                  <h1 className="text-2xl font-bold">
-                    Create a new organization
-                  </h1>
-                  <p className="text-muted-foreground mt-2">
-                    Give your organization a name. You can always adjust the
-                    details later
+                <div className="mb-16">
+                  <h6 className="font-light text-muted-foreground">
+                    {FORM_STEPS[currentStep]?.name}
+                  </h6>
+                  <p className="text-xl font-medium">
+                    Take control and empower your community
                   </p>
                 </div>
                 <FormField
@@ -397,12 +399,11 @@ export function CreateOrganizationForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Organization Name</FormLabel>
+                      <FormLabel>
+                        What&apos;s the name of your community?
+                      </FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Enter organization name"
-                          {...field}
-                        />
+                        <Input placeholder="Web3 Workers" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -417,7 +418,7 @@ export function CreateOrganizationForm() {
                       <FormLabel>Description (optional)</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Description (max 64 characters)"
+                          placeholder="Join a global network of unstoppable individuals pushing boundaries and building a better internet, one block at a time."
                           className="resize-none"
                           {...field}
                         />
@@ -431,11 +432,12 @@ export function CreateOrganizationForm() {
 
             {currentStep === 1 && (
               <div className="space-y-6">
-                <div className="text-center">
-                  <h1 className="text-2xl font-bold">Configure token</h1>
-                  <p className="text-muted-foreground mt-2">
-                    Add the token address that will be associated with this
-                    organization
+                <div className="mb-16">
+                  <h1 className="font-light text-muted-foreground">
+                    {FORM_STEPS[currentStep]?.name}
+                  </h1>
+                  <p className="text-xl font-medium">
+                    The token mint address that will change the world
                   </p>
                 </div>
                 <FormField
@@ -444,23 +446,32 @@ export function CreateOrganizationForm() {
                   name="tokenAddress"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Token Address</FormLabel>
+                      <FormLabel>What&apos;s the token mint address?</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="e.g. F7Hwf8ib5..."
+                          placeholder="F7Hwf8ib5DVCoiuyGr618Y3gon429Rnd1r5F9R5upump"
                           onInput={(v) =>
                             debouncedTokenValidate(v.currentTarget.value)
                           }
                           {...field}
                         />
                       </FormControl>
-                      <FormDescription>
-                        This token will be used for organization operations
-                      </FormDescription>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col w-1/2 gap-2">
                         {isPendingTokenInfo && (
-                          <LoaderCircle className="animate-spin size-4" />
+                          <div className="mt-8">
+                            <Skeleton className="w-100 h-4" />
+                            <div className="flex flex-row gap-2">
+                              <div className="inline-flex items-center gap-3 px-4 py-2 bg-muted/50 rounded-lg mt-2">
+                                <Skeleton className="w-8 h-8 rounded-full" />
+                                <Skeleton className="w-24 h-6 rounded-none" />
+                              </div>
+                              <div className="inline-flex items-center gap-3 px-4  rounded-lg mt-2 ms-2">
+                                <Skeleton className="w-36 h-10 rounded-sm" />
+                              </div>
+                            </div>
+                          </div>
                         )}
+
                         <FormMessage />
                       </div>
                     </FormItem>
@@ -469,44 +480,49 @@ export function CreateOrganizationForm() {
 
                 {!!tokenInfo?.success && (
                   <div className="mt-2">
-                    <div className="inline-flex items-center gap-3 px-4 py-2 bg-muted/50 rounded-lg">
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage
-                          src={tokenInfo.success.logoURI}
-                          alt={tokenInfo.success.name}
-                          className="rounded-full"
-                        />
-                        <AvatarFallback className="text-xs">
-                          {tokenInfo.success.symbol.slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex items-center gap-1">
-                        <span className="font-medium">
-                          {tokenInfo.success.name}
-                        </span>
-                        <span className="text-muted-foreground">
-                          ({tokenInfo.success.symbol})
-                        </span>
+                    <span className="text-sm font-medium">
+                      What&apos;s the minimum amount required to participate?
+                    </span>
+                    <div className="mt-2 flex flex-row gap-4">
+                      <div className="inline-flex items-center gap-3 px-4 py-2 bg-muted/50 rounded-lg">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage
+                            src={tokenInfo.success.logoURI}
+                            alt={tokenInfo.success.name}
+                            className="rounded-full"
+                          />
+                          <AvatarFallback className="text-xs">
+                            {tokenInfo.success.symbol.slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium">
+                            {tokenInfo.success.name}
+                          </span>
+                          <span className="text-muted-foreground">
+                            ({tokenInfo.success.symbol})
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="mt-6">
-                      <FormField
-                        control={form.control}
-                        name="requiredTokenAmount"
-                        disabled={form.formState.isSubmitting}
-                        render={({ field }) => (
-                          <FormItem className="w-full">
-                            <FormLabel className="md:text-base">
-                              Minimum token amount
-                            </FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="">
+                        <FormField
+                          control={form.control}
+                          name="requiredTokenAmount"
+                          disabled={form.formState.isSubmitting}
+                          render={({ field }) => (
+                            <FormItem className="w-full py-1">
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  className="py-4 text-lg font-normal"
+                                  placeholder="1000500"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -515,9 +531,11 @@ export function CreateOrganizationForm() {
 
             {currentStep === 2 && (
               <div className="space-y-6">
-                <div className="text-center">
-                  <h1 className="text-2xl font-bold">Configure Voting</h1>
-                  <p className="text-muted-foreground mt-2">
+                <div className="mb-16">
+                  <h1 className="font-light text-muted-foreground">
+                    {FORM_STEPS[currentStep]?.name}
+                  </h1>
+                  <p className="text-xl font-medium">
                     Set up how voting and proposals will work in your
                     organization
                   </p>
@@ -527,7 +545,9 @@ export function CreateOrganizationForm() {
                   name="votingApprovalThreshold"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Voting Approval Threshold (%)</FormLabel>
+                      <FormLabel>
+                        What percentage of votes are needed to pass a proposal?
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -537,9 +557,6 @@ export function CreateOrganizationForm() {
                           {...field}
                         />
                       </FormControl>
-                      <FormDescription>
-                        Percentage of votes needed for a proposal to pass
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -550,7 +567,7 @@ export function CreateOrganizationForm() {
                   name="votingPeriod"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Voting Period (days)</FormLabel>
+                      <FormLabel>How long will the voting period be?</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -560,9 +577,6 @@ export function CreateOrganizationForm() {
                           {...field}
                         />
                       </FormControl>
-                      <FormDescription>
-                        How long proposals remain open for voting
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -573,7 +587,10 @@ export function CreateOrganizationForm() {
                   name="quorumPercentage"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Quorum Percentage (%)</FormLabel>
+                      <FormLabel>
+                        What&apos;s the minimum percentage of members that must
+                        vote for a proposal to be valid?
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -583,10 +600,6 @@ export function CreateOrganizationForm() {
                           {...field}
                         />
                       </FormControl>
-                      <FormDescription>
-                        Minimum percentage of members that must vote for a
-                        proposal to be valid
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -631,9 +644,12 @@ export function CreateOrganizationForm() {
 
             {currentStep === 3 && (
               <div className="space-y-6">
-                <div className="text-center">
-                  <h1 className="text-2xl font-bold">Review and confirm</h1>
-                  <p className="text-muted-foreground mt-2">
+                <div className="mb-16">
+                  <h1 className="font-light text-muted-foreground">
+                    {" "}
+                    {FORM_STEPS[currentStep]?.name}
+                  </h1>
+                  <p className="text-xl font-medium">
                     One last look at the selected parameters before the
                     organization is created
                   </p>
@@ -684,13 +700,8 @@ export function CreateOrganizationForm() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="font-medium">Deploy fee</h3>
+                    <h3 className="font-medium">Deployment fee</h3>
                     <p className="text-muted-foreground">~0.015 SOL</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      This amount consists of 0.01 SOL one-time platform fee,
-                      0.001 SOL which will be deposited into your
-                      organization&apos;s account and ~0.004 SOL network rent.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -724,7 +735,7 @@ export function CreateOrganizationForm() {
                 >
                   {form.formState.isSubmitting
                     ? "Sending Transaction..."
-                    : "Confirm"}
+                    : "Confirm & Create"}
                 </LoaderButton>
               )}
             </div>

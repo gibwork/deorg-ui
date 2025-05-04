@@ -203,6 +203,7 @@ function ProposalCard({
         `Vote ${vote ? "For" : "Against"} `
       );
 
+
       updateStep(1, "loading", "Preparing transaction details...");
 
       const { success: createProposalTx, error } = await createProposalVote(

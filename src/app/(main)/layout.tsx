@@ -38,12 +38,12 @@ export default async function MainLayout({
   }
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <main className="flex flex-col min-h-screen w-full  overflow-hidden">
+      <main className="flex flex-col min-h-screen w-full overflow-hidden">
         {/* <Header /> */}
 
-        <div className="flex h-screen ">
+        <div className="flex h-screen overflow-hidden">
           {/* <Sidebar /> */}
-          <div className=" w-full   ">{children}</div>
+          <div className="w-full overflow-y-auto">{children}</div>
         </div>
       </main>
     </HydrationBoundary>
