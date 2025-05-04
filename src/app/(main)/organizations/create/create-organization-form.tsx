@@ -270,7 +270,9 @@ export function CreateOrganizationForm() {
       }
       updateStep(4, "success");
       updateStatus("success");
-      router.push(`/organizations/${createOrganizationResponse.success.id}`);
+      router.push(
+        `/organizations/${createOrganizationResponse.success.accountAddress}`
+      );
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Please try again later";
@@ -397,12 +399,11 @@ export function CreateOrganizationForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>What&apos;s the name of your community?</FormLabel>
+                      <FormLabel>
+                        What&apos;s the name of your community?
+                      </FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Web3 Workers"
-                          {...field}
-                        />
+                        <Input placeholder="Web3 Workers" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -432,7 +433,9 @@ export function CreateOrganizationForm() {
             {currentStep === 1 && (
               <div className="space-y-6">
                 <div className="mb-16">
-                  <h1 className="font-light text-muted-foreground">{FORM_STEPS[currentStep]?.name}</h1>
+                  <h1 className="font-light text-muted-foreground">
+                    {FORM_STEPS[currentStep]?.name}
+                  </h1>
                   <p className="text-xl font-medium">
                     The token mint address that will change the world
                   </p>
@@ -477,7 +480,9 @@ export function CreateOrganizationForm() {
 
                 {!!tokenInfo?.success && (
                   <div className="mt-2">
-                    <span className="text-sm font-medium">What&apos;s the minimum amount required to participate?</span>
+                    <span className="text-sm font-medium">
+                      What&apos;s the minimum amount required to participate?
+                    </span>
                     <div className="mt-2 flex flex-row gap-4">
                       <div className="inline-flex items-center gap-3 px-4 py-2 bg-muted/50 rounded-lg">
                         <Avatar className="w-8 h-8">
@@ -507,7 +512,11 @@ export function CreateOrganizationForm() {
                           render={({ field }) => (
                             <FormItem className="w-full py-1">
                               <FormControl>
-                                <Input {...field} className="py-4 text-lg font-normal" placeholder="1000500" />
+                                <Input
+                                  {...field}
+                                  className="py-4 text-lg font-normal"
+                                  placeholder="1000500"
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -523,7 +532,9 @@ export function CreateOrganizationForm() {
             {currentStep === 2 && (
               <div className="space-y-6">
                 <div className="mb-16">
-                  <h1 className="font-light text-muted-foreground">{FORM_STEPS[currentStep]?.name}</h1>
+                  <h1 className="font-light text-muted-foreground">
+                    {FORM_STEPS[currentStep]?.name}
+                  </h1>
                   <p className="text-xl font-medium">
                     Set up how voting and proposals will work in your
                     organization
@@ -534,7 +545,9 @@ export function CreateOrganizationForm() {
                   name="votingApprovalThreshold"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>What percentage of votes are needed to pass a proposal?</FormLabel>
+                      <FormLabel>
+                        What percentage of votes are needed to pass a proposal?
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -574,7 +587,10 @@ export function CreateOrganizationForm() {
                   name="quorumPercentage"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>What&apos;s the minimum percentage of members that must vote for a proposal to be valid?</FormLabel>
+                      <FormLabel>
+                        What&apos;s the minimum percentage of members that must
+                        vote for a proposal to be valid?
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -629,7 +645,10 @@ export function CreateOrganizationForm() {
             {currentStep === 3 && (
               <div className="space-y-6">
                 <div className="mb-16">
-                  <h1 className="font-light text-muted-foreground"> {FORM_STEPS[currentStep]?.name}</h1>
+                  <h1 className="font-light text-muted-foreground">
+                    {" "}
+                    {FORM_STEPS[currentStep]?.name}
+                  </h1>
                   <p className="text-xl font-medium">
                     One last look at the selected parameters before the
                     organization is created
