@@ -78,6 +78,7 @@ export interface RequiredToken {
 export interface Organization {
   id: string;
   externalId: string;
+  accountAddress: string;
   name: string;
   description?: string;
   logoUrl?: string;
