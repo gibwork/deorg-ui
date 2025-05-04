@@ -66,7 +66,7 @@ export function JoinOrganizationDialog({
   });
 
   const handleJoin = async () => {
-    joinOrgMutaion.mutate(organization.id);
+    joinOrgMutaion.mutate(organization.accountAddress);
   };
 
   const userData = queryClient.getQueryData<User>([`user-${user?.id}`]);
