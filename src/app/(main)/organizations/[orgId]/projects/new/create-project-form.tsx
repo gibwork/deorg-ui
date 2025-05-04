@@ -23,9 +23,16 @@ import { useOrganizationMembers } from "@/features/organizations/hooks/use-organ
 import { Member } from "@/types/types.organization";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTransactionStore } from "@/features/transaction-toast/use-transaction-store";
+import { toast } from "sonner";
+import { createProjectTransaction } from "@/features/organizations/actions/projects/create-project-transaction";
+import { Transaction } from "@solana/web3.js";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { createProject } from "@/features/organizations/actions/projects/create-project";
 export default function CreateProjectForm() {
   const params = useParams();
   const router = useRouter();
+  const { signTransaction } = useWallet();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [budget, setBudget] = useState("");
@@ -35,31 +42,27 @@ export default function CreateProjectForm() {
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const {
+    startTransaction,
+    updateStep,
+    setTxHash,
+    updateStatus,
+    addWarning,
+    resetTransaction,
+  } = useTransactionStore.getState();
   const { data: members, isLoading: isLoadingMembers } = useOrganizationMembers(
     params?.orgId as string
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!signTransaction) {
+      toast.error("No wallet connected");
+      return;
+    }
 
     if (!title.trim()) {
       setError("Project title is required");
-      return;
-    }
-
-    if (!budget || isNaN(Number(budget)) || Number(budget) <= 0) {
-      setError("Please enter a valid budget amount");
-      return;
-    }
-
-    if (!startDate) {
-      setError("Start date is required");
-      return;
-    }
-
-    if (!endDate) {
-      setError("End date is required");
       return;
     }
 
@@ -67,15 +70,79 @@ export default function CreateProjectForm() {
     setError(null);
 
     try {
-      // This is where you would connect to Solana to create the project proposal
-      // For now, we'll just simulate a delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      toast.dismiss();
+      const transactionId = startTransaction("Create project proposal");
+
+      updateStep(1, "loading", "Preparing transaction details...");
+
+      const { success: createProposalTx, error } =
+        await createProjectTransaction({
+          organizationId: params.orgId as string,
+          name: title,
+          members: selectedMembers,
+          projectProposalThreshold: 60,
+          projectProposalValidityPeriod: 30,
+        });
+
+      if (error) {
+        throw new Error(error?.message);
+      }
+
+      updateStep(1, "success");
+      updateStep(2, "loading", "Please sign the transaction in your wallet");
+
+      const retreivedTx = Transaction.from(
+        Buffer.from(createProposalTx.serializedTransaction, "base64")
+      );
+
+      const serializedTx = await signTransaction(retreivedTx);
+
+      const serializedSignedTx = serializedTx?.serialize().toString("base64");
+
+      updateStep(2, "success");
+      updateStep(3, "loading", "Submitting transaction to the network...");
+
+      const createProjectResponse = await createProject({
+        transactionId: createProposalTx.transactionId,
+        serializedTransaction: serializedSignedTx,
+      });
+
+      updateStep(3, "success");
+      updateStep(4, "loading", "Confirming transaction...");
+
+      if (createProjectResponse.error) {
+        throw new Error(createProjectResponse.error.message);
+      }
+
+      updateStep(4, "success");
+      updateStatus("success");
 
       // Redirect back to projects page after successful creation
       router.push(`/organizations/${params.orgId}/projects`);
-    } catch (err) {
-      setError("Failed to create project. Please try again.");
-      console.error(err);
+    } catch (error) {
+      console.error(error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Please try again later";
+
+      // Find the current step that failed
+      const currentStep =
+        [1, 2, 3, 4].find((step) => {
+          const activeTransaction =
+            useTransactionStore.getState().activeTransaction;
+          return (
+            activeTransaction?.steps.find((s) => s.id === step)?.status ===
+            "loading"
+          );
+        }) || 2;
+
+      // Update the failed step with error message
+      updateStep(currentStep, "error", errorMessage);
+      updateStatus("error");
+
+      // Add warning if it's a specific type of error
+      if (error instanceof Error && error.message.includes("insufficient")) {
+        addWarning("Insufficient balance for transaction");
+      }
     } finally {
       setIsSubmitting(false);
     }
