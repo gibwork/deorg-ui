@@ -23,7 +23,10 @@ import {
 } from "lucide-react";
 import { CreateProjectModal } from "./create-project-modal";
 import { ProjectDetailModal } from "./project-detail-modal";
-import { getOrganizationProjects } from "../../actions/projects/get-organization-projects";
+import {
+  getOrganizationProjects,
+  Project,
+} from "../../actions/projects/get-organization-projects";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -133,7 +136,7 @@ export function OrganizationProjects({
         <TabsContent value="active" className="space-y-4 mt-6">
           {projects?.activeProjects.map((project) => (
             <ProjectCard
-              key={project.id}
+              key={project.uuid}
               project={project}
               onViewProject={handleViewProject}
             />
@@ -143,7 +146,7 @@ export function OrganizationProjects({
         <TabsContent value="completed" className="space-y-4 mt-6">
           {projects?.completedProjects.map((project) => (
             <ProjectCard
-              key={project.id}
+              key={project.uuid}
               project={project}
               onViewProject={handleViewProject}
             />
@@ -172,8 +175,8 @@ export function OrganizationProjects({
 }
 
 interface ProjectCardProps {
-  project: any;
-  onViewProject: (project: any) => void;
+  project: Project;
+  onViewProject: (project: Project) => void;
 }
 
 function ProjectCard({ project, onViewProject }: ProjectCardProps) {
@@ -186,25 +189,27 @@ function ProjectCard({ project, onViewProject }: ProjectCardProps) {
           <div>
             <CardTitle>{project.title}</CardTitle>
             <CardDescription className="mt-1">
-              {project.description}
+              {/* {project.description} */}
+              Mock description
             </CardDescription>
           </div>
-          <ProjectStatusBadge
+          {project.isActive ? "in progress" : "completed"}
+          {/* <ProjectStatusBadge
             status={project.status}
             votingStatus={project.votingStatus}
-          />
+          /> */}
         </div>
       </CardHeader>
 
       <CardContent>
         <div className="space-y-4">
-          {project.status !== "pending_approval" && (
+          {project.isActive && (
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Progress</span>
-                <span>{project.progress}%</span>
+                <span>10%</span>
               </div>
-              <Progress value={project.progress} className="h-2" />
+              <Progress value={10} className="h-2" />
             </div>
           )}
 
@@ -215,9 +220,7 @@ function ProjectCard({ project, onViewProject }: ProjectCardProps) {
               </div>
               <div>
                 <p className="text-sm font-medium">Budget</p>
-                <p className="text-sm text-muted-foreground">
-                  {project.spent} / {project.budget} SOL
-                </p>
+                <p className="text-sm text-muted-foreground">10 / 100 SOL</p>
               </div>
             </div>
 
@@ -228,8 +231,7 @@ function ProjectCard({ project, onViewProject }: ProjectCardProps) {
               <div>
                 <p className="text-sm font-medium">Timeline</p>
                 <p className="text-sm text-muted-foreground">
-                  {formatDate(project.startDate)} -{" "}
-                  {formatDate(project.endDate)}
+                  timestamp - {project.validityEndTime}
                 </p>
               </div>
             </div>
@@ -241,27 +243,29 @@ function ProjectCard({ project, onViewProject }: ProjectCardProps) {
               <div>
                 <p className="text-sm font-medium">Contributors</p>
                 <div className="flex items-center">
-                  {project.contributors.length > 0 ? (
+                  {project.members.length > 0 ? (
                     <div className="flex -space-x-2">
-                      {project.contributors
+                      {project.members
                         .slice(0, 3)
-                        .map((contributor: any, i: number) => (
+                        .map((contributor, i: number) => (
                           <Avatar
                             key={i}
                             className="h-6 w-6 border-2 border-background"
                           >
                             <AvatarImage
-                              src={contributor.avatar || "/placeholder.svg"}
-                              alt={contributor.name}
+                              src={
+                                contributor.profilePicture || "/placeholder.svg"
+                              }
+                              alt={contributor.username}
                             />
                             <AvatarFallback>
-                              {contributor.name.charAt(0)}
+                              {contributor.username.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                         ))}
-                      {project.contributors.length > 3 && (
+                      {project.members.length > 3 && (
                         <div className="flex items-center justify-center h-6 w-6 rounded-full bg-muted text-xs">
-                          +{project.contributors.length - 3}
+                          +{project.members.length - 3}
                         </div>
                       )}
                     </div>
@@ -275,7 +279,7 @@ function ProjectCard({ project, onViewProject }: ProjectCardProps) {
             </div>
           </div>
 
-          {project.status === "pending_approval" && (
+          {/* {project.status === "pending_approval" && (
             <div className="mt-4 p-3 bg-amber-50 text-amber-800 rounded-md text-sm dark:bg-amber-900/20 dark:text-amber-400 flex items-center">
               <Clock className="h-4 w-4 mr-2" />
               <span>
@@ -283,17 +287,19 @@ function ProjectCard({ project, onViewProject }: ProjectCardProps) {
                 {project.votingStatus.votesAgainst} against
               </span>
             </div>
-          )}
+          )} */}
         </div>
       </CardContent>
 
       <CardFooter className="flex justify-between">
         <div className="text-sm text-muted-foreground">
-          {project.tasks.completed} of {project.tasks.total} tasks completed
+          {/* {project.tasks.completed} of {project.tasks.total} tasks completed */}
         </div>
 
         <Button variant="outline" size="sm" asChild>
-          <Link href={`/organizations/${orgId}/projects/${project.id}`}>
+          <Link
+            href={`/organizations/${orgId}/projects/${project.accountAddress}`}
+          >
             View Details
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
