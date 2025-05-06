@@ -38,10 +38,7 @@ const formSchema = z.object({
     .string()
     .min(10, "Description must be at least 10 characters")
     .max(1000, "Description must not exceed 1000 characters"),
-  amount: z.coerce
-    .number()
-    .min(0.1, "Amount must be at least 0.1 SOL")
-    .max(1000, "Amount must not exceed 1000 SOL"),
+  amount: z.coerce.number().max(1000, "Amount must not exceed 1000 SOL"),
   assigneeAccountAddress: z.string().min(1, "Please select an assignee"),
 });
 
