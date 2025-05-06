@@ -16,14 +16,38 @@ import {
   ListChecks,
   PlusCircle,
   Users,
+  ArrowDownToLine,
 } from "lucide-react";
 import { ProjectDetailModal } from "./project-detail-modal";
 import { useOrganization } from "../../hooks/use-organization";
 import { useQuery } from "@tanstack/react-query";
 import { getOrganizationOverview } from "../../actions/get-organization-overview";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import {
+  Connection,
+  PublicKey,
+  Transaction,
+  SystemProgram,
+} from "@solana/web3.js";
+import {
+  TOKEN_PROGRAM_ID,
+  createTransferInstruction,
+  getAssociatedTokenAddress,
+} from "@solana/spl-token";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { Organization } from "@/types/types.organization";
 
 interface OrganizationOverviewProps {
   organization: {
@@ -36,6 +60,123 @@ interface OrganizationOverviewProps {
   };
 }
 
+function DepositModal({
+  isOpen,
+  onClose,
+  organization,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  organization: Organization;
+}) {
+  const [amount, setAmount] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { publicKey, signTransaction } = useWallet();
+  const { connection } = useConnection();
+
+  const handleDeposit = async () => {
+    if (!publicKey || !amount || !organization) return;
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Get the latest blockhash
+      const { blockhash } = await connection.getLatestBlockhash();
+
+      // Get user's token account
+      const userTokenAccount = await getAssociatedTokenAddress(
+        new PublicKey(organization.tokenMint),
+        publicKey
+      );
+
+      // Convert amount to raw value using decimals
+      const rawAmount = Math.floor(
+        parseFloat(amount) * Math.pow(10, organization.treasuryBalance.decimals)
+      );
+
+      const transaction = new Transaction();
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = publicKey;
+
+      console.log({
+        from: userTokenAccount.toBase58(), // from
+        to: organization.treasuryTokenAccount, // to
+        mint: organization.tokenMint, // mint
+        amount: rawAmount,
+      });
+
+      // Add transfer instruction
+      const transferInstruction = createTransferInstruction(
+        userTokenAccount, // from
+        new PublicKey(organization.treasuryTokenAccount), // to
+        publicKey, // owner (signer)
+        BigInt(rawAmount)
+      );
+
+      transaction.add(transferInstruction);
+
+      // Send transaction
+      if (!signTransaction) throw new Error("Wallet not connected");
+      const signedTx = await signTransaction(transaction);
+      const signature = await connection.sendRawTransaction(
+        signedTx.serialize()
+      );
+      await connection.confirmTransaction(signature);
+
+      onClose();
+    } catch (error) {
+      console.error("Error depositing:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to process deposit"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Deposit to Treasury</DialogTitle>
+          <DialogDescription>
+            Enter the amount you want to deposit to the organization treasury.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="amount">Amount</Label>
+            <Input
+              id="amount"
+              type="number"
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+            <p className="text-sm text-muted-foreground">
+              Token: {organization?.token?.symbol}
+            </p>
+            {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeposit}
+            disabled={isLoading || !amount || !publicKey}
+          >
+            {isLoading ? "Processing..." : "Deposit"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function OrganizationOverview({
   organizationId,
 }: {
@@ -43,6 +184,7 @@ export function OrganizationOverview({
 }) {
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [showProjectDetail, setShowProjectDetail] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
 
   const {
     data: organization,
@@ -111,6 +253,45 @@ export function OrganizationOverview({
           </Card>
         ))}
       </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Treasury Balance</CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDepositModal(true)}
+            >
+              <ArrowDownToLine className="h-4 w-4 mr-2" />
+              Deposit
+            </Button>
+          </div>
+          <CardDescription>
+            {`${organization?.name}'s treasury balance and transaction history`}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Current Balance</p>
+                <p className="text-2xl font-bold">
+                  {organization?.treasuryBalance?.ui || 0}{" "}
+                  {organization?.token?.symbol || "SOL"}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Token Account</p>
+                <p className="text-sm font-mono">
+                  {organization?.treasuryTokenAccount?.slice(0, 8)}...
+                  {organization?.treasuryTokenAccount?.slice(-8)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="col-span-1">
@@ -231,6 +412,14 @@ export function OrganizationOverview({
           isOpen={showProjectDetail}
           onClose={() => setShowProjectDetail(false)}
           project={selectedProject}
+        />
+      )}
+
+      {showDepositModal && (
+        <DepositModal
+          isOpen={showDepositModal}
+          onClose={() => setShowDepositModal(false)}
+          organization={organization!}
         />
       )}
     </div>

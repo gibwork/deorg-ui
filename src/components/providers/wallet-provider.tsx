@@ -19,10 +19,10 @@ type Props = {
 export const WalletProvider: FC<Props> = ({ children }) => {
   // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
   const networkState = useNetwork((state) => state.network);
-  const network =
-    networkState === "devnet"
-      ? WalletAdapterNetwork.Devnet
-      : WalletAdapterNetwork.Mainnet;
+  const network = WalletAdapterNetwork.Devnet;
+  // networkState === "devnet"
+  //   ? WalletAdapterNetwork.Devnet
+  //   : WalletAdapterNetwork.Mainnet;
 
   // You can also provide a custom RPC endpoint.
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
