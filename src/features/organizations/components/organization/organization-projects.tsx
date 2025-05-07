@@ -40,7 +40,6 @@ import { Transaction } from "@solana/web3.js";
 import { createProject } from "../../actions/projects/create-project";
 import { cn, truncate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { CopyButton } from "@/components/ui/copy-button";
 
 export function OrganizationProjects({
   organizationId,

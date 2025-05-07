@@ -238,7 +238,7 @@ export function OrganizationOverview({
   return (
     <div className="space-y-6">
       {/* <OrganizationHeader organizationId={organizationId} /> */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat, i) => (
           <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -252,7 +252,7 @@ export function OrganizationOverview({
             </CardContent>
           </Card>
         ))}
-      </div>
+      </div> */}
 
       <Card>
         <CardHeader>
@@ -293,7 +293,7 @@ export function OrganizationOverview({
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      {/* <div className="grid gap-4 md:grid-cols-2">
         <Card className="col-span-1">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -405,7 +405,7 @@ export function OrganizationOverview({
             </div>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
 
       {selectedProject && (
         <ProjectDetailModal
