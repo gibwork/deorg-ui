@@ -337,24 +337,32 @@ function ProjectTaskModal({
             Mark Complete
           </LoaderButton>
         )}
-        {task.status === "completed" && (
-          <LoaderButton
-            isLoading={transactionStatus.isProcessing}
-            onClick={handleEnableTaskWithdraw}
-            size="sm"
-          >
-            Enable task withdraw
-          </LoaderButton>
-        )}
-        {task.status === "completed" && (
-          <LoaderButton
-            isLoading={transactionStatus.isProcessing}
-            onClick={handleWithdrawTaskFunds}
-            size="sm"
-          >
-            Withdraw task funds
-          </LoaderButton>
-        )}
+        {task.status === "completed" &&
+          project.members.some(
+            (member) => member.walletAddress === publicKey?.toString()
+          ) && (
+            <LoaderButton
+              isLoading={transactionStatus.isProcessing}
+              onClick={handleEnableTaskWithdraw}
+              size="sm"
+              disabled={publicKey?.toString() === task.assignee?.walletAddress}
+            >
+              Enable task withdraw
+            </LoaderButton>
+          )}
+        {task.status === "completed" &&
+          project.members.some(
+            (member) => member.walletAddress === publicKey?.toString()
+          ) && (
+            <LoaderButton
+              isLoading={transactionStatus.isProcessing}
+              onClick={handleWithdrawTaskFunds}
+              size="sm"
+              disabled={publicKey?.toString() !== task.assignee?.walletAddress}
+            >
+              Withdraw task funds
+            </LoaderButton>
+          )}
       </DialogContent>
     </Dialog>
   );
