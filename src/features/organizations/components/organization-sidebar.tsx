@@ -108,7 +108,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                       defaultValue={isProjectsActive ? "projects" : undefined}
                     >
                       <AccordionItem value="projects" className="border-none">
-                        <AccordionTrigger className="py-0 hover:bg-stone-100">
+                        <AccordionTrigger className={cn("py-0 hover:bg-stone-100", isProjectsActive && "bg-stone-100")}>
                           <SidebarMenuButton
                             isActive={isProjectsActive}
                             tooltip={item.label}
@@ -131,7 +131,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                                 className={cn(
                                   "flex px-2 py-1 text-sm rounded-md items-center",
                                   pathname === `/organizations/${orgId}/projects/${project.accountAddress}`
-                                    ? "font-semibold text-sidebar-accent-foreground font-medium"
+                                    ? "text-sidebar-accent-foreground font-medium"
                                     : "hover:bg-sidebar-accent/50"
                                 )}
                               >
