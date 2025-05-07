@@ -35,6 +35,14 @@ import { toast } from "sonner";
 import { Transaction } from "@solana/web3.js";
 import { createProject } from "../../actions/projects/create-project";
 import { getOrganizationProjects } from "../../actions/projects/get-organization-projects";
+import {
+  enableTaskWithdraw,
+  enableTaskWithdrawTransaction,
+} from "../../actions/tasks/enable-task-withdraw";
+import {
+  withdrawTaskFunds,
+  withdrawTaskFundsTransaction,
+} from "../../actions/tasks/withdraw-task-funds";
 export default function ProjectDetailsPage({
   orgId,
   projectId,
@@ -565,9 +573,77 @@ function TaskCard({ task, orgId, projectId }: TaskCardProps) {
       serializedTransaction: serializedSignedTx,
     });
 
-    console.log({ createProjectResponse });
+    if (createProjectResponse.error) {
+      toast.error("Failed to complete task");
+      return;
+    }
 
     toast.success("Task completed successfully");
+  };
+
+  const handleEnableTaskWithdraw = async () => {
+    if (!signTransaction) return;
+
+    const { success, error } = await enableTaskWithdrawTransaction(
+      task.accountAddress
+    );
+    if (!success) {
+      toast.error("Failed to enable task withdraw");
+      return;
+    }
+
+    const retreivedTx = Transaction.from(
+      Buffer.from(success.serializedTransaction, "base64")
+    );
+
+    const serializedTx = await signTransaction(retreivedTx);
+
+    const serializedSignedTx = serializedTx?.serialize().toString("base64");
+
+    const enableTaskWithdrawResponse = await enableTaskWithdraw({
+      transactionId: success.transactionId,
+      serializedTransaction: serializedSignedTx,
+    });
+
+    if (enableTaskWithdrawResponse.error) {
+      toast.error("Failed to enable task withdraw");
+      return;
+    }
+
+    toast.success("Task withdraw enabled successfully");
+  };
+
+  const handleWithdrawTaskFunds = async () => {
+    if (!signTransaction) return;
+
+    const { success, error } = await withdrawTaskFundsTransaction(
+      task.accountAddress
+    );
+
+    if (!success) {
+      toast.error("Failed to withdraw task funds");
+      return;
+    }
+
+    const retreivedTx = Transaction.from(
+      Buffer.from(success.serializedTransaction, "base64")
+    );
+
+    const serializedTx = await signTransaction(retreivedTx);
+
+    const serializedSignedTx = serializedTx?.serialize().toString("base64");
+
+    const withdrawTaskFundsResponse = await withdrawTaskFunds({
+      transactionId: success.transactionId,
+      serializedTransaction: serializedSignedTx,
+    });
+
+    if (withdrawTaskFundsResponse.error) {
+      toast.error("Failed to withdraw task funds");
+      return;
+    }
+
+    toast.success("Task funds withdrawn successfully");
   };
 
   return (
@@ -616,6 +692,16 @@ function TaskCard({ task, orgId, projectId }: TaskCardProps) {
         {task.status === "ready" && (
           <Button onClick={handleCompleteTask} size="sm">
             Complete
+          </Button>
+        )}
+        {task.status === "completed" && (
+          <Button onClick={handleEnableTaskWithdraw} size="sm">
+            Enable task withdraw
+          </Button>
+        )}
+        {task.status === "completed" && (
+          <Button onClick={handleWithdrawTaskFunds} size="sm">
+            Withdraw task funds
           </Button>
         )}
         <Button variant="outline" size="sm" asChild>
