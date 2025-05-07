@@ -13,6 +13,8 @@ import {
   Activity,
   ArrowLeftToLine,
   ArrowLeft,
+  ChevronDown,
+  FolderKanban,
 } from "lucide-react";
 import {
   Sidebar,
@@ -26,13 +28,15 @@ import {
 } from "@/components/ui/sidebar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { OrganizationNavbarItems } from "@/constants/data";
 import { useOrganization } from "../hooks/use-organization";
 import { OrgsSwitcher } from "./orgs-switcher";
 import { Icons } from "@/components/icons";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useOrganizationProjects } from "../hooks/use-organization-projects";
 import { SlimOrgSidebar } from "./slim-org-sidebar";
 import { SideBarLoading } from "@/components/layout/sidebar";
 import Image from "next/image";
@@ -40,6 +44,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
   const pathname = usePathname();
   const { isMobile } = useSidebar();
   const { data: organization } = useOrganization(orgId);
+  const { data: projectsData } = useOrganizationProjects(orgId, "active");
 
   const mockOrgs = useMemo(() => {
     return [
@@ -89,6 +94,59 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
         <SidebarContent>
           <SidebarMenu>
             {OrganizationNavbarItems.map((item) => {
+              // Special handling for Projects item to make it collapsible
+              if (item.value === "projects") {
+                const isProjectsActive = pathname === item.href(orgId) ||
+                  pathname.includes(`/organizations/${orgId}/projects/`);
+
+                return (
+                  <SidebarMenuItem key={item.value} className="border-b border-stone-200">
+                    <Accordion
+                      type="single"
+                      collapsible                    
+                      className="w-full"
+                      defaultValue={isProjectsActive ? "projects" : undefined}
+                    >
+                      <AccordionItem value="projects" className="border-none">
+                        <AccordionTrigger className="py-0 hover:bg-stone-100">
+                          <SidebarMenuButton
+                            isActive={isProjectsActive}
+                            tooltip={item.label}
+                            className="h-10 w-full flex justify-between"
+                          >
+                            <div className="flex items-center gap-2">
+                              <item.icon className={cn("h-4 w-4", isProjectsActive && "stroke-black")} />
+                              <span className={cn(isProjectsActive && "!text-black")}>Projects</span>
+                            </div>
+                          </SidebarMenuButton>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="flex flex-col gap-2 ml-10 mt-1">
+
+                            {/* Display active projects if we have any */}
+                            {projectsData?.activeProjects?.map((project: any) => (
+                              <Link
+                                key={project.uuid || project.accountAddress}
+                                href={`/organizations/${orgId}/projects/${project.accountAddress}`}
+                                className={cn(
+                                  "flex px-2 py-1 text-sm rounded-md items-center",
+                                  pathname === `/organizations/${orgId}/projects/${project.accountAddress}`
+                                    ? "font-semibold text-sidebar-accent-foreground font-medium"
+                                    : "hover:bg-sidebar-accent/50"
+                                )}
+                              >
+                                {project.title.length > 20 ? project.title.substring(0, 20) + '...' : project.title}
+                              </Link>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </SidebarMenuItem>
+                );
+              }
+
+              // Regular menu items
               const isActive = pathname === item.href(orgId);
 
               return (
