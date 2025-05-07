@@ -29,7 +29,11 @@ import { CreateTaskButton } from "./create-task-button";
 import { listTasks, Task } from "../../actions/tasks/list-tasks";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useOrganizationMembers } from "../../hooks/use-organization-members";
-
+import { useWallet } from "@solana/wallet-adapter-react";
+import { compeleteTaskTransaction } from "../../actions/tasks/comlete-task";
+import { toast } from "sonner";
+import { Transaction } from "@solana/web3.js";
+import { createProject } from "../../actions/projects/create-project";
 export default function ProjectDetailsPage({
   orgId,
   projectId,
@@ -527,6 +531,37 @@ interface TaskCardProps {
 }
 
 function TaskCard({ task, orgId, projectId }: TaskCardProps) {
+  const { signTransaction } = useWallet();
+
+  const handleCompleteTask = async () => {
+    if (!signTransaction) return;
+
+    const { success, error } = await compeleteTaskTransaction(
+      task.accountAddress
+    );
+    if (!success) {
+      toast.error("Failed to complete task");
+      return;
+    }
+
+    const retreivedTx = Transaction.from(
+      Buffer.from(success.serializedTransaction, "base64")
+    );
+
+    const serializedTx = await signTransaction(retreivedTx);
+
+    const serializedSignedTx = serializedTx?.serialize().toString("base64");
+
+    const createProjectResponse = await createProject({
+      transactionId: success.transactionId,
+      serializedTransaction: serializedSignedTx,
+    });
+
+    console.log({ createProjectResponse });
+
+    toast.success("Task completed successfully");
+  };
+
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -565,7 +600,12 @@ function TaskCard({ task, orgId, projectId }: TaskCardProps) {
           </div>
         </div>
       </CardContent>
-      <div className="px-6 pb-4 flex justify-end">
+      <div className="px-6 pb-4 flex justify-end gap-2">
+        {task.status === "ready" && (
+          <Button onClick={handleCompleteTask} size="sm">
+            Complete
+          </Button>
+        )}
         <Button variant="outline" size="sm" asChild>
           <Link
             href={`/organizations/${orgId}/projects/${projectId}/tasks/${task.transferProposal}`}
