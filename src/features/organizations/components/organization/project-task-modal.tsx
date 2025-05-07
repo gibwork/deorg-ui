@@ -170,6 +170,8 @@ function ProjectTaskModal({
         transactionId: success.transactionId,
         serializedTransaction: serializedSignedTx,
       });
+      updateStep(3, "success");
+      updateStep(4, "loading", "Confirming transaction...");
 
       if (enableTaskWithdrawResponse.error) {
         throw new Error(enableTaskWithdrawResponse.error);
