@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -30,6 +30,8 @@ import { useTransactionStore } from "@/features/transaction-toast/use-transactio
 import { useTransactionStatus } from "@/hooks/use-transaction-status";
 import { LoaderButton } from "@/components/loader-button";
 import { useOrganizationMembers } from "../../hooks/use-organization-members";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
 export function OrganizationProposals({
   organizationId,
 }: {
@@ -54,8 +56,6 @@ export function OrganizationProposals({
     },
   });
 
-  console.log({ proposals });
-
   if (isLoading) return <div>Loading...</div>;
 
   return (
@@ -67,10 +67,16 @@ export function OrganizationProposals({
             Create and vote on funding proposals for your organization.
           </p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)}>
+        <Link
+          href={`/organizations/${organizationId}/proposals/new`}
+          className={cn(
+            buttonVariants({ variant: "default" }),
+            "flex items-center"
+          )}
+        >
           <PlusCircle className="mr-2 h-4 w-4" />
-          New Proposal
-        </Button>
+          Create Proposal
+        </Link>
       </div>
 
       <Tabs defaultValue="active" className="w-full">
@@ -95,10 +101,13 @@ export function OrganizationProposals({
               <p className="mt-2 text-sm text-muted-foreground">
                 Create a new proposal to get started
               </p>
-              <Button onClick={() => setShowCreateModal(true)} className="mt-4">
+              <Link
+                href={`/organizations/${organizationId}/proposals/new`}
+                className={cn(buttonVariants({ variant: "default" }), "mt-4")}
+              >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Create Proposal
-              </Button>
+              </Link>
             </div>
           ) : (
             proposals?.activeProposals.map((proposal) => (
@@ -160,10 +169,13 @@ function ProposalCard({
   organizationId,
 }: ProposalCardProps) {
   const queryClient = useQueryClient();
+
   console.log(proposal);
 
   const { data: organizationMembers } = useOrganizationMembers(organizationId);
-  const totalMembers = organizationMembers?.length || 0;
+  const totalMembers =
+    organizationMembers?.filter((member) => member.role === "CONTRIBUTOR")
+      .length || 0;
 
   // Calculate percentages based on total votes cast
   const totalVotesCast = proposal.votesTotal;
