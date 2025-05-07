@@ -38,6 +38,10 @@ import {
   enableTaskWithdraw,
   enableTaskWithdrawTransaction,
 } from "../../actions/tasks/enable-task-withdraw";
+import {
+  withdrawTaskFunds,
+  withdrawTaskFundsTransaction,
+} from "../../actions/tasks/withdraw-task-funds";
 export default function ProjectDetailsPage({
   orgId,
   projectId,
@@ -601,6 +605,39 @@ function TaskCard({ task, orgId, projectId }: TaskCardProps) {
     toast.success("Task withdraw enabled successfully");
   };
 
+  const handleWithdrawTaskFunds = async () => {
+    if (!signTransaction) return;
+
+    const { success, error } = await withdrawTaskFundsTransaction(
+      task.accountAddress
+    );
+
+    if (!success) {
+      toast.error("Failed to withdraw task funds");
+      return;
+    }
+
+    const retreivedTx = Transaction.from(
+      Buffer.from(success.serializedTransaction, "base64")
+    );
+
+    const serializedTx = await signTransaction(retreivedTx);
+
+    const serializedSignedTx = serializedTx?.serialize().toString("base64");
+
+    const withdrawTaskFundsResponse = await withdrawTaskFunds({
+      transactionId: success.transactionId,
+      serializedTransaction: serializedSignedTx,
+    });
+
+    if (withdrawTaskFundsResponse.error) {
+      toast.error("Failed to withdraw task funds");
+      return;
+    }
+
+    toast.success("Task funds withdrawn successfully");
+  };
+
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -648,6 +685,11 @@ function TaskCard({ task, orgId, projectId }: TaskCardProps) {
         {task.status === "completed" && (
           <Button onClick={handleEnableTaskWithdraw} size="sm">
             Enable task withdraw
+          </Button>
+        )}
+        {task.status === "completed" && (
+          <Button onClick={handleWithdrawTaskFunds} size="sm">
+            Withdraw task funds
           </Button>
         )}
         <Button variant="outline" size="sm" asChild>
