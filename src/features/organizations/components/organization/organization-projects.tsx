@@ -193,7 +193,6 @@ function ProjectCard({ project, onViewProject }: ProjectCardProps) {
   const params = useParams();
   const orgId = params.orgId;
 
-  console.log(project);
   return (
     <Link
       className=""
