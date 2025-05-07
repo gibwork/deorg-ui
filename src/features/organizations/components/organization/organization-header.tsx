@@ -91,7 +91,7 @@ export function OrganizationHeader({
             <Plus className="h-4 w-4" />
             New Proposal
           </Link>
-          <PriorityFeePopover />
+          {/* <PriorityFeePopover /> */}
           <WalletButton />
         </div>
       </div>
