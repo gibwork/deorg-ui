@@ -34,6 +34,10 @@ import { compeleteTaskTransaction } from "../../actions/tasks/comlete-task";
 import { toast } from "sonner";
 import { Transaction } from "@solana/web3.js";
 import { createProject } from "../../actions/projects/create-project";
+import {
+  enableTaskWithdraw,
+  enableTaskWithdrawTransaction,
+} from "../../actions/tasks/enable-task-withdraw";
 export default function ProjectDetailsPage({
   orgId,
   projectId,
@@ -557,9 +561,44 @@ function TaskCard({ task, orgId, projectId }: TaskCardProps) {
       serializedTransaction: serializedSignedTx,
     });
 
-    console.log({ createProjectResponse });
+    if (createProjectResponse.error) {
+      toast.error("Failed to complete task");
+      return;
+    }
 
     toast.success("Task completed successfully");
+  };
+
+  const handleEnableTaskWithdraw = async () => {
+    if (!signTransaction) return;
+
+    const { success, error } = await enableTaskWithdrawTransaction(
+      task.accountAddress
+    );
+    if (!success) {
+      toast.error("Failed to enable task withdraw");
+      return;
+    }
+
+    const retreivedTx = Transaction.from(
+      Buffer.from(success.serializedTransaction, "base64")
+    );
+
+    const serializedTx = await signTransaction(retreivedTx);
+
+    const serializedSignedTx = serializedTx?.serialize().toString("base64");
+
+    const enableTaskWithdrawResponse = await enableTaskWithdraw({
+      transactionId: success.transactionId,
+      serializedTransaction: serializedSignedTx,
+    });
+
+    if (enableTaskWithdrawResponse.error) {
+      toast.error("Failed to enable task withdraw");
+      return;
+    }
+
+    toast.success("Task withdraw enabled successfully");
   };
 
   return (
@@ -604,6 +643,11 @@ function TaskCard({ task, orgId, projectId }: TaskCardProps) {
         {task.status === "ready" && (
           <Button onClick={handleCompleteTask} size="sm">
             Complete
+          </Button>
+        )}
+        {task.status === "completed" && (
+          <Button onClick={handleEnableTaskWithdraw} size="sm">
+            Enable task withdraw
           </Button>
         )}
         <Button variant="outline" size="sm" asChild>
