@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { CheckIcon, PlusCircleIcon } from "lucide-react";
-import { availableTags } from "@/constants/data";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 

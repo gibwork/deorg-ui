@@ -33,6 +33,9 @@ import { useOrganization } from "../hooks/use-organization";
 import { OrgsSwitcher } from "./orgs-switcher";
 import { Icons } from "@/components/icons";
 import { useMemo } from "react";
+import { SlimOrgSidebar } from "./slim-org-sidebar";
+import { SideBarLoading } from "@/components/layout/sidebar";
+import Image from "next/image";
 export function OrganizationSidebar({ orgId }: { orgId: string }) {
   const pathname = usePathname();
   const { isMobile } = useSidebar();
@@ -52,6 +55,11 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
       },
     ];
   }, [organization]);
+
+  if (!organization) {
+    return <SideBarLoading />;
+  }
+
   return (
     <>
       {!isMobile && (
@@ -60,35 +68,39 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
         </div>
       )}
 
-      <Sidebar className="relative max-h-full ">
-        <Link href="/" className=" flex items-center justify-center px-3 py-2">
-          <Icons.workLogo
-            width={32}
-            height={32}
-            className="rounded-md me-2 mt-1 "
-          />
-          <h2 className="text-3xl  font-bold tracking-tight ">DeOrg</h2>
-        </Link>
-        <SidebarHeader className="flex items-center px-3 justify-between  ">
-          <OrgsSwitcher orgs={mockOrgs} />
-          {isMobile && <SidebarTrigger />}
+      <SlimOrgSidebar orgId={organization!.accountAddress!} className="shadow-md" />
+      <Sidebar className="fixed top-0 left-16 max-h-full bg-white" style={{ height: "100vh" }}>
+        <SidebarHeader className="pb-0">
+          <div className="flex flex-row border-b border-stone-200 h-[50px]">
+            <div className="h-[42px] w-[42px]">
+              <Image src={organization?.logoUrl ?? ""} alt={organization.name} width={42} height={42} className="rounded-lg p-1" />
+            </div>
+            <h1 className="text-lg font-bold pt-2">{organization.name}</h1>
+          </div>
+          <div className="flex flex-col items-center justify-center py-2 border-b">
+            <div className="flex flex-row items-center gap-2">
+              <Icons.usdc className="h-8 w-8" />
+              <span className="text-3xl font-bold text-black">$100.17</span>
+            </div>
+            <span className="text-sm text-stone-500">Total Earned</span>
+          </div>
         </SidebarHeader>
 
-        <SidebarContent className="px-3">
+        <SidebarContent>
           <SidebarMenu>
             {OrganizationNavbarItems.map((item) => {
               const isActive = pathname === item.href(orgId);
 
               return (
-                <SidebarMenuItem key={item.value}>
+                <SidebarMenuItem key={item.value} className="border-b border-stone-200">
                   <SidebarMenuButton
                     asChild
                     isActive={isActive}
                     tooltip={item.label}
                     className="h-10"
                   >
-                    <Link href={item.href(orgId)}>
-                      <item.icon className="h-5 w-5" />
+                    <Link href={item.href(orgId)} className={cn(isActive && " !text-black", "rounded-none")}>
+                      <item.icon className={cn("h-8 w-8", isActive && "stroke-black")} />
                       <span>{item.label}</span>
                     </Link>
                   </SidebarMenuButton>

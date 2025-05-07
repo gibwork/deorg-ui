@@ -13,7 +13,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { Separator } from "../ui/separator";
 import { SidebarNavItems } from "./sidebar-nav-items";
-import { gibworkTotalVolume, navItems } from "@/constants/data";
 import { ClerkLoading, ClerkLoaded, useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -25,6 +24,7 @@ import { useAuthModal } from "@/hooks/use-auth-modal";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { usePathname } from "next/navigation";
 import { OrganizationSidebarMobile } from "@/features/organizations/components/organizations-sidebar-mobile";
+import { navItems } from "@/constants/data";
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function MobileSidebar({ className }: SidebarProps) {
@@ -161,9 +161,7 @@ export function MobileSidebar({ className }: SidebarProps) {
                         <Icons.usdc />
                       </div>
                       <div>
-                        <span className="text-center ">
-                          {gibworkTotalVolume}
-                        </span>
+
                       </div>
                     </div>
                     <div className="flex justify-center text-sm font-light leading-3">
