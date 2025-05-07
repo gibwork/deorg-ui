@@ -60,13 +60,9 @@ export default function ProjectDetailsPage({
     queryFn: () => getOrganizationProjects(orgId, 1, "active"),
   });
 
-  console.log(projects?.activeProjects);
-
-  const project = projects?.activeProjects.find(
+  const project = (projects as any)?.activeProjects.find(
     (project: any) => project.accountAddress === projectId
-  );
-
-  console.log(project);
+  );  
 
   // Mock data for project details
   // const project = {
@@ -230,7 +226,7 @@ export default function ProjectDetailsPage({
       )} */}
 
       <div className="md:hidden grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Budget</CardTitle>
           </CardHeader>
@@ -256,7 +252,7 @@ export default function ProjectDetailsPage({
               />
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* <Card>
           <CardHeader>
@@ -291,7 +287,7 @@ export default function ProjectDetailsPage({
           </CardContent>
         </Card> */}
 
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Contributors</CardTitle>
           </CardHeader>
@@ -335,7 +331,7 @@ export default function ProjectDetailsPage({
               </div>
             )}
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       <Tabs defaultValue="tasks" className="w-full">
