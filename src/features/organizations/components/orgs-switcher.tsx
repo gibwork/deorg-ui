@@ -27,6 +27,7 @@ export function OrgsSwitcher({ orgs }: { orgs: any }) {
   const router = useRouter();
   const activeOrg = orgs[0];
 
+  console.log(orgs, "orgs");
   if (!activeOrg) {
     return null;
   }
@@ -75,7 +76,7 @@ export function OrgsSwitcher({ orgs }: { orgs: any }) {
             </DropdownMenuLabel>
             {orgs.map((org: Organization, index: number) => (
               <DropdownMenuItem
-                key={org.name}
+                key={index}
                 onClick={() => router.push(`/organizations/${org.id}`)}
                 className="gap-2 p-2"
               >

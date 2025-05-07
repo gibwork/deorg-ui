@@ -19,6 +19,7 @@ import {
   Settings,
   Home,
   ListChecks,
+  Wallet,
 } from "lucide-react";
 
 export const gibworkLogoImgUrl = "https://media.gib.work/work-logo.png";
@@ -59,6 +60,12 @@ export const OrganizationNavbarItems = [
     icon: Home,
     value: "home",
     href: (orgId: string) => `/organizations/${orgId}`,
+  },
+  {
+    label: "Assets",
+    icon: Wallet,
+    value: "assets",
+    href: (orgId: string) => `/organizations/${orgId}/assets`,
   },
   {
     label: "Proposals",

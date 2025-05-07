@@ -122,7 +122,9 @@ export function JoinOrganizationDialog({
     <>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h2 className="text-lg font-semibold">Join {organization.name}</h2>
+          <h2 className="text-lg font-semibold line-clamp-2 max-w-xs sm:max-w-sm">
+            Join {organization.name}
+          </h2>
           <p className="text-sm text-muted-foreground">
             Are you sure you want to join this organization?
           </p>

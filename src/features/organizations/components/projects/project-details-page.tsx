@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -25,6 +26,7 @@ import {
   LayoutGrid,
   LayoutList,
 } from "lucide-react";
+
 import { CreateTaskButton } from "./create-task-button";
 import { listTasks, Task } from "../../actions/tasks/list-tasks";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
@@ -43,6 +45,8 @@ import {
   withdrawTaskFunds,
   withdrawTaskFundsTransaction,
 } from "../../actions/tasks/withdraw-task-funds";
+import { useOrganizationProjects } from "../../hooks/use-organization-projects";
+import ProjectTaskModal from "../organization/project-task-modal";
 export default function ProjectDetailsPage({
   orgId,
   projectId,
@@ -52,121 +56,18 @@ export default function ProjectDetailsPage({
 }) {
   const router = useRouter();
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+  const [showTaskDetailsModal, setShowTaskDetailsModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<any | null>(null);
   const { data: members } = useOrganizationMembers(orgId);
 
   //TanStack Query to get project details
-  const { data: projects } = useQuery({
-    queryKey: ["organization_projects", orgId],
-    queryFn: () => getOrganizationProjects(orgId, 1, "active"),
-  });
+  const { data: projects } = useOrganizationProjects(orgId, "active");
 
   const project = (projects as any)?.activeProjects.find(
     (project: any) => project.accountAddress === projectId
-  );  
+  );
 
-  // Mock data for project details
-  // const project = {
-  //   id: projectId,
-  //   title:
-  //     projectId === "frontend-redesign"
-  //       ? "Frontend Redesign"
-  //       : "Smart Contract Audit",
-  //   description:
-  //     projectId === "frontend-redesign"
-  //       ? "Redesign the frontend UI to improve user experience and conversion rates."
-  //       : "Comprehensive audit of all smart contracts to ensure security and efficiency.",
-  //   status:
-  //     projectId === "frontend-redesign" ? "in_progress" : "pending_approval",
-  //   progress: projectId === "frontend-redesign" ? 45 : 0,
-  //   budget: projectId === "frontend-redesign" ? 1200 : 2000,
-  //   spent: projectId === "frontend-redesign" ? 540 : 0,
-  //   startDate: projectId === "frontend-redesign" ? "2023-06-01" : "2023-07-01",
-  //   endDate: projectId === "frontend-redesign" ? "2023-07-15" : "2023-08-15",
-  //   contributors:
-  //     projectId === "frontend-redesign"
-  //       ? [
-  //           { name: "Alice", avatar: "/placeholder.svg?height=32&width=32" },
-  //           { name: "Bob", avatar: "/placeholder.svg?height=32&width=32" },
-  //         ]
-  //       : [],
-  //   milestones:
-  //     projectId === "frontend-redesign"
-  //       ? [
-  //           {
-  //             title: "Design Phase",
-  //             status: "completed",
-  //             dueDate: "2023-06-15",
-  //           },
-  //           {
-  //             title: "Implementation",
-  //             status: "in_progress",
-  //             dueDate: "2023-07-01",
-  //           },
-  //           {
-  //             title: "Testing & Launch",
-  //             status: "not_started",
-  //             dueDate: "2023-07-15",
-  //           },
-  //         ]
-  //       : [
-  //           {
-  //             title: "Initial Review",
-  //             status: "not_started",
-  //             dueDate: "2023-07-15",
-  //           },
-  //           {
-  //             title: "Vulnerability Testing",
-  //             status: "not_started",
-  //             dueDate: "2023-08-01",
-  //           },
-  //           {
-  //             title: "Final Report",
-  //             status: "not_started",
-  //             dueDate: "2023-08-15",
-  //           },
-  //         ],
-  //   tasks: {
-  //     total: projectId === "frontend-redesign" ? 12 : 8,
-  //     completed: projectId === "frontend-redesign" ? 5 : 0,
-  //   },
-  //   votingStatus: {
-  //     status: projectId === "frontend-redesign" ? "approved" : "voting",
-  //     votesFor: projectId === "frontend-redesign" ? 5 : 3,
-  //     votesAgainst: projectId === "frontend-redesign" ? 0 : 1,
-  //     totalVotes: 5,
-  //     endTime: projectId === "frontend-redesign" ? undefined : "June 15, 2023",
-  //   },
-  //   votes: [
-  //     {
-  //       voter: { name: "Alice", avatar: "/placeholder.svg?height=32&width=32" },
-  //       vote: "for",
-  //       timestamp: "June 10, 2023 14:32",
-  //       comment: "This is a critical feature we need to implement.",
-  //     },
-  //     {
-  //       voter: { name: "Bob", avatar: "/placeholder.svg?height=32&width=32" },
-  //       vote: "for",
-  //       timestamp: "June 10, 2023 15:45",
-  //     },
-  //     {
-  //       voter: {
-  //         name: "Charlie",
-  //         avatar: "/placeholder.svg?height=32&width=32",
-  //       },
-  //       vote: "against",
-  //       timestamp: "June 11, 2023 09:10",
-  //       comment: "I think we should prioritize other features first.",
-  //     },
-  //     {
-  //       voter: { name: "Dave", avatar: "/placeholder.svg?height=32&width=32" },
-  //       vote: "for",
-  //       timestamp: "June 11, 2023 11:25",
-  //     },
-  //   ],
-  // };
-
-  console.log(members);
-
+  console.log(project, "project");
   const {
     data,
     error,
@@ -191,6 +92,13 @@ export default function ProjectDetailsPage({
   });
 
   const tasks = data?.pages?.flatMap((page) => page) || [];
+
+  console.log(tasks, "tasks", project);
+
+  const handleTaskCardClick = (task: Task) => {
+    setSelectedTask(task);
+    setShowTaskDetailsModal(true);
+  };
 
   return (
     <div className="space-y-6 w-full">
@@ -373,6 +281,7 @@ export default function ProjectDetailsPage({
                     task={task}
                     orgId={orgId}
                     projectId={projectId}
+                    onTaskClick={handleTaskCardClick}
                   />
                 ))
               ) : (
@@ -532,6 +441,15 @@ export default function ProjectDetailsPage({
           </div>
         </TabsContent> */}
       </Tabs>
+
+      {selectedTask && showTaskDetailsModal && (
+        <ProjectTaskModal
+          project={project}
+          task={selectedTask}
+          showTaskDetailsModal={showTaskDetailsModal}
+          setShowTaskDetailsModal={setShowTaskDetailsModal}
+        />
+      )}
     </div>
   );
 }
@@ -540,9 +458,10 @@ interface TaskCardProps {
   task: Task;
   orgId: string;
   projectId: string;
+  onTaskClick: (task: Task) => void;
 }
 
-function TaskCard({ task, orgId, projectId }: TaskCardProps) {
+function TaskCard({ task, orgId, projectId, onTaskClick }: TaskCardProps) {
   const { signTransaction } = useWallet();
 
   const handleCompleteTask = async () => {
@@ -643,73 +562,87 @@ function TaskCard({ task, orgId, projectId }: TaskCardProps) {
   };
 
   return (
-    <Link href={`/organizations/${orgId}/projects/${projectId}/tasks/${task.accountAddress}`}>
-      <Card>
-        {/* <CardHeader className="pb-2">
+    <>
+      <button
+        className="w-full"
+        // href={`/organizations/${orgId}/projects/${projectId}/tasks/${task.accountAddress}`}
+        onClick={() => {
+          onTaskClick(task);
+        }}
+      >
+        <Card>
+          {/* <CardHeader className="pb-2">
 
       </CardHeader> */}
-        <CardContent className="p-2 px-4 my-2">
-          <div className="flex justify-between flex-row gap-2">
-            <CardTitle className="text-base font-normal">{task.title}</CardTitle>
-            <div className="text-sm font-medium">{task.paymentAmount} SOL</div>
-            <div className="flex justify-between">
-              <TaskStatusBadge status={task.status} />
-            </div>
-            {/* <p className="text-sm mb-4">Mock description</p> */}
-            <div className="flex flex-wrap justify-between items-center">
-              <div className="flex items-center gap-2">
-                {task.assignee ? (
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage
-                        src={task.assignee.profilePicture || "/placeholder.svg"}
-                        alt={task.assignee.username}
-                      />
-                      <AvatarFallback>
-                        {task.assignee.username.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm">{task.assignee.username}</span>
-                  </div>
-                ) : (
-                  <Badge variant="outline">Unassigned</Badge>
-                )}
+          <CardContent className="p-2 px-4 my-2">
+            <div className="flex justify-between flex-row gap-2">
+              <CardTitle className="text-base font-normal">
+                {task.title}
+              </CardTitle>
+              <div className="text-sm font-medium">
+                {task.paymentAmount} SOL
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  {/* <Clock className="h-4 w-4" /> */}
-                  {/* <span>Due {formatDate(task.dueDate)}</span> */}
+              <div className="flex justify-between">
+                <TaskStatusBadge status={task.status} />
+              </div>
+              {/* <p className="text-sm mb-4">Mock description</p> */}
+              <div className="flex flex-wrap justify-between items-center">
+                <div className="flex items-center gap-2">
+                  {task.assignee ? (
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage
+                          src={
+                            task.assignee.profilePicture || "/placeholder.svg"
+                          }
+                          alt={task.assignee.username}
+                        />
+                        <AvatarFallback>
+                          {task.assignee.username.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm">{task.assignee.username}</span>
+                    </div>
+                  ) : (
+                    <Badge variant="outline">Unassigned</Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    {/* <Clock className="h-4 w-4" /> */}
+                    {/* <span>Due {formatDate(task.dueDate)}</span> */}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-        {/* <div className="px-6 pb-4 flex justify-end gap-2">
-        {task.status === "ready" && (
-          <Button onClick={handleCompleteTask} size="sm">
-            Complete
-          </Button>
-        )}
-        {task.status === "completed" && (
-          <Button onClick={handleEnableTaskWithdraw} size="sm">
-            Enable task withdraw
-          </Button>
-        )}
-        {task.status === "completed" && (
-          <Button onClick={handleWithdrawTaskFunds} size="sm">
-            Withdraw task funds
-          </Button>
-        )}
-        <Button variant="outline" size="sm" asChild>
-          <Link
-            href={`/organizations/${orgId}/projects/${projectId}/tasks/${task.transferProposal}`}
-          >
-            View Details
-          </Link>
-        </Button>
-      </div> */}
-      </Card>
-    </Link>
+          </CardContent>
+          {/* <div className="px-6 pb-4 flex justify-end gap-2">
+            {task.status === "ready" && (
+              <Button onClick={handleCompleteTask} size="sm">
+                Complete
+              </Button>
+            )}
+            {task.status === "completed" && (
+              <Button onClick={handleEnableTaskWithdraw} size="sm">
+                Enable task withdraw
+              </Button>
+            )}
+            {task.status === "completed" && (
+              <Button onClick={handleWithdrawTaskFunds} size="sm">
+                Withdraw task funds
+              </Button>
+            )}
+            <Button variant="outline" size="sm" asChild>
+              <Link
+                href={`/organizations/${orgId}/projects/${projectId}/tasks/${task.transferProposal}`}
+              >
+                View Details
+              </Link>
+            </Button>
+          </div> */}
+        </Card>
+      </button>
+    </>
   );
 }
 

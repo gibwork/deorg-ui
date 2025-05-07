@@ -1,14 +1,14 @@
 "use client";
 
-import { HardDrive, AlertTriangle } from "lucide-react";
+import { HardDrive, AlertTriangle, Plus } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Copy, ExternalLink, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { useOrganization } from "../../hooks/use-organization";
-import { truncate } from "@/lib/utils";
+import { cn, truncate } from "@/lib/utils";
 import Link from "next/link";
 import { SignedIn, useAuth } from "@clerk/nextjs";
 import { PriorityFeePopover } from "@/features/priority-fee/components/priority-fee-popover";
@@ -80,7 +80,18 @@ export function OrganizationHeader({
             <Button variant="default" size="sm">
               Fund Treasury
             </Button> */}
-          <PriorityFeePopover />
+          <Link
+            href={`/organizations/${organizationId}/proposals/new
+              `}
+            className={cn(
+              buttonVariants({ variant: "default", size: "sm" }),
+              "flex items-center gap-2"
+            )}
+          >
+            <Plus className="h-4 w-4" />
+            New Proposal
+          </Link>
+          {/* <PriorityFeePopover /> */}
           <WalletButton />
         </div>
       </div>
