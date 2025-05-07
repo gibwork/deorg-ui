@@ -86,6 +86,14 @@ export interface Organization {
   projects: ProjectDetails[];
   createdAt: string;
   updatedAt: string;
+  tokenMint: string;
   token?: RequiredToken | null;
   multisigWallet: string;
+  hasTreasuryRegistryAccount: boolean;
+  treasuryTokenAccount: string;
+  treasuryBalance: {
+    raw: string;
+    ui: number;
+    decimals: number;
+  };
 }

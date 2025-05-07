@@ -202,10 +202,10 @@ const OrganizationsList = () => {
           <div className="flex justify-between">
             <div className="w-full sm:w-2/4 p-4 mt-10">
               <h1 className="text-3xl font-bold">
-                Where Token Communities Thrive
+                Where On-chain Communities Thrive
               </h1>
               <p className="text-gray-500 mt-4">
-                DeOrg makes it easy to create, manage, and grow your token
+                DeOrg makes it easy to create, organize, and grow your on-chain
                 community with{" "}
                 <span className="font-medium text-black">
                   actionable governance

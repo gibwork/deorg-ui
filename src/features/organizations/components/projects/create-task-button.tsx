@@ -11,17 +11,10 @@ import {
 } from "@/components/ui/dialog";
 import { PlusCircle } from "lucide-react";
 import { CreateTaskForm } from "./create-task-form";
+import { Member } from "@/types/types.organization";
 
 interface CreateTaskButtonProps {
-  members: Array<{
-    id: string;
-    externalId: string;
-    username: string;
-    walletAddress: string;
-    profilePicture: string;
-    createdAt: string;
-    updatedAt: string;
-  }>;
+  members: Array<Member>;
   projectId: string;
 }
 
@@ -50,9 +43,9 @@ export function CreateTaskButton({
         <CreateTaskForm
           members={members.map((member, index) => ({
             id: `member-${index}`, // Generate a temporary ID
-            username: member.username,
-            walletAddress: member.walletAddress,
-            profilePicture: member.profilePicture,
+            username: member.user.username,
+            walletAddress: member.user.walletAddress,
+            profilePicture: member.user.profilePicture,
           }))}
           projectId={projectId}
           onSuccess={handleSuccess}

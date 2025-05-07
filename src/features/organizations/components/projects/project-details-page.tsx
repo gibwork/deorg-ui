@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,8 +27,22 @@ import {
 } from "lucide-react";
 import { CreateTaskButton } from "./create-task-button";
 import { listTasks, Task } from "../../actions/tasks/list-tasks";
-import { useInfiniteQuery } from "@tanstack/react-query";
-
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useOrganizationMembers } from "../../hooks/use-organization-members";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { compeleteTaskTransaction } from "../../actions/tasks/comlete-task";
+import { toast } from "sonner";
+import { Transaction } from "@solana/web3.js";
+import { createProject } from "../../actions/projects/create-project";
+import { getOrganizationProjects } from "../../actions/projects/get-organization-projects";
+import {
+  enableTaskWithdraw,
+  enableTaskWithdrawTransaction,
+} from "../../actions/tasks/enable-task-withdraw";
+import {
+  withdrawTaskFunds,
+  withdrawTaskFundsTransaction,
+} from "../../actions/tasks/withdraw-task-funds";
 export default function ProjectDetailsPage({
   orgId,
   projectId,
@@ -38,194 +52,120 @@ export default function ProjectDetailsPage({
 }) {
   const router = useRouter();
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+  const { data: members } = useOrganizationMembers(orgId);
+
+  //TanStack Query to get project details
+  const { data: projects } = useQuery({
+    queryKey: ["organization_projects", orgId],
+    queryFn: () => getOrganizationProjects(orgId, 1, "active"),
+  });
+
+  const project = (projects as any)?.activeProjects.find(
+    (project: any) => project.accountAddress === projectId
+  );  
 
   // Mock data for project details
-  const project = {
-    id: projectId,
-    title:
-      projectId === "frontend-redesign"
-        ? "Frontend Redesign"
-        : "Smart Contract Audit",
-    description:
-      projectId === "frontend-redesign"
-        ? "Redesign the frontend UI to improve user experience and conversion rates."
-        : "Comprehensive audit of all smart contracts to ensure security and efficiency.",
-    status:
-      projectId === "frontend-redesign" ? "in_progress" : "pending_approval",
-    progress: projectId === "frontend-redesign" ? 45 : 0,
-    budget: projectId === "frontend-redesign" ? 1200 : 2000,
-    spent: projectId === "frontend-redesign" ? 540 : 0,
-    startDate: projectId === "frontend-redesign" ? "2023-06-01" : "2023-07-01",
-    endDate: projectId === "frontend-redesign" ? "2023-07-15" : "2023-08-15",
-    members: [
-      {
-        id: "349d6a22-0d85-4a58-ac38-bfa66faac0d4",
-        externalId: "user_2wVuKljf3oI3C1ZPrNpE5OyFr1A",
-        username: "fryexu",
-        walletAddress: "FRyeXUJWxCnBLcrdgfP1KzsCCmPWRxDmEMM31zno3LtV",
-        profilePicture:
-          "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yd1ZyYWdzb2JOSHJaRDJNMHlYUHpKbW5pWloiLCJyaWQiOiJ1c2VyXzJ3VnVLbGpmM29JM0MxWlByTnBFNU95RnIxQSIsImluaXRpYWxzIjoiRlcifQ",
-        createdAt: "2025-05-02T03:52:55.571Z",
-        updatedAt: "2025-05-02T03:52:55.571Z",
-      },
-      {
-        id: "db087f89-104f-438a-8df5-95c8d410a02e",
-        externalId: "user_2wW9Zw3USCkq5LRZKNnwobk5cB8",
-        username: "hd1wav",
-        walletAddress: "Hd1wAVXrpvpTjbK5KMYS5ZXBKAzBpST7HAQXtXXtUATj",
-        profilePicture:
-          "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yd1ZyYWdzb2JOSHJaRDJNMHlYUHpKbW5pWloiLCJyaWQiOiJ1c2VyXzJ3VzladzNVU0NrcTVMUlpLTm53b2JrNWNCOCIsImluaXRpYWxzIjoiSFcifQ",
-        createdAt: "2025-05-02T03:54:06.468Z",
-        updatedAt: "2025-05-02T03:54:06.468Z",
-      },
-      {
-        id: "a0a7360e-0ba2-4739-8afd-1fd3eee598c1",
-        externalId: "user_2wZKq9FZGE0iqv9699YGkb5AjU3",
-        username: "evdeba",
-        walletAddress: "EvdEbaFHenWYsyp11LRksdVpB6DgsJXQVaNEZjRbQHy7",
-        profilePicture:
-          "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yd1ZyYWdzb2JOSHJaRDJNMHlYUHpKbW5pWloiLCJyaWQiOiJ1c2VyXzJ3WktxOUZaR0UwaXF2OTY5OVlHa2I1QWpVMyIsImluaXRpYWxzIjoiRVcifQ",
-        createdAt: "2025-05-03T06:44:03.486Z",
-        updatedAt: "2025-05-03T06:44:03.486Z",
-      },
-    ],
-    contributors:
-      projectId === "frontend-redesign"
-        ? [
-            { name: "Alice", avatar: "/placeholder.svg?height=32&width=32" },
-            { name: "Bob", avatar: "/placeholder.svg?height=32&width=32" },
-          ]
-        : [],
-    milestones:
-      projectId === "frontend-redesign"
-        ? [
-            {
-              title: "Design Phase",
-              status: "completed",
-              dueDate: "2023-06-15",
-            },
-            {
-              title: "Implementation",
-              status: "in_progress",
-              dueDate: "2023-07-01",
-            },
-            {
-              title: "Testing & Launch",
-              status: "not_started",
-              dueDate: "2023-07-15",
-            },
-          ]
-        : [
-            {
-              title: "Initial Review",
-              status: "not_started",
-              dueDate: "2023-07-15",
-            },
-            {
-              title: "Vulnerability Testing",
-              status: "not_started",
-              dueDate: "2023-08-01",
-            },
-            {
-              title: "Final Report",
-              status: "not_started",
-              dueDate: "2023-08-15",
-            },
-          ],
-    tasks: {
-      total: projectId === "frontend-redesign" ? 12 : 8,
-      completed: projectId === "frontend-redesign" ? 5 : 0,
-    },
-    votingStatus: {
-      status: projectId === "frontend-redesign" ? "approved" : "voting",
-      votesFor: projectId === "frontend-redesign" ? 5 : 3,
-      votesAgainst: projectId === "frontend-redesign" ? 0 : 1,
-      totalVotes: 5,
-      endTime: projectId === "frontend-redesign" ? undefined : "June 15, 2023",
-    },
-    votes: [
-      {
-        voter: { name: "Alice", avatar: "/placeholder.svg?height=32&width=32" },
-        vote: "for",
-        timestamp: "June 10, 2023 14:32",
-        comment: "This is a critical feature we need to implement.",
-      },
-      {
-        voter: { name: "Bob", avatar: "/placeholder.svg?height=32&width=32" },
-        vote: "for",
-        timestamp: "June 10, 2023 15:45",
-      },
-      {
-        voter: {
-          name: "Charlie",
-          avatar: "/placeholder.svg?height=32&width=32",
-        },
-        vote: "against",
-        timestamp: "June 11, 2023 09:10",
-        comment: "I think we should prioritize other features first.",
-      },
-      {
-        voter: { name: "Dave", avatar: "/placeholder.svg?height=32&width=32" },
-        vote: "for",
-        timestamp: "June 11, 2023 11:25",
-      },
-    ],
-  };
+  // const project = {
+  //   id: projectId,
+  //   title:
+  //     projectId === "frontend-redesign"
+  //       ? "Frontend Redesign"
+  //       : "Smart Contract Audit",
+  //   description:
+  //     projectId === "frontend-redesign"
+  //       ? "Redesign the frontend UI to improve user experience and conversion rates."
+  //       : "Comprehensive audit of all smart contracts to ensure security and efficiency.",
+  //   status:
+  //     projectId === "frontend-redesign" ? "in_progress" : "pending_approval",
+  //   progress: projectId === "frontend-redesign" ? 45 : 0,
+  //   budget: projectId === "frontend-redesign" ? 1200 : 2000,
+  //   spent: projectId === "frontend-redesign" ? 540 : 0,
+  //   startDate: projectId === "frontend-redesign" ? "2023-06-01" : "2023-07-01",
+  //   endDate: projectId === "frontend-redesign" ? "2023-07-15" : "2023-08-15",
+  //   contributors:
+  //     projectId === "frontend-redesign"
+  //       ? [
+  //           { name: "Alice", avatar: "/placeholder.svg?height=32&width=32" },
+  //           { name: "Bob", avatar: "/placeholder.svg?height=32&width=32" },
+  //         ]
+  //       : [],
+  //   milestones:
+  //     projectId === "frontend-redesign"
+  //       ? [
+  //           {
+  //             title: "Design Phase",
+  //             status: "completed",
+  //             dueDate: "2023-06-15",
+  //           },
+  //           {
+  //             title: "Implementation",
+  //             status: "in_progress",
+  //             dueDate: "2023-07-01",
+  //           },
+  //           {
+  //             title: "Testing & Launch",
+  //             status: "not_started",
+  //             dueDate: "2023-07-15",
+  //           },
+  //         ]
+  //       : [
+  //           {
+  //             title: "Initial Review",
+  //             status: "not_started",
+  //             dueDate: "2023-07-15",
+  //           },
+  //           {
+  //             title: "Vulnerability Testing",
+  //             status: "not_started",
+  //             dueDate: "2023-08-01",
+  //           },
+  //           {
+  //             title: "Final Report",
+  //             status: "not_started",
+  //             dueDate: "2023-08-15",
+  //           },
+  //         ],
+  //   tasks: {
+  //     total: projectId === "frontend-redesign" ? 12 : 8,
+  //     completed: projectId === "frontend-redesign" ? 5 : 0,
+  //   },
+  //   votingStatus: {
+  //     status: projectId === "frontend-redesign" ? "approved" : "voting",
+  //     votesFor: projectId === "frontend-redesign" ? 5 : 3,
+  //     votesAgainst: projectId === "frontend-redesign" ? 0 : 1,
+  //     totalVotes: 5,
+  //     endTime: projectId === "frontend-redesign" ? undefined : "June 15, 2023",
+  //   },
+  //   votes: [
+  //     {
+  //       voter: { name: "Alice", avatar: "/placeholder.svg?height=32&width=32" },
+  //       vote: "for",
+  //       timestamp: "June 10, 2023 14:32",
+  //       comment: "This is a critical feature we need to implement.",
+  //     },
+  //     {
+  //       voter: { name: "Bob", avatar: "/placeholder.svg?height=32&width=32" },
+  //       vote: "for",
+  //       timestamp: "June 10, 2023 15:45",
+  //     },
+  //     {
+  //       voter: {
+  //         name: "Charlie",
+  //         avatar: "/placeholder.svg?height=32&width=32",
+  //       },
+  //       vote: "against",
+  //       timestamp: "June 11, 2023 09:10",
+  //       comment: "I think we should prioritize other features first.",
+  //     },
+  //     {
+  //       voter: { name: "Dave", avatar: "/placeholder.svg?height=32&width=32" },
+  //       vote: "for",
+  //       timestamp: "June 11, 2023 11:25",
+  //     },
+  //   ],
+  // };
 
-  // Mock data for tasks
-  // const tasks = [
-  //   {
-  //     id: 1,
-  //     title: "Design UI Mockups",
-  //     description: "Create mockups for the new UI design",
-  //     status: "completed",
-  //     assignee: {
-  //       name: "Alice",
-  //       avatar: "/placeholder.svg?height=32&width=32",
-  //     },
-  //     dueDate: "2023-06-15",
-  //     reward: 50,
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Implement Header Component",
-  //     description: "Create the new header component based on the design",
-  //     status: "in_progress",
-  //     assignee: {
-  //       name: "Bob",
-  //       avatar: "/placeholder.svg?height=32&width=32",
-  //     },
-  //     dueDate: "2023-06-25",
-  //     reward: 75,
-  //   },
-  //   {
-  //     id: 3,
-  //     title: "Implement Footer Component",
-  //     description: "Create the new footer component based on the design",
-  //     status: "to_do",
-  //     assignee: null,
-  //     dueDate: "2023-07-05",
-  //     reward: 60,
-  //   },
-  //   {
-  //     id: 4,
-  //     title: "Implement Navigation Menu",
-  //     description: "Create the navigation menu component based on the design",
-  //     status: "to_do",
-  //     assignee: null,
-  //     dueDate: "2023-07-10",
-  //     reward: 80,
-  //   },
-  //   {
-  //     id: 5,
-  //     title: "Implement Responsive Design",
-  //     description: "Ensure the design works well on all screen sizes",
-  //     status: "to_do",
-  //     assignee: null,
-  //     dueDate: "2023-07-12",
-  //     reward: 90,
-  //   },
-  // ];
+  console.log(members);
 
   const {
     data,
@@ -257,13 +197,6 @@ export default function ProjectDetailsPage({
       <div className="flex justify-between items-center">
         <div>
           <div className="flex items-center gap-2">
-            <Link
-              href={`/organizations/${orgId}/projects`}
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              Projects
-            </Link>
-            <span className="text-sm text-muted-foreground">/</span>
             <h1 className="text-2xl font-bold tracking-tight">
               {project.title}
             </h1>
@@ -274,11 +207,15 @@ export default function ProjectDetailsPage({
           </div>
           <p className="text-muted-foreground mt-1">{project.description}</p>
         </div>
-
-        <CreateTaskButton members={project.members} projectId={projectId} />
+        {members && (
+          <CreateTaskButton
+            members={members.filter((member) => member.role === "CONTRIBUTOR")}
+            projectId={projectId}
+          />
+        )}
       </div>
 
-      {project.status !== "pending_approval" && (
+      {/* {project.status !== "pending_approval" && (
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span>Overall Progress</span>
@@ -286,10 +223,10 @@ export default function ProjectDetailsPage({
           </div>
           <Progress value={project.progress} className="h-2" />
         </div>
-      )}
+      )} */}
 
       <div className="md:hidden grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Budget</CardTitle>
           </CardHeader>
@@ -315,9 +252,9 @@ export default function ProjectDetailsPage({
               />
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Timeline</CardTitle>
           </CardHeader>
@@ -348,28 +285,28 @@ export default function ProjectDetailsPage({
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Contributors</CardTitle>
           </CardHeader>
           <CardContent>
-            {project.contributors.length > 0 ? (
+            {project.members.length > 0 ? (
               <div className="space-y-4">
-                {project.contributors.map((contributor: any, i: number) => (
+                {project.members.map((contributor: any, i: number) => (
                   <div key={i} className="flex items-center gap-3">
                     <Avatar>
                       <AvatarImage
-                        src={contributor.avatar || "/placeholder.svg"}
-                        alt={contributor.name}
+                        src={contributor.profilePicture || "/placeholder.svg"}
+                        alt={contributor.username}
                       />
                       <AvatarFallback>
-                        {contributor.name.charAt(0)}
+                        {contributor.username.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium">{contributor.name}</p>
+                      <p className="font-medium">{contributor.username}</p>
                       <p className="text-sm text-muted-foreground">
                         Contributor
                       </p>
@@ -394,7 +331,7 @@ export default function ProjectDetailsPage({
               </div>
             )}
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       <Tabs defaultValue="tasks" className="w-full">
@@ -454,7 +391,7 @@ export default function ProjectDetailsPage({
           )}
         </TabsContent>
 
-        <TabsContent value="milestones" className="mt-6">
+        {/* <TabsContent value="milestones" className="mt-6">
           <h3 className="text-lg font-medium mb-4">Project Milestones</h3>
           <div className="space-y-4">
             {project.milestones.map((milestone: any, index: number) => (
@@ -593,7 +530,7 @@ export default function ProjectDetailsPage({
               </Card>
             ))}
           </div>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   );
@@ -606,45 +543,163 @@ interface TaskCardProps {
 }
 
 function TaskCard({ task, orgId, projectId }: TaskCardProps) {
+  const { signTransaction } = useWallet();
+
+  const handleCompleteTask = async () => {
+    if (!signTransaction) return;
+
+    const { success, error } = await compeleteTaskTransaction(
+      task.accountAddress
+    );
+    if (!success) {
+      toast.error("Failed to complete task");
+      return;
+    }
+
+    const retreivedTx = Transaction.from(
+      Buffer.from(success.serializedTransaction, "base64")
+    );
+
+    const serializedTx = await signTransaction(retreivedTx);
+
+    const serializedSignedTx = serializedTx?.serialize().toString("base64");
+
+    const createProjectResponse = await createProject({
+      transactionId: success.transactionId,
+      serializedTransaction: serializedSignedTx,
+    });
+
+    if (createProjectResponse.error) {
+      toast.error("Failed to complete task");
+      return;
+    }
+
+    toast.success("Task completed successfully");
+  };
+
+  const handleEnableTaskWithdraw = async () => {
+    if (!signTransaction) return;
+
+    const { success, error } = await enableTaskWithdrawTransaction(
+      task.accountAddress
+    );
+    if (!success) {
+      toast.error("Failed to enable task withdraw");
+      return;
+    }
+
+    const retreivedTx = Transaction.from(
+      Buffer.from(success.serializedTransaction, "base64")
+    );
+
+    const serializedTx = await signTransaction(retreivedTx);
+
+    const serializedSignedTx = serializedTx?.serialize().toString("base64");
+
+    const enableTaskWithdrawResponse = await enableTaskWithdraw({
+      transactionId: success.transactionId,
+      serializedTransaction: serializedSignedTx,
+    });
+
+    if (enableTaskWithdrawResponse.error) {
+      toast.error("Failed to enable task withdraw");
+      return;
+    }
+
+    toast.success("Task withdraw enabled successfully");
+  };
+
+  const handleWithdrawTaskFunds = async () => {
+    if (!signTransaction) return;
+
+    const { success, error } = await withdrawTaskFundsTransaction(
+      task.accountAddress
+    );
+
+    if (!success) {
+      toast.error("Failed to withdraw task funds");
+      return;
+    }
+
+    const retreivedTx = Transaction.from(
+      Buffer.from(success.serializedTransaction, "base64")
+    );
+
+    const serializedTx = await signTransaction(retreivedTx);
+
+    const serializedSignedTx = serializedTx?.serialize().toString("base64");
+
+    const withdrawTaskFundsResponse = await withdrawTaskFunds({
+      transactionId: success.transactionId,
+      serializedTransaction: serializedSignedTx,
+    });
+
+    if (withdrawTaskFundsResponse.error) {
+      toast.error("Failed to withdraw task funds");
+      return;
+    }
+
+    toast.success("Task funds withdrawn successfully");
+  };
+
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex justify-between">
-          <CardTitle className="text-base">{task.title}</CardTitle>
-          <TaskStatusBadge status={task.status} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm mb-4">Mock description</p>
-        <div className="flex flex-wrap justify-between items-center">
-          <div className="flex items-center gap-2">
-            {task.assignee ? (
-              <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage
-                    src={task.assignee.profilePicture || "/placeholder.svg"}
-                    alt={task.assignee.username}
-                  />
-                  <AvatarFallback>
-                    {task.assignee.username.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm">{task.assignee.username}</span>
-              </div>
-            ) : (
-              <Badge variant="outline">Unassigned</Badge>
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <Clock className="h-4 w-4" />
-              {/* <span>Due {formatDate(task.dueDate)}</span> */}
-            </div>
+    <Link href={`/organizations/${orgId}/projects/${projectId}/tasks/${task.accountAddress}`}>
+      <Card>
+        {/* <CardHeader className="pb-2">
+
+      </CardHeader> */}
+        <CardContent className="p-2 px-4 my-2">
+          <div className="flex justify-between flex-row gap-2">
+            <CardTitle className="text-base font-normal">{task.title}</CardTitle>
             <div className="text-sm font-medium">{task.paymentAmount} SOL</div>
+            <div className="flex justify-between">
+              <TaskStatusBadge status={task.status} />
+            </div>
+            {/* <p className="text-sm mb-4">Mock description</p> */}
+            <div className="flex flex-wrap justify-between items-center">
+              <div className="flex items-center gap-2">
+                {task.assignee ? (
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage
+                        src={task.assignee.profilePicture || "/placeholder.svg"}
+                        alt={task.assignee.username}
+                      />
+                      <AvatarFallback>
+                        {task.assignee.username.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm">{task.assignee.username}</span>
+                  </div>
+                ) : (
+                  <Badge variant="outline">Unassigned</Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  {/* <Clock className="h-4 w-4" /> */}
+                  {/* <span>Due {formatDate(task.dueDate)}</span> */}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </CardContent>
-      <div className="px-6 pb-4 flex justify-end">
+        </CardContent>
+        {/* <div className="px-6 pb-4 flex justify-end gap-2">
+        {task.status === "ready" && (
+          <Button onClick={handleCompleteTask} size="sm">
+            Complete
+          </Button>
+        )}
+        {task.status === "completed" && (
+          <Button onClick={handleEnableTaskWithdraw} size="sm">
+            Enable task withdraw
+          </Button>
+        )}
+        {task.status === "completed" && (
+          <Button onClick={handleWithdrawTaskFunds} size="sm">
+            Withdraw task funds
+          </Button>
+        )}
         <Button variant="outline" size="sm" asChild>
           <Link
             href={`/organizations/${orgId}/projects/${projectId}/tasks/${task.transferProposal}`}
@@ -652,8 +707,9 @@ function TaskCard({ task, orgId, projectId }: TaskCardProps) {
             View Details
           </Link>
         </Button>
-      </div>
-    </Card>
+      </div> */}
+      </Card>
+    </Link>
   );
 }
 

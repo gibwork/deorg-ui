@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import axios from "axios";
 
 export type Task = {
+  accountAddress: string;
   project: string;
   title: string;
   paymentAmount: number;

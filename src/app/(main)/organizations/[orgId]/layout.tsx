@@ -28,7 +28,7 @@ function OrganizationLayout({
             <OrganizationHeader organizationId={params.orgId} />
             <div className="h-[calc(100vh-1rem)]">
               <ScrollArea className="h-full">
-                <div className="mt-6 w-full">
+                <div className="mt-6 w-2/3 mx-auto">
                   <Unauthorized orgId={params.orgId}>{children}</Unauthorized>
                 </div>
               </ScrollArea>

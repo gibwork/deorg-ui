@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {
-  gibworkTotalVolume,
+import {  
   navItems,
   OrganizationNavbarItems,
 } from "@/constants/data";
