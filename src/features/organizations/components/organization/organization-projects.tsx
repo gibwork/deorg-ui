@@ -20,6 +20,7 @@ import {
   BarChart3,
   ArrowRight,
   Clock,
+  Copy,
 } from "lucide-react";
 import { CreateProjectModal } from "./create-project-modal";
 import { ProjectDetailModal } from "./project-detail-modal";
@@ -37,7 +38,9 @@ import {
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import { createProject } from "../../actions/projects/create-project";
-import { cn } from "@/lib/utils";
+import { cn, truncate } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { CopyButton } from "@/components/ui/copy-button";
 
 export function OrganizationProjects({
   organizationId,
@@ -112,12 +115,12 @@ export function OrganizationProjects({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
+        {/* <div>
           <h2 className="text-2xl font-bold tracking-tight">Projects</h2>
           <p className="text-muted-foreground">
             Create and manage projects for your organization.
           </p>
-        </div>
+        </div> */}
         <Link
           href={`/organizations/${organizationId}/projects/new`}
           className={cn(
@@ -189,130 +192,69 @@ interface ProjectCardProps {
 function ProjectCard({ project, onViewProject }: ProjectCardProps) {
   const params = useParams();
   const orgId = params.orgId;
+
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle>{project.title}</CardTitle>
-            <CardDescription className="mt-1">
-              {/* {project.description} */}
-              Mock description
-            </CardDescription>
-          </div>
-          {project.isActive ? "in progress" : "completed"}
-          {/* <ProjectStatusBadge
+    <Link
+      className=""
+      href={`/organizations/${orgId}/projects/${project.accountAddress}`}
+    >
+      <Card className="mb-2">
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle>{project.title}</CardTitle>
+              <Badge variant="outline" className="my-2 me-2 rounded-sm">{project.isActive ? "in progress" : "completed"}</Badge>
+              <div className="inline-block">
+                <Badge variant="outline" className="my-2 me-2 rounded-sm">
+                  <Copy className="mr-2 h-3 w-3" />
+                  {truncate(project.accountAddress, 6, 4)}
+                </Badge>
+              </div>
+            </div>
+            <div className="flex items-center">
+              {project.members.length > 0 ? (
+                <div className="flex -space-x-2">
+                  {project.members
+                    .slice(0, 3)
+                    .map((contributor, i: number) => (
+                      <Avatar
+                        key={i}
+                        className="h-8 w-8 border-2 border-background"
+                      >
+                        <AvatarImage
+                          src={
+                            contributor.profilePicture || "/placeholder.svg"
+                          }
+                          alt={contributor.username}
+                        />
+                        <AvatarFallback>
+                          {contributor.username.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                  {project.members.length > 3 && (
+                    <div className="flex items-center justify-center h-6 w-6 rounded-full bg-muted text-xs">
+                      +{project.members.length - 3}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <span className="text-sm text-muted-foreground">
+                  No contributors yet
+                </span>
+              )}
+            </div>
+            {/* <ProjectStatusBadge
             status={project.status}
             votingStatus={project.votingStatus}
           /> */}
-        </div>
-      </CardHeader>
-
-      <CardContent>
-        <div className="space-y-4">
-          {project.isActive && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Progress</span>
-                <span>10%</span>
-              </div>
-              <Progress value={10} className="h-2" />
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            <div className="flex items-center gap-2">
-              <div className="rounded-full p-2 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                <BarChart3 className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Budget</p>
-                <p className="text-sm text-muted-foreground">10 / 100 SOL</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="rounded-full p-2 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                <Calendar className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Timeline</p>
-                <p className="text-sm text-muted-foreground">
-                  timestamp - {project.validityEndTime}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="rounded-full p-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                <Users className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Contributors</p>
-                <div className="flex items-center">
-                  {project.members.length > 0 ? (
-                    <div className="flex -space-x-2">
-                      {project.members
-                        .slice(0, 3)
-                        .map((contributor, i: number) => (
-                          <Avatar
-                            key={i}
-                            className="h-6 w-6 border-2 border-background"
-                          >
-                            <AvatarImage
-                              src={
-                                contributor.profilePicture || "/placeholder.svg"
-                              }
-                              alt={contributor.username}
-                            />
-                            <AvatarFallback>
-                              {contributor.username.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                        ))}
-                      {project.members.length > 3 && (
-                        <div className="flex items-center justify-center h-6 w-6 rounded-full bg-muted text-xs">
-                          +{project.members.length - 3}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">
-                      No contributors yet
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
           </div>
+        </CardHeader>
 
-          {/* {project.status === "pending_approval" && (
-            <div className="mt-4 p-3 bg-amber-50 text-amber-800 rounded-md text-sm dark:bg-amber-900/20 dark:text-amber-400 flex items-center">
-              <Clock className="h-4 w-4 mr-2" />
-              <span>
-                Voting in progress: {project.votingStatus.votesFor} for,{" "}
-                {project.votingStatus.votesAgainst} against
-              </span>
-            </div>
-          )} */}
-        </div>
-      </CardContent>
+        <CardContent className="p-0" />
 
-      <CardFooter className="flex justify-between">
-        <div className="text-sm text-muted-foreground">
-          {/* {project.tasks.completed} of {project.tasks.total} tasks completed */}
-        </div>
-
-        <Button variant="outline" size="sm" asChild>
-          <Link
-            href={`/organizations/${orgId}/projects/${project.accountAddress}`}
-          >
-            View Details
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-      </CardFooter>
-    </Card>
+      </Card>
+    </Link>
   );
 }
 
