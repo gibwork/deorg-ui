@@ -31,6 +31,7 @@ export type Task = {
   }[];
   transferProposal: string;
   vault: string;
+  reviewer?: string
 };
 
 export async function listTasks(projectAccountAddress: string): Promise<Task[]> {
