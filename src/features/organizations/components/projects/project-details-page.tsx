@@ -96,8 +96,10 @@ export default function ProjectDetailsPage({
 
   const tasksByStatus = {
     ready: tasks.filter((task) => task.status === "ready"),
-    completed: tasks.filter((task) => task.status === "completed"),
-    paid: tasks.filter((task) => task.status === "paid"),
+    completed: tasks.filter(
+      (task) => task.status === "completed" && !task.reviewer
+    ),
+    paid: tasks.filter((task) => !!task.reviewer),
   };
 
   console.log(tasks, "tasks", project);
