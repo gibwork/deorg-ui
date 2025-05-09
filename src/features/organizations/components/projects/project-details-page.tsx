@@ -47,6 +47,7 @@ import {
 } from "../../actions/tasks/withdraw-task-funds";
 import { useOrganizationProjects } from "../../hooks/use-organization-projects";
 import ProjectTaskModal from "../organization/project-task-modal";
+import { OrganizationTasksKanban } from "../organization/organization-tasks-kanban";
 export default function ProjectDetailsPage({
   orgId,
   projectId,
@@ -92,6 +93,14 @@ export default function ProjectDetailsPage({
   });
 
   const tasks = data?.pages?.flatMap((page) => page) || [];
+
+  const tasksByStatus = {
+    ready: tasks.filter((task) => task.status === "ready"),
+    completed: tasks.filter(
+      (task) => task.status === "completed" && !task.reviewer
+    ),
+    paid: tasks.filter((task) => !!task.reviewer),
+  };
 
   console.log(tasks, "tasks", project);
 
@@ -291,12 +300,11 @@ export default function ProjectDetailsPage({
               )}
             </div>
           ) : (
-            // <KanbanBoard
-            //   columns={tasksByStatus}
-            //   orgId={params.orgId}
-            //   projectId={params.projectId}
-            // />
-            <></>
+            <OrganizationTasksKanban
+              columns={tasksByStatus}
+              orgId={orgId}
+              projectId={projectId}
+            />
           )}
         </TabsContent>
 
