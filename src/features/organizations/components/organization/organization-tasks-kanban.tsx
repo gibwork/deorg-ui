@@ -213,18 +213,14 @@ export function OrganizationTasksKanban({
     setDraggedTask(null);
     const { destination, source, draggableId } = result;
 
+    console.log(result, "result");
+
     // If there's no destination or the item was dropped back in the same place
     if (
       !destination ||
       (destination.droppableId === source.droppableId &&
         destination.index === source.index)
     ) {
-      return;
-    }
-
-    // Prevent direct movement from ready to paid
-    if (source.droppableId === "ready" && destination.droppableId === "paid") {
-      toast.error("Tasks must be completed before being marked as paid");
       return;
     }
 
@@ -237,6 +233,49 @@ export function OrganizationTasksKanban({
     if (taskIndex === -1) return;
 
     const task = { ...sourceColumn[taskIndex] };
+
+    // Check if user is authorized to move the task
+    if (
+      source.droppableId === "ready" &&
+      destination.droppableId === "completed"
+    ) {
+      // Only task assignee can move from ready to completed
+      if (publicKey?.toString() !== task.assignee?.walletAddress) {
+        toast.error("Only the task assignee can mark a task as completed");
+        return;
+      }
+    } else if (
+      source.droppableId === "completed" &&
+      destination.droppableId === "paid"
+    ) {
+      // Only non-assignee members can move from completed to paid
+      if (publicKey?.toString() === task.assignee?.walletAddress) {
+        toast.error("Task assignee cannot enable task withdraw");
+        return;
+      }
+    }
+
+    // Prevent moving tasks back from paid state
+    if (source.droppableId === "paid") {
+      toast.error("Tasks cannot be moved back from paid state");
+      return;
+    }
+
+    // Prevent moving tasks back from completed state
+    if (
+      source.droppableId === "completed" &&
+      destination.droppableId === "ready"
+    ) {
+      toast.error("Completed tasks cannot be moved back to ready state");
+      return;
+    }
+
+    // Prevent direct movement from ready to paid
+    if (source.droppableId === "ready" && destination.droppableId === "paid") {
+      toast.error("Tasks must be completed before being marked as paid");
+      return;
+    }
+
     const originalColumns = { ...columns };
 
     // Update the task status based on the destination column
@@ -263,8 +302,14 @@ export function OrganizationTasksKanban({
     // Handle the transaction based on the destination
     if (destination.droppableId === "completed") {
       success = await handleCompleteTask(task);
+      if (!success) {
+        toast.error("Failed to complete task. Please try again.");
+      }
     } else if (destination.droppableId === "paid") {
       success = await handleEnableTaskWithdraw(task);
+      if (!success) {
+        toast.error("Failed to enable task withdraw. Please try again.");
+      }
     }
 
     // If the transaction failed, revert the UI changes

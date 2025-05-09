@@ -102,8 +102,6 @@ export default function ProjectDetailsPage({
     paid: tasks.filter((task) => !!task.reviewer),
   };
 
-  console.log(tasks, "tasks", project);
-
   const handleTaskCardClick = (task: Task) => {
     setSelectedTask(task);
     setShowTaskDetailsModal(true);
