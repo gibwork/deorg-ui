@@ -59,6 +59,12 @@ export type CreateOrganizationFormDataType = {
   projectProposalValidityPeriod: number;
   projectProposalThreshold: number;
   minimumTokenRequirement: number;
+  description?: string;
+  logoUrl?: string;
+  websiteUrl?: string;
+  twitterUrl?: string;
+  discordUrl?: string;
+  telegramUrl?: string;
   // rolePromotionRequirement: "majority" | "supermajority" | "consensus";
 };
 

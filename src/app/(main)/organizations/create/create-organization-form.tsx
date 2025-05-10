@@ -71,6 +71,11 @@ const createOrganizationSchema = z.object({
     .number({ message: "Please enter a valid percentage." })
     .min(1)
     .max(100),
+  logoUrl: z.string().optional(),
+  websiteUrl: z.string().optional(),
+  twitterUrl: z.string().optional(),
+  discordUrl: z.string().optional(),
+  telegramUrl: z.string().optional(),
   // rolePromotionRequirement: z.enum(["majority", "supermajority", "consensus"]),
 });
 
@@ -92,6 +97,17 @@ const FORM_STEPS: Step[] = [
     id: "Specify Token",
     name: "Specify Token",
     fields: ["tokenAddress", "requiredTokenAmount"],
+  },
+  {
+    id: "Informations",
+    name: "Informations",
+    fields: [
+      "logoUrl",
+      "websiteUrl",
+      "twitterUrl",
+      "discordUrl",
+      "telegramUrl",
+    ],
   },
   {
     id: "Setup Voting",
@@ -220,6 +236,12 @@ export function CreateOrganizationForm() {
           projectProposalValidityPeriod: data.votingPeriod,
           projectProposalThreshold: data.votingApprovalThreshold,
           minimumTokenRequirement: data.requiredTokenAmount!,
+          logoUrl: data.logoUrl,
+          websiteUrl: data.websiteUrl,
+          twitterUrl: data.twitterUrl,
+          discordUrl: data.discordUrl,
+          telegramUrl: data.telegramUrl,
+          description: data.description,
           // rolePromotionRequirement: data.rolePromotionRequirement,
         }
       );
@@ -536,6 +558,100 @@ export function CreateOrganizationForm() {
                     {FORM_STEPS[currentStep]?.name}
                   </h1>
                   <p className="text-xl font-medium">
+                    Add your organization&apos;s social presence and branding
+                  </p>
+                </div>
+                <FormField
+                  control={form.control}
+                  name="logoUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Logo URL (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="https://example.com/logo.png"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        A URL to your organization&apos;s logo image
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="websiteUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Website URL (optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="twitterUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Twitter URL (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="https://twitter.com/yourorg"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="discordUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Discord URL (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="https://discord.gg/yourorg"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="telegramUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Telegram URL (optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://t.me/yourorg" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            {currentStep === 3 && (
+              <div className="space-y-6">
+                <div className="mb-16">
+                  <h1 className="font-light text-muted-foreground">
+                    {FORM_STEPS[currentStep]?.name}
+                  </h1>
+                  <p className="text-xl font-medium">
                     Set up how voting and proposals will work in your
                     organization
                   </p>
@@ -604,49 +720,13 @@ export function CreateOrganizationForm() {
                     </FormItem>
                   )}
                 />
-
-                {/* <FormField
-                  control={form.control}
-                  name="rolePromotionRequirement"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Role Promotion Requirements</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select requirement" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="majority">
-                            Simple Majority (50%+)
-                          </SelectItem>
-                          <SelectItem value="supermajority">
-                            Super Majority (66%+)
-                          </SelectItem>
-                          <SelectItem value="consensus">
-                            Full Consensus (100%)
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Voting threshold for promoting members to new roles
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
               </div>
             )}
 
-            {currentStep === 3 && (
+            {currentStep === 4 && (
               <div className="space-y-6">
                 <div className="mb-16">
                   <h1 className="font-light text-muted-foreground">
-                    {" "}
                     {FORM_STEPS[currentStep]?.name}
                   </h1>
                   <p className="text-xl font-medium">
@@ -676,6 +756,36 @@ export function CreateOrganizationForm() {
                     </p>
                   </div>
                   <div>
+                    <h3 className="font-medium">Social Links</h3>
+                    <div className="space-y-2 mt-2">
+                      {currentValues.logoUrl && (
+                        <p className="text-muted-foreground">
+                          Logo: {currentValues.logoUrl}
+                        </p>
+                      )}
+                      {currentValues.websiteUrl && (
+                        <p className="text-muted-foreground">
+                          Website: {currentValues.websiteUrl}
+                        </p>
+                      )}
+                      {currentValues.twitterUrl && (
+                        <p className="text-muted-foreground">
+                          Twitter: {currentValues.twitterUrl}
+                        </p>
+                      )}
+                      {currentValues.discordUrl && (
+                        <p className="text-muted-foreground">
+                          Discord: {currentValues.discordUrl}
+                        </p>
+                      )}
+                      {currentValues.telegramUrl && (
+                        <p className="text-muted-foreground">
+                          Telegram: {currentValues.telegramUrl}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div>
                     <h3 className="font-medium">Voting Configuration</h3>
                     <div className="space-y-2 mt-2">
                       <p className="text-muted-foreground">
@@ -688,15 +798,6 @@ export function CreateOrganizationForm() {
                       <p className="text-muted-foreground">
                         Quorum: {currentValues.quorumPercentage}%
                       </p>
-                      {/* <p className="text-muted-foreground">
-                        Role Promotion:{" "}
-                        {currentValues.rolePromotionRequirement === "majority"
-                          ? "Simple Majority"
-                          : currentValues.rolePromotionRequirement ===
-                            "supermajority"
-                          ? "Super Majority"
-                          : "Full Consensus"}
-                      </p> */}
                     </div>
                   </div>
                   <div>
