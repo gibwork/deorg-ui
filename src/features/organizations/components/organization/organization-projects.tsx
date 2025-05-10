@@ -62,6 +62,7 @@ export function OrganizationProjects({
       const payload: CreateProjectTransactionPayload = {
         organizationId,
         name: project.title,
+        description: project.description || "",
         members: project.members,
         projectProposalThreshold: 1,
         projectProposalValidityPeriod: 1,
@@ -202,7 +203,9 @@ function ProjectCard({ project, onViewProject }: ProjectCardProps) {
           <div className="flex justify-between items-start">
             <div>
               <CardTitle>{project.title}</CardTitle>
-              <Badge variant="outline" className="my-2 me-2 rounded-sm">{project.isActive ? "in progress" : "completed"}</Badge>
+              <Badge variant="outline" className="my-2 me-2 rounded-sm">
+                {project.isActive ? "in progress" : "completed"}
+              </Badge>
               <div className="inline-block">
                 <Badge variant="outline" className="my-2 me-2 rounded-sm">
                   <Copy className="mr-2 h-3 w-3" />
@@ -213,24 +216,20 @@ function ProjectCard({ project, onViewProject }: ProjectCardProps) {
             <div className="flex items-center">
               {project.members.length > 0 ? (
                 <div className="flex -space-x-2">
-                  {project.members
-                    .slice(0, 3)
-                    .map((contributor, i: number) => (
-                      <Avatar
-                        key={i}
-                        className="h-8 w-8 border-2 border-background"
-                      >
-                        <AvatarImage
-                          src={
-                            contributor.profilePicture || "/placeholder.svg"
-                          }
-                          alt={contributor.username}
-                        />
-                        <AvatarFallback>
-                          {contributor.username.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                    ))}
+                  {project.members.slice(0, 3).map((contributor, i: number) => (
+                    <Avatar
+                      key={i}
+                      className="h-8 w-8 border-2 border-background"
+                    >
+                      <AvatarImage
+                        src={contributor.profilePicture || "/placeholder.svg"}
+                        alt={contributor.username}
+                      />
+                      <AvatarFallback>
+                        {contributor.username.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                  ))}
                   {project.members.length > 3 && (
                     <div className="flex items-center justify-center h-6 w-6 rounded-full bg-muted text-xs">
                       +{project.members.length - 3}
@@ -251,7 +250,6 @@ function ProjectCard({ project, onViewProject }: ProjectCardProps) {
         </CardHeader>
 
         <CardContent className="p-0" />
-
       </Card>
     </Link>
   );

@@ -380,7 +380,8 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
       !data.projectName ||
       !data.projectMembers ||
       !data.projectProposalThreshold ||
-      !data.projectProposalValidityPeriod
+      !data.projectProposalValidityPeriod ||
+      !data.projectDescription
     ) {
       return;
     }
@@ -395,6 +396,7 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
         await createProjectTransaction({
           organizationId: orgId,
           name: data.projectName,
+          description: data.projectDescription || "",
           members: data.projectMembers,
           projectProposalThreshold: data.projectProposalThreshold,
           projectProposalValidityPeriod: data.projectProposalValidityPeriod,

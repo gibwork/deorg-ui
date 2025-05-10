@@ -79,6 +79,7 @@ export default function CreateProjectForm() {
         await createProjectTransaction({
           organizationId: params.orgId as string,
           name: title,
+          description,
           members: selectedMembers,
           projectProposalThreshold: 60,
           projectProposalValidityPeriod: 30,

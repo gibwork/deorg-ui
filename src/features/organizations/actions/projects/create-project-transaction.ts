@@ -9,6 +9,7 @@ import { AxiosError } from "axios";
 export type CreateProjectTransactionPayload = {
   organizationId: string;
   name: string
+  description: string
   members: string[]
   projectProposalThreshold: number
   projectProposalValidityPeriod: number
