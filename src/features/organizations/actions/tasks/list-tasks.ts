@@ -32,6 +32,13 @@ export type Task = {
   transferProposal: string;
   vault: string;
   reviewer?: string
+  tokenInfo: {
+    mint: string;
+    symbol: string;
+    decimals: number;
+    balance: string;
+    uiBalance: number;
+  };
 };
 
 export async function listTasks(projectAccountAddress: string): Promise<Task[]> {

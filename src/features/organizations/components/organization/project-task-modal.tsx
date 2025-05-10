@@ -298,8 +298,8 @@ function ProjectTaskModal({
         <DialogHeader>
           <DialogTitle>{task.title}</DialogTitle>
           <DialogDescription>
-            {project.title} • 8 hours estimated • {task.paymentAmount} SOL
-            reward
+            {project.title} • 8 hours estimated • {task.tokenInfo.uiBalance}{" "}
+            {task.tokenInfo.symbol} reward
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center">

@@ -586,7 +586,7 @@ function TaskCard({ task, orgId, projectId, onTaskClick }: TaskCardProps) {
                 {task.title}
               </CardTitle>
               <div className="text-sm font-medium">
-                {task.paymentAmount} SOL
+                {task.tokenInfo.uiBalance} {task.tokenInfo.symbol}
               </div>
               <div className="flex justify-between">
                 <TaskStatusBadge status={task.status} />

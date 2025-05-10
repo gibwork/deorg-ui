@@ -1,26 +1,51 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Calendar, CheckCircle2, Clock, ListChecks, PlusCircle, ThumbsDown, ThumbsUp, Users } from "lucide-react"
-import { CreateTaskModal } from "./create-task-modal"
-import { ApplyToProjectModal } from "./apply-to-project-modal"
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Calendar,
+  CheckCircle2,
+  Clock,
+  ListChecks,
+  PlusCircle,
+  ThumbsDown,
+  ThumbsUp,
+  Users,
+} from "lucide-react";
+import { CreateTaskModal } from "./create-task-modal";
+import { ApplyToProjectModal } from "./apply-to-project-modal";
 
 interface ProjectDetailModalProps {
-  isOpen: boolean
-  onClose: () => void
-  project: any
+  isOpen: boolean;
+  onClose: () => void;
+  project: any;
 }
 
-export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailModalProps) {
-  const [showCreateTaskModal, setShowCreateTaskModal] = useState(false)
-  const [showApplyModal, setShowApplyModal] = useState(false)
+export function ProjectDetailModal({
+  isOpen,
+  onClose,
+  project,
+}: ProjectDetailModalProps) {
+  const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
 
   // Mock data for project tasks
   const tasks = [
@@ -57,7 +82,7 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
       dueDate: "2023-07-05",
       reward: 60,
     },
-  ]
+  ];
 
   // Mock data for project votes
   const votes = [
@@ -97,7 +122,7 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
       timestamp: "2023-06-02 11:25",
       comment: "The design looks great, I support this project.",
     },
-  ]
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -111,18 +136,30 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
           <Badge
             variant="outline"
             className={`
-              ${project.status === "pending_approval" ? "border-amber-200 text-amber-700 dark:border-amber-800 dark:text-amber-400" : ""}
-              ${project.status === "in_progress" ? "border-blue-200 text-blue-700 dark:border-blue-800 dark:text-blue-400" : ""}
-              ${project.status === "completed" ? "border-green-200 text-green-700 dark:border-green-800 dark:text-green-400" : ""}
+              ${
+                project.status === "pending_approval"
+                  ? "border-amber-200 text-amber-700 dark:border-amber-800 dark:text-amber-400"
+                  : ""
+              }
+              ${
+                project.status === "in_progress"
+                  ? "border-blue-200 text-blue-700 dark:border-blue-800 dark:text-blue-400"
+                  : ""
+              }
+              ${
+                project.status === "completed"
+                  ? "border-green-200 text-green-700 dark:border-green-800 dark:text-green-400"
+                  : ""
+              }
             `}
           >
             {project.status === "pending_approval"
               ? "Pending Approval"
               : project.status === "in_progress"
-                ? "In Progress"
-                : project.status === "completed"
-                  ? "Completed"
-                  : project.status}
+              ? "In Progress"
+              : project.status === "completed"
+              ? "Completed"
+              : project.status}
           </Badge>
 
           <Badge variant="outline" className="flex items-center gap-1">
@@ -159,7 +196,9 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
               <Card>
                 <CardHeader>
                   <CardTitle>Budget</CardTitle>
-                  <CardDescription>Project funding and spending</CardDescription>
+                  <CardDescription>
+                    Project funding and spending
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -173,9 +212,14 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
                     </div>
                     <div className="flex justify-between">
                       <span>Remaining:</span>
-                      <span className="text-green-600 dark:text-green-400">{project.budget - project.spent} SOL</span>
+                      <span className="text-green-600 dark:text-green-400">
+                        {project.budget - project.spent} SOL
+                      </span>
                     </div>
-                    <Progress value={(project.spent / project.budget) * 100} className="h-2" />
+                    <Progress
+                      value={(project.spent / project.budget) * 100}
+                      className="h-2"
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -183,24 +227,40 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
               <Card>
                 <CardHeader>
                   <CardTitle>Contributors</CardTitle>
-                  <CardDescription>Team members working on this project</CardDescription>
+                  <CardDescription>
+                    Team members working on this project
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {project.contributors.length > 0 ? (
                     <div className="space-y-4">
-                      {project.contributors.map((contributor: any, i: number) => (
-                        <div key={i} className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={contributor.avatar || "/placeholder.svg"} alt={contributor.name} />
-                            <AvatarFallback>{contributor.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{contributor.name}</p>
-                            <p className="text-sm text-muted-foreground">Contributor</p>
+                      {project.contributors.map(
+                        (contributor: any, i: number) => (
+                          <div key={i} className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage
+                                src={contributor.avatar || "/placeholder.svg"}
+                                alt={contributor.name}
+                              />
+                              <AvatarFallback>
+                                {contributor.name.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{contributor.name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                Contributor
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                      <Button variant="outline" size="sm" className="w-full" onClick={() => setShowApplyModal(true)}>
+                        )
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => setShowApplyModal(true)}
+                      >
                         <PlusCircle className="h-4 w-4 mr-2" />
                         Apply to Join
                       </Button>
@@ -208,7 +268,9 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
                   ) : (
                     <div className="text-center py-6">
                       <Users className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                      <p className="text-muted-foreground mb-4">No contributors yet</p>
+                      <p className="text-muted-foreground mb-4">
+                        No contributors yet
+                      </p>
                       <Button onClick={() => setShowApplyModal(true)}>
                         <PlusCircle className="h-4 w-4 mr-2" />
                         Apply to Join
@@ -231,22 +293,34 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
                     <p className="text-2xl font-bold">
                       {project.tasks.completed}/{project.tasks.total}
                     </p>
-                    <p className="text-sm text-muted-foreground">Tasks completed</p>
+                    <p className="text-sm text-muted-foreground">
+                      Tasks completed
+                    </p>
                   </div>
 
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Milestones</p>
                     <p className="text-2xl font-bold">
-                      {project.milestones.filter((m: any) => m.status === "completed").length}/
-                      {project.milestones.length}
+                      {
+                        project.milestones.filter(
+                          (m: any) => m.status === "completed"
+                        ).length
+                      }
+                      /{project.milestones.length}
                     </p>
-                    <p className="text-sm text-muted-foreground">Milestones completed</p>
+                    <p className="text-sm text-muted-foreground">
+                      Milestones completed
+                    </p>
                   </div>
 
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Timeline</p>
-                    <p className="text-2xl font-bold">{getDaysRemaining(project.endDate)}</p>
-                    <p className="text-sm text-muted-foreground">Days remaining</p>
+                    <p className="text-2xl font-bold">
+                      {getDaysRemaining(project.endDate)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Days remaining
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -270,7 +344,9 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
                   <Card key={task.id}>
                     <CardHeader className="pb-2">
                       <div className="flex justify-between">
-                        <CardTitle className="text-base">{task.title}</CardTitle>
+                        <CardTitle className="text-base">
+                          {task.title}
+                        </CardTitle>
                         <TaskStatusBadge status={task.status} />
                       </div>
                     </CardHeader>
@@ -282,12 +358,18 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
                             <div className="flex items-center gap-2">
                               <Avatar className="h-6 w-6">
                                 <AvatarImage
-                                  src={task.assignee.avatar || "/placeholder.svg"}
+                                  src={
+                                    task.assignee.avatar || "/placeholder.svg"
+                                  }
                                   alt={task.assignee.name}
                                 />
-                                <AvatarFallback>{task.assignee.name.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>
+                                  {task.assignee.name.charAt(0)}
+                                </AvatarFallback>
                               </Avatar>
-                              <span className="text-sm">{task.assignee.name}</span>
+                              <span className="text-sm">
+                                {task.assignee.name}
+                              </span>
                             </div>
                           ) : (
                             <Badge variant="outline">Unassigned</Badge>
@@ -298,7 +380,9 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
                             <Clock className="h-4 w-4" />
                             <span>Due {formatDate(task.dueDate)}</span>
                           </div>
-                          <div className="text-sm font-medium">{task.reward} SOL</div>
+                          <div className="text-sm font-medium">
+                            {task.reward} SOL
+                          </div>
                         </div>
                       </div>
                     </CardContent>
@@ -308,7 +392,9 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
             ) : (
               <div className="text-center py-10">
                 <ListChecks className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                <p className="text-muted-foreground mb-4">No tasks created yet</p>
+                <p className="text-muted-foreground mb-4">
+                  No tasks created yet
+                </p>
                 {project.status !== "pending_approval" && (
                   <Button onClick={() => setShowCreateTaskModal(true)}>
                     <PlusCircle className="h-4 w-4 mr-2" />
@@ -332,8 +418,8 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
                             milestone.status === "completed"
                               ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                               : milestone.status === "in_progress"
-                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                                : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                              : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
                           }
                         `}
                       >
@@ -345,7 +431,9 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
                       </div>
                       <div>
                         <p className="font-medium">{milestone.title}</p>
-                        <p className="text-sm text-muted-foreground">Due {formatDate(milestone.dueDate)}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Due {formatDate(milestone.dueDate)}
+                        </p>
                       </div>
                     </div>
                     <MilestoneStatusBadge status={milestone.status} />
@@ -363,8 +451,8 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
                   {project.votingStatus.status === "voting"
                     ? "This project is currently being voted on by contributors."
                     : project.votingStatus.status === "approved"
-                      ? "This project has been approved by contributors."
-                      : "This project has been rejected by contributors."}
+                    ? "This project has been approved by contributors."
+                    : "This project has been rejected by contributors."}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -372,11 +460,20 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
                   <div className="flex justify-between items-center">
                     <span>Approval Rate:</span>
                     <span className="font-bold">
-                      {Math.round((project.votingStatus.votesFor / project.votingStatus.totalVotes) * 100)}%
+                      {Math.round(
+                        (project.votingStatus.votesFor /
+                          project.votingStatus.totalVotes) *
+                          100
+                      )}
+                      %
                     </span>
                   </div>
                   <Progress
-                    value={(project.votingStatus.votesFor / project.votingStatus.totalVotes) * 100}
+                    value={
+                      (project.votingStatus.votesFor /
+                        project.votingStatus.totalVotes) *
+                      100
+                    }
                     className="h-2"
                   />
                   <div className="flex justify-between text-sm text-muted-foreground">
@@ -413,8 +510,13 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={vote.voter.avatar || "/placeholder.svg"} alt={vote.voter.name} />
-                        <AvatarFallback>{vote.voter.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage
+                          src={vote.voter.avatar || "/placeholder.svg"}
+                          alt={vote.voter.name}
+                        />
+                        <AvatarFallback>
+                          {vote.voter.name.charAt(0)}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex justify-between items-center">
@@ -429,11 +531,15 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
                               }
                             `}
                           >
-                            {vote.vote === "for" ? "Voted For" : "Voted Against"}
+                            {vote.vote === "for"
+                              ? "Voted For"
+                              : "Voted Against"}
                           </Badge>
                         </div>
                         <p className="text-sm mt-1">{vote.comment}</p>
-                        <p className="text-xs text-muted-foreground mt-2">{vote.timestamp}</p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {vote.timestamp}
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -447,8 +553,8 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
           isOpen={showCreateTaskModal}
           onClose={() => setShowCreateTaskModal(false)}
           onSubmit={(data) => {
-            console.log("Creating task with data:", data)
-            setShowCreateTaskModal(false)
+            console.log("Creating task with data:", data);
+            setShowCreateTaskModal(false);
           }}
         />
 
@@ -456,79 +562,87 @@ export function ProjectDetailModal({ isOpen, onClose, project }: ProjectDetailMo
           isOpen={showApplyModal}
           onClose={() => setShowApplyModal(false)}
           onSubmit={(data) => {
-            console.log("Applying to project with data:", data)
-            setShowApplyModal(false)
+            console.log("Applying to project with data:", data);
+            setShowApplyModal(false);
           }}
           project={project}
         />
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 function TaskStatusBadge({ status }: { status: string }) {
-  let className = "px-2.5 py-0.5 text-xs font-medium rounded-full "
+  let className = "px-2.5 py-0.5 text-xs font-medium rounded-full ";
 
   switch (status) {
     case "open":
-      className += "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-      break
+      className +=
+        "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+      break;
     case "in_progress":
-      className += "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
-      break
+      className +=
+        "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400";
+      break;
     case "completed":
-      className += "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-      break
+      className +=
+        "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+      break;
     default:
-      className += "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+      className +=
+        "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
   }
 
   const statusMap: Record<string, string> = {
     open: "Open",
     in_progress: "In Progress",
     completed: "Completed",
-  }
+  };
 
-  return <span className={className}>{statusMap[status] || status}</span>
+  return <span className={className}>{statusMap[status] || status}</span>;
 }
 
 function MilestoneStatusBadge({ status }: { status: string }) {
-  let className = "px-2.5 py-0.5 text-xs font-medium rounded-full "
+  let className = "px-2.5 py-0.5 text-xs font-medium rounded-full ";
 
   switch (status) {
     case "not_started":
-      className += "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-      break
+      className +=
+        "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+      break;
     case "in_progress":
-      className += "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-      break
+      className +=
+        "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+      break;
     case "completed":
-      className += "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-      break
+      className +=
+        "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+      break;
     default:
-      className += "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+      className +=
+        "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
   }
 
   const statusMap: Record<string, string> = {
     not_started: "Not Started",
     in_progress: "In Progress",
     completed: "Completed",
-  }
+  };
 
-  return <span className={className}>{statusMap[status] || status}</span>
+  return <span className={className}>{statusMap[status] || status}</span>;
 }
 
 // Helper function to format dates
 function formatDate(dateString: string) {
-  const date = new Date(dateString)
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 // Helper function to calculate days remaining
 function getDaysRemaining(endDateString: string) {
-  const endDate = new Date(endDateString)
-  const today = new Date()
-  const diffTime = endDate.getTime() - today.getTime()
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  return diffDays > 0 ? diffDays : 0
+  const endDate = new Date(endDateString);
+  const today = new Date();
+  const diffTime = endDate.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays > 0 ? diffDays : 0;
 }

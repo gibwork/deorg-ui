@@ -396,7 +396,7 @@ function KanbanCard({ task, orgId, projectId, isDragging }: KanbanCardProps) {
         <h4 className="font-medium text-sm">{task.title}</h4>
       </div>
       <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
-        {task.paymentAmount} SOL
+        {task.tokenInfo.uiBalance} {task.tokenInfo.symbol}
       </p>
       <div className="flex justify-between items-center">
         <Avatar className="h-6 w-6">
