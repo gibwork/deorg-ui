@@ -68,7 +68,6 @@ export default function ProjectDetailsPage({
     (project: any) => project.accountAddress === projectId
   );
 
-  console.log(project, "project");
   const {
     data,
     error,

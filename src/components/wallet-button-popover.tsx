@@ -7,7 +7,14 @@ import {
 } from "@/components/ui/popover";
 import { truncate } from "@/lib/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Copy, UnplugIcon, WalletMinimalIcon, Lock, Wallet2, Wallet } from "lucide-react";
+import {
+  Copy,
+  UnplugIcon,
+  WalletMinimalIcon,
+  Lock,
+  Wallet2,
+  Wallet,
+} from "lucide-react";
 import { Separator } from "./ui/separator";
 import Link from "next/link";
 import { Icons } from "./icons";
@@ -90,7 +97,6 @@ export function WalletButtonPopover({ userData }: { userData?: User }) {
                   if (userData?.walletAddress) {
                     signOut();
                   }
-
                 }}
               >
                 <UnplugIcon className="h-4 w-4" />
