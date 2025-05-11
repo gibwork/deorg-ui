@@ -42,8 +42,6 @@ export function OrganizationHeader({
     error,
   } = useOrganization(organizationId);
 
-  console.log(organization);
-
   const handleCopyMultisigAddress = () => {
     try {
       navigator.clipboard.writeText("5xT...");

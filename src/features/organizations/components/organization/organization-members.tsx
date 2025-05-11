@@ -163,8 +163,6 @@ export function OrganizationMembers({
     }
   };
 
-  console.log(members);
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">

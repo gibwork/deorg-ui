@@ -12,7 +12,13 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { PlusCircle, ThumbsDown, ThumbsUp, Clock } from "lucide-react";
+import {
+  PlusCircle,
+  ThumbsDown,
+  ThumbsUp,
+  Clock,
+  ExternalLink,
+} from "lucide-react";
 import { CreateProposalModal } from "./create-proposal-modal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -30,7 +36,7 @@ import { useTransactionStore } from "@/features/transaction-toast/use-transactio
 import { useTransactionStatus } from "@/hooks/use-transaction-status";
 import { LoaderButton } from "@/components/loader-button";
 import { useOrganizationMembers } from "../../hooks/use-organization-members";
-import { cn } from "@/lib/utils";
+import { cn, truncate } from "@/lib/utils";
 import Link from "next/link";
 export function OrganizationProposals({
   organizationId,
@@ -158,21 +164,23 @@ function ProposalCard({
   organizationId,
 }: ProposalCardProps) {
   const queryClient = useQueryClient();
+  const { publicKey } = useWallet();
 
   const { data: organizationMembers } = useOrganizationMembers(organizationId);
   const totalMembers =
     organizationMembers?.filter((member) => member.role === "CONTRIBUTOR")
       .length || 0;
 
-  // Calculate percentages based on total votes cast
+  // Check if user has already voted
+  const hasVoted = publicKey && proposal.voters?.includes(publicKey.toString());
+
+  // Calculate percentages based on total members
   const totalVotesCast = proposal.votesTotal;
   const approvalPercentage =
-    totalVotesCast > 0
-      ? Math.round((proposal.votesFor / totalVotesCast) * 100)
-      : 0;
+    totalMembers > 0 ? Math.round((proposal.votesFor / totalMembers) * 100) : 0;
   const disapprovalPercentage =
-    totalVotesCast > 0
-      ? Math.round((proposal.votesAgainst / totalVotesCast) * 100)
+    totalMembers > 0
+      ? Math.round((proposal.votesAgainst / totalMembers) * 100)
       : 0;
   const remainingVotes = totalMembers - totalVotesCast;
 
@@ -291,55 +299,61 @@ function ProposalCard({
           <div>
             <CardTitle>{proposal.title || "Untitled"}</CardTitle>
             <CardDescription className="mt-1">
-              <p className="text-sm mb-4">{proposal.proposalAddress}</p>
-              Proposed by {proposal.proposer}
+              Proposed by {truncate(proposal.proposer, 8, 4)}
             </CardDescription>
           </div>
           <ProposalStatusBadge status={proposal.status} />
+          <Link
+            href={`https://explorer.solana.com/address/${proposal.accountAddress}?cluster=devnet`}
+            className="text-muted-foreground hover:text-primary ml-2"
+          >
+            <ExternalLink className="size-4" />
+          </Link>
         </div>
       </CardHeader>
 
       <CardContent>
         {/* <p className="text-sm mb-4">{proposal.description}</p> */}
 
-        {proposal.requestedAmount && (
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium">Requested Amount</span>
-            <span className="font-bold">
-              {proposal.requestedAmount?.amount} SOL
-            </span>
-          </div>
-        )}
-
-        {proposal.proposedRate && (
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium">Proposed Rate</span>
-            <span className="font-bold">{proposal.proposedRate} SOL</span>
-          </div>
-        )}
-
-        {isActive && (
-          <>
-            <div className="space-y-2 mt-4">
-              <div className="flex justify-between text-sm">
-                <span>Voting Progress</span>
-                <span>{approvalPercentage}% Approval</span>
-              </div>
-              <Progress
-                value={approvalPercentage}
-                className="h-2 bg-secondary"
+        <>
+          <div className="space-y-4 mt-4">
+            <div className="flex justify-between text-sm">
+              <span>Voting Progress</span>
+              <span className="font-medium">
+                {approvalPercentage}% Approval
+              </span>
+            </div>
+            <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
+              <div
+                className="absolute h-full bg-theme transition-all duration-300"
+                style={{ width: `${approvalPercentage}%` }}
               />
+              <div
+                className="absolute h-full bg-red-500 transition-all duration-300"
+                style={{
+                  width: `${disapprovalPercentage}%`,
+                  left: `${approvalPercentage}%`,
+                }}
+              />
+            </div>
+            {isActive && (
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>{proposal.votesFor} For</span>
-                <span>{proposal.votesAgainst} Against</span>
+                <span className="flex items-center gap-1">
+                  <ThumbsUp className="h-3 w-3" />
+                  {proposal.votesFor} For
+                </span>
+                <span className="flex items-center gap-1">
+                  <ThumbsDown className="h-3 w-3" />
+                  {proposal.votesAgainst} Against
+                </span>
                 <span>{remainingVotes} Members Haven&apos;t Voted</span>
               </div>
-            </div>
-          </>
-        )}
+            )}
+          </div>
+        </>
       </CardContent>
 
-      {isActive && (
+      {isActive && !hasVoted && (
         <CardFooter className="flex  justify-between">
           <div className="mt-4 p-3 bg-amber-50 text-amber-800 rounded-md text-sm dark:bg-amber-900/20 dark:text-amber-400">
             <span className="font-medium">Time remaining:</span>{" "}
@@ -353,7 +367,7 @@ function ProposalCard({
                   .format("MMM D, YYYY h:mm A")}`} */}
           </div>
 
-          {isActive && (
+          {isActive && !hasVoted && (
             <div className="flex gap-2">
               <Button
                 variant="outline"
