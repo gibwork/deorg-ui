@@ -429,7 +429,7 @@ export function CreateOrganizationForm() {
   const stepProgress = ((currentStep + 1) / FORM_STEPS.length) * 100;
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="w-full max-w-sm px-2 md:max-w-4xl mx-auto pb-20">
       {/* {!publicKey && <WalletConnectionOverlay />} */}
       {/* Progress Steps */}
       <div className="mb-8">
@@ -442,7 +442,7 @@ export function CreateOrganizationForm() {
                 index === currentStep ? "text-primary" : "text-muted-foreground"
               )}
             >
-              {step.name}
+              <span className="hidden md:block">{step.name}</span>
             </div>
           ))}
         </div>
@@ -459,7 +459,7 @@ export function CreateOrganizationForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {currentStep === 0 && (
               <div className="space-y-6">
-                <div className="mb-16">
+                <div className="">
                   <h6 className="font-light text-muted-foreground">
                     {FORM_STEPS[currentStep]?.name}
                   </h6>
@@ -505,7 +505,7 @@ export function CreateOrganizationForm() {
 
             {currentStep === 1 && (
               <div className="space-y-6">
-                <div className="mb-16">
+                <div className="">
                   <h1 className="font-light text-muted-foreground">
                     {FORM_STEPS[currentStep]?.name}
                   </h1>
@@ -556,7 +556,7 @@ export function CreateOrganizationForm() {
                     <span className="text-sm font-medium">
                       What&apos;s the minimum amount required to participate?
                     </span>
-                    <div className="mt-2 flex flex-row gap-4">
+                    <div className="mt-2 flex flex-col md:flex-row gap-4">
                       <div className="inline-flex items-center gap-3 px-4 py-2 bg-muted/50 rounded-lg">
                         <Avatar className="w-8 h-8">
                           <AvatarImage
@@ -631,7 +631,7 @@ export function CreateOrganizationForm() {
 
             {currentStep === 2 && (
               <div className="space-y-6">
-                <div className="mb-16">
+                <div className="">
                   <h1 className="font-light text-muted-foreground">
                     {FORM_STEPS[currentStep]?.name}
                   </h1>
@@ -659,73 +659,78 @@ export function CreateOrganizationForm() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="websiteUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Website URL (optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="websiteUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Website URL (optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="twitterUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Twitter URL (optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="https://twitter.com/yourorg"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="twitterUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Twitter URL (optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="https://twitter.com/yourorg"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="discordUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Discord URL (optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="https://discord.gg/yourorg"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="discordUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Discord URL (optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="https://discord.gg/yourorg"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="telegramUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Telegram URL (optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://t.me/yourorg" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="telegramUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Telegram URL (optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="https://t.me/yourorg"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             )}
 
             {currentStep === 3 && (
               <div className="space-y-6">
-                <div className="mb-16">
+                <div className="">
                   <h1 className="font-light text-muted-foreground">
                     {FORM_STEPS[currentStep]?.name}
                   </h1>
@@ -803,7 +808,7 @@ export function CreateOrganizationForm() {
 
             {currentStep === 4 && (
               <div className="space-y-6">
-                <div className="mb-16">
+                <div className="">
                   <h1 className="font-light text-muted-foreground">
                     {FORM_STEPS[currentStep]?.name}
                   </h1>
@@ -829,7 +834,7 @@ export function CreateOrganizationForm() {
                   )}
                   <div>
                     <h3 className="font-medium">Token Address</h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground w-52 md:w-full truncate">
                       {currentValues.tokenAddress}
                     </p>
                   </div>
