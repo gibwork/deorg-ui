@@ -121,12 +121,6 @@ export default function ProjectDetailsPage({
           </div>
           <p className="text-muted-foreground mt-1">{project.description}</p>
         </div>
-        {members && (
-          <CreateTaskButton
-            members={members.filter((member) => member.role === "CONTRIBUTOR")}
-            projectId={projectId}
-          />
-        )}
       </div>
 
       {/* {project.status !== "pending_approval" && (

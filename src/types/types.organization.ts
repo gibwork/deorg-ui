@@ -75,20 +75,34 @@ export interface RequiredToken {
   decimals: number;
 }
 
+export interface OrganizationMetadata {
+  logoUrl?: string | null;
+  websiteUrl?: string | null;
+  twitterUrl?: string | null;
+  discordUrl?: string | null;
+  telegramUrl?: string | null;
+  description?: string | null;
+}
+
 export interface Organization {
   id: string;
+  uuid?: string;
+  slug?: string;
   externalId: string;
   accountAddress: string;
+  creator?: string; //public-key
+  createdBy?: string;
   name: string;
   description?: string;
   logoUrl?: string;
   members: Member[];
-  projects: ProjectDetails[];
+  contributors?: string[]; // public-keys
+  projects?: ProjectDetails[];
   createdAt: string;
   updatedAt: string;
   tokenMint: string;
   token?: RequiredToken | null;
-  multisigWallet: string;
+  multisigWallet?: string;
   hasTreasuryRegistryAccount: boolean;
   treasuryTokenAccount: string;
   treasuryBalance: {
@@ -96,4 +110,15 @@ export interface Organization {
     ui: number;
     decimals: number;
   };
+  contributorProposalThresholdPercentage?: number;
+  contributorProposalValidityPeriod?: number;
+  treasuryTransferQuorumPercentage?: number;
+  treasuryTransferThresholdPercentage?: number;
+  treasuryTransferProposalValidityPeriod?: number;
+  minimumTokenRequirement?: number;
+  contributorValidityPeriod?: number;
+  projectProposalValidityPeriod?: number;
+  contributorProposalQuorumPercentage?: number;
+  projectProposalThresholdPercentage?: number;
+  metadata?: OrganizationMetadata;
 }

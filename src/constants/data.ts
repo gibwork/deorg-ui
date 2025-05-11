@@ -67,12 +67,12 @@ export const OrganizationNavbarItems = [
     value: "assets",
     href: (orgId: string) => `/organizations/${orgId}/assets`,
   },
-  {
-    label: "Proposals",
-    icon: FileText,
-    value: "proposals",
-    href: (orgId: string) => `/organizations/${orgId}/proposals`,
-  },
+  // {
+  //   label: "Proposals",
+  //   icon: FileText,
+  //   value: "proposals",
+  //   href: (orgId: string) => `/organizations/${orgId}/proposals`,
+  // },
   {
     label: "Projects",
     icon: FolderKanban,
