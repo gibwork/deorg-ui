@@ -34,7 +34,7 @@ function OrganizationLayoutHeader() {
   const pathname = usePathname();
 
   return (
-    <div className="flex items-center justify-between p-4 ">
+    <div className="flex items-center justify-between px-4 py-2 md:p-4 ">
       <Popover>
         <PopoverTrigger asChild>
           <button className="IconButton" aria-label="Update dimensions">
