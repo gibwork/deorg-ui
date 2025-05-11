@@ -48,6 +48,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Organization } from "@/types/types.organization";
+import { OrganizationProposals } from "./organization-proposals";
 
 interface OrganizationOverviewProps {
   organization: {
@@ -236,7 +237,7 @@ export function OrganizationOverview({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       {/* <OrganizationHeader organizationId={organizationId} /> */}
       {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat, i) => (
@@ -292,6 +293,8 @@ export function OrganizationOverview({
           </div>
         </CardContent>
       </Card>
+
+      <OrganizationProposals organizationId={organizationId} />
 
       {/* <div className="grid gap-4 md:grid-cols-2">
         <Card className="col-span-1">

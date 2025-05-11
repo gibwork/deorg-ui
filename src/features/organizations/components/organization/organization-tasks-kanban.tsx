@@ -199,7 +199,6 @@ export function OrganizationTasksKanban({
   const onDragStart = (result: any) => {
     setIsDragging(true);
 
-    console.log("is drag", result);
     const sourceColumn =
       columns[result.source.droppableId as keyof typeof columns];
     const task = sourceColumn.find(
@@ -212,8 +211,6 @@ export function OrganizationTasksKanban({
     setIsDragging(false);
     setDraggedTask(null);
     const { destination, source, draggableId } = result;
-
-    console.log(result, "result");
 
     // If there's no destination or the item was dropped back in the same place
     if (

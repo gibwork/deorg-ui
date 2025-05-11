@@ -43,7 +43,7 @@ import { cn, truncate } from "@/lib/utils";
 import { useOrganizationMembers } from "@/features/organizations/hooks/use-organization-members";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Member } from "@/types/types.organization";
+import { Member, ProjectDetails } from "@/types/types.organization";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useTransactionStore } from "@/features/transaction-toast/use-transaction-store";
 import { toast } from "sonner";
@@ -55,17 +55,14 @@ import { createProject } from "@/features/organizations/actions/projects/create-
 import { useTransactionStatus } from "@/hooks/use-transaction-status";
 import { LoaderButton } from "@/components/loader-button";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { useOrganizationProjects } from "@/features/organizations/hooks/use-organization-projects";
+import { createTaskTransaction } from "@/features/organizations/actions/tasks/create-task-transaction";
+import { createTask } from "@/features/organizations/actions/tasks/create-task";
 const proposalFormSchema = z
   .object({
     proposalType: z.string().min(1, "Please select a proposal type"),
-    title: z
-      .string()
-
-      .optional(),
-    description: z
-      .string()
-
-      .optional(),
+    title: z.string().optional(),
+    description: z.string().optional(),
     requiresFunding: z.boolean().default(false),
     amount: z.coerce.number().optional(),
     selectedMember: z.string().optional(),
@@ -86,19 +83,10 @@ const proposalFormSchema = z
     taskDescription: z.string().optional(),
     taskDeadline: z.string().optional(),
     taskPriority: z.string().default("medium"),
+    selectedProject: z.string().optional(),
+    assignedMember: z.string().optional(),
   })
-  .refine(
-    (data) => {
-      if (data.requiresFunding && (!data.amount || data.amount <= 0)) {
-        return false;
-      }
-      return true;
-    },
-    {
-      message: "Amount is required when funding is required",
-      path: ["amount"],
-    }
-  )
+
   .refine(
     (data) => {
       if (data.proposalType === "member" && !data.selectedMember) {
@@ -128,17 +116,66 @@ const proposalFormSchema = z
   )
   .refine(
     (data) => {
+      if (data.proposalType === "task" && !data.taskName) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Task name is Required",
+      path: ["taskName"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.proposalType === "project" && !data.projectName) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Project name is required",
+      path: ["projectName"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.proposalType === "project" && !data.projectDescription) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Project description is required",
+      path: ["projectDescription"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.proposalType === "task" && !data.taskDescription) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Task description is required",
+      path: ["taskDescription"],
+    }
+  )
+  .refine(
+    (data) => {
       if (
         data.proposalType === "task" &&
-        (!data.taskName || !data.taskDeadline)
+        data.requiresFunding &&
+        (!data.amount || data.amount <= 0)
       ) {
         return false;
       }
       return true;
     },
     {
-      message: "Task name and deadline are required for task proposals",
-      path: ["taskName"],
+      message: "Amount is required for task funding",
+      path: ["amount"],
     }
   );
 
@@ -163,7 +200,7 @@ const FORM_STEPS: Step[] = [
   },
   {
     id: "voting",
-    name: "Setup Voting",
+    name: "Additional Details",
     fields: ["projectProposalThreshold", "projectProposalValidityPeriod"],
   },
   {
@@ -191,6 +228,9 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
   const { data: orgMembers, isLoading: isLoadingMembers } =
     useOrganizationMembers(orgId);
 
+  const { data: orgProjects, isLoading: isLoadingProjects } =
+    useOrganizationProjects(orgId, "active");
+
   const orgMembersData = orgMembers?.filter(
     (member) => member.role !== "CONTRIBUTOR"
   );
@@ -201,7 +241,7 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
       proposalType: "",
       title: "",
       description: "",
-      requiresFunding: false,
+      requiresFunding: true,
       amount: undefined,
       selectedMember: "",
       role: "",
@@ -233,17 +273,19 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
       fieldsToValidate = ["projectName", "projectMembers"];
     }
 
-    // if (currentStep === 1 && currentValues.proposalType === "task") {
-    //   fieldsToValidate = ["taskName", "taskDescription", "taskDeadline"];
-    // }
+    if (currentStep === 1 && currentValues.proposalType === "task") {
+      fieldsToValidate = ["taskName", "taskDescription", "amount"];
+    }
 
-    // if (currentStep === 2 && currentValues.proposalType === "project") {
-    //   fieldsToValidate = ["projectName", "projectDuration"];
-    // }
-
-    if (currentStep === 2) {
+    if (currentStep === 2 && currentValues.proposalType === "project") {
       fieldsToValidate = ["projectName", "projectDuration"];
     }
+
+    if (currentStep === 2 && currentValues.proposalType === "task") {
+      fieldsToValidate = ["selectedProject", "assignedMember"];
+    }
+
+    //TODO: Add validation to check treasury balance for task creation
 
     const output = await form.trigger(fieldsToValidate as any, {
       shouldFocus: true,
@@ -338,7 +380,7 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
       updateStep(4, "success");
 
       updateStatus("success");
-      router.push(`/organizations/${orgId}/proposals`);
+      router.push(`/organizations/${orgId}`);
     } catch (error) {
       console.error(error);
       const errorMessage =
@@ -436,7 +478,103 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
       updateStatus("success");
 
       // Redirect back to projects page after successful creation
-      router.push(`/organizations/${orgId}/proposals`);
+      router.push(`/organizations/${orgId}`);
+    } catch (error) {
+      console.error(error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Please try again later";
+
+      // Find the current step that failed
+      const currentStep =
+        [1, 2, 3, 4].find((step) => {
+          const activeTransaction =
+            useTransactionStore.getState().activeTransaction;
+          return (
+            activeTransaction?.steps.find((s) => s.id === step)?.status ===
+            "loading"
+          );
+        }) || 2;
+
+      // Update the failed step with error message
+      updateStep(currentStep, "error", errorMessage);
+      updateStatus("error");
+
+      // Add warning if it's a specific type of error
+      if (error instanceof Error && error.message.includes("insufficient")) {
+        addWarning("Insufficient balance for transaction");
+      }
+    } finally {
+      transactionStatus.onEnd();
+    }
+  };
+
+  const handleCreateTaskProposal: SubmitHandler<ProposalFormDataType> = async (
+    data
+  ) => {
+    if (!signTransaction) {
+      toast.error("No wallet connected");
+      return;
+    }
+
+    if (
+      !data.taskName ||
+      !data.taskDescription ||
+      !data.selectedProject ||
+      !data.assignedMember ||
+      !data.amount
+    ) {
+      return;
+    }
+
+    try {
+      toast.dismiss();
+      const transactionId = startTransaction("Create project proposal");
+
+      updateStep(1, "loading", "Preparing transaction details...");
+
+      const { success: createProposalTx, error } = await createTaskTransaction({
+        title: data.taskName,
+        description: data.taskDescription,
+        projectAccountAddress: data.selectedProject,
+        memberAccountAddress: data.assignedMember,
+        paymentAmount: data.amount,
+      });
+
+      if (error) {
+        throw new Error(error);
+      }
+
+      updateStep(1, "success");
+      updateStep(2, "loading", "Please sign the transaction in your wallet");
+
+      const retreivedTx = Transaction.from(
+        Buffer.from(createProposalTx.serializedTransaction, "base64")
+      );
+
+      const serializedTx = await signTransaction(retreivedTx);
+
+      const serializedSignedTx = serializedTx?.serialize().toString("base64");
+
+      updateStep(2, "success");
+      updateStep(3, "loading", "Submitting transaction to the network...");
+
+      const createProjectResponse = await createTask({
+        transactionId: createProposalTx.transactionId,
+        serializedTransaction: serializedSignedTx,
+      });
+
+      updateStep(3, "success");
+      updateStep(4, "loading", "Confirming transaction...");
+
+      if (createProjectResponse.error) {
+        throw new Error(createProjectResponse.error);
+      }
+
+      updateStep(4, "success");
+      updateStatus("success");
+
+      // Redirect back to projects page after successful creation
+      router.push(`/organizations/${orgId}`);
     } catch (error) {
       console.error(error);
       const errorMessage =
@@ -474,6 +612,10 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
 
     if (currentValues.proposalType === "project") {
       await handleCreateProjectProposal(data);
+    }
+
+    if (currentValues.proposalType === "task") {
+      await handleCreateTaskProposal(data);
     }
   };
 
@@ -562,7 +704,7 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
                             </FormLabel>
                           </div>
 
-                          {/* <div className="flex items-center space-x-2 rounded-md border p-4">
+                          <div className="flex items-center space-x-2 rounded-md border p-4">
                             <RadioGroupItem value="task" id="task" />
                             <FormLabel
                               htmlFor="task"
@@ -573,7 +715,7 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
                                 Propose a specific task to be completed
                               </div>
                             </FormLabel>
-                          </div> */}
+                          </div>
                         </RadioGroup>
                       </FormControl>
                       <FormMessage />
@@ -793,13 +935,13 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
                     <>
                       <FormField
                         control={form.control}
-                        name="title"
+                        name="taskName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Project Title</FormLabel>
+                            <FormLabel>Task Title</FormLabel>
                             <FormControl>
                               <Input
-                                placeholder="Enter project title"
+                                placeholder="Enter task title"
                                 {...field}
                               />
                             </FormControl>
@@ -810,13 +952,13 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
 
                       <FormField
                         control={form.control}
-                        name="description"
+                        name="taskDescription"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Description</FormLabel>
                             <FormControl>
                               <Textarea
-                                placeholder="Describe what this project aims to accomplish"
+                                placeholder="Describe what this task is for"
                                 rows={3}
                                 {...field}
                               />
@@ -826,7 +968,7 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
                         )}
                       />
 
-                      <FormField
+                      {/* <FormField
                         control={form.control}
                         name="requiresFunding"
                         render={({ field }) => (
@@ -842,14 +984,14 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
                             </FormLabel>
                           </FormItem>
                         )}
-                      />
+                      /> */}
                       {currentValues.requiresFunding && (
                         <FormField
                           control={form.control}
                           name="amount"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Requested Amount (SOL)</FormLabel>
+                              <FormLabel>Requested Amount</FormLabel>
                               <FormControl>
                                 <Input
                                   type="number"
@@ -916,53 +1058,66 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
 
                   {currentValues.proposalType === "task" && (
                     <>
+                      {/* Add a formfield dropdown to select project from the organization and another formfield to select assigned member */}
                       <FormField
                         control={form.control}
-                        name="taskName"
+                        name="selectedProject"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Task Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter task name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="taskDeadline"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Deadline</FormLabel>
-                            <FormControl>
-                              <Input type="date" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="taskPriority"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Priority</FormLabel>
+                            <FormLabel>Select Project</FormLabel>
                             <Select
-                              value={field.value}
                               onValueChange={field.onChange}
+                              defaultValue={field.value}
                             >
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select priority" />
+                                  <SelectValue placeholder="Select a member" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="low">Low</SelectItem>
-                                <SelectItem value="medium">Medium</SelectItem>
-                                <SelectItem value="high">High</SelectItem>
+                                {orgProjects?.activeProjects?.map((project) => (
+                                  <SelectItem
+                                    key={project.uuid}
+                                    value={project.accountAddress}
+                                  >
+                                    {project.title}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="assignedMember"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Assignee</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a member" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {orgMembers
+                                  ?.filter(
+                                    (member) => member.role === "CONTRIBUTOR"
+                                  )
+                                  ?.map((member) => (
+                                    <SelectItem
+                                      key={member.id}
+                                      value={member.user.walletAddress}
+                                    >
+                                      {member.user.username}
+                                    </SelectItem>
+                                  ))}
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -1044,16 +1199,23 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
                         </div>
 
                         <div>
-                          <h3 className="font-medium">Deadline</h3>
+                          <h3 className="font-medium">Project</h3>
                           <p className="text-muted-foreground">
-                            {currentValues.taskDeadline}
+                            {currentValues.selectedProject}
                           </p>
                         </div>
 
                         <div>
-                          <h3 className="font-medium">Priority</h3>
-                          <p className="text-muted-foreground capitalize">
-                            {currentValues.taskPriority}
+                          <h3 className="font-medium">Assignee</h3>
+                          <p className="text-muted-foreground">
+                            {currentValues.assignedMember}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="font-medium">Task Amount</h3>
+                          <p className="text-muted-foreground">
+                            {currentValues.amount}
                           </p>
                         </div>
                       </>
@@ -1073,9 +1235,7 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() =>
-                    router.push(`/organizations/${orgId}/proposals`)
-                  }
+                  onClick={() => router.push(`/organizations/${orgId}`)}
                 >
                   Cancel
                 </Button>

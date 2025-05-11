@@ -43,7 +43,7 @@ export default async function MainLayout({
 
         <div className="flex h-screen overflow-hidden">
           {/* <Sidebar /> */}
-          <div className="w-full overflow-y-auto">{children}</div>
+          <div className="w-full">{children}</div>
         </div>
       </main>
     </HydrationBoundary>

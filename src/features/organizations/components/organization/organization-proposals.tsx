@@ -59,7 +59,7 @@ export function OrganizationProposals({
   if (isLoading) return <div>Loading...</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Proposals</h2>
@@ -67,16 +67,6 @@ export function OrganizationProposals({
             Create and vote on funding proposals for your organization.
           </p>
         </div>
-        <Link
-          href={`/organizations/${organizationId}/proposals/new`}
-          className={cn(
-            buttonVariants({ variant: "default" }),
-            "flex items-center"
-          )}
-        >
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Create Proposal
-        </Link>
       </div>
 
       <Tabs defaultValue="active" className="w-full">
@@ -149,7 +139,6 @@ export function OrganizationProposals({
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSubmit={(data) => {
-          console.log("Creating proposal with data:", data);
           setShowCreateModal(false);
         }}
       />
@@ -169,8 +158,6 @@ function ProposalCard({
   organizationId,
 }: ProposalCardProps) {
   const queryClient = useQueryClient();
-
-  console.log(proposal);
 
   const { data: organizationMembers } = useOrganizationMembers(organizationId);
   const totalMembers =
@@ -241,12 +228,12 @@ function ProposalCard({
         ?.serialize()
         .toString("base64");
 
-      console.log({
-        proposalId: proposal,
-        organizationId,
-        transactionId: createProposalTx.transactionId,
-        serializedTransaction: serializedSignedTransaction,
-      });
+      // console.log({
+      //   proposalId: proposal,
+      //   organizationId,
+      //   transactionId: createProposalTx.transactionId,
+      //   serializedTransaction: serializedSignedTransaction,
+      // });
 
       const voteResponse = await voteProposal(
         proposal.proposalAddress,

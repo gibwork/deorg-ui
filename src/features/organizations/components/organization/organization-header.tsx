@@ -1,6 +1,6 @@
 "use client";
 
-import { HardDrive, AlertTriangle, Plus } from "lucide-react";
+import { HardDrive, AlertTriangle, Plus, Twitter, Globe } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Copy, ExternalLink, Users } from "lucide-react";
@@ -16,6 +16,7 @@ import { WalletButton } from "@/components/wallet-button";
 import { getUserData } from "@/actions/get/get-user-data";
 import { User } from "@/types/user.types";
 import { useQuery } from "@tanstack/react-query";
+import { Icons } from "@/components/icons";
 
 interface OrganizationHeaderProps {
   organization: {
@@ -40,6 +41,8 @@ export function OrganizationHeader({
     isLoading,
     error,
   } = useOrganization(organizationId);
+
+  console.log(organization);
 
   const handleCopyMultisigAddress = () => {
     try {
@@ -73,13 +76,30 @@ export function OrganizationHeader({
           </div> */}
 
         <div className="flex items-center gap-3">
-          {/* <Button variant="outline" size="sm">
-              <Users className="h-4 w-4 mr-2" />
-              Invite Members
+          {organization?.metadata?.twitterUrl && (
+            <Button
+              variant="outline"
+              size="icon"
+              asChild
+              className="h-9 w-9 rounded-full"
+            >
+              <Link href={organization.metadata.twitterUrl} target="_blank">
+                <Icons.twitter className="h-4 w-4" />
+              </Link>
             </Button>
-            <Button variant="default" size="sm">
-              Fund Treasury
-            </Button> */}
+          )}
+          {organization?.metadata?.websiteUrl && (
+            <Button
+              variant="outline"
+              size="icon"
+              asChild
+              className="h-9 w-9 rounded-full"
+            >
+              <Link href={organization.metadata.websiteUrl} target="_blank">
+                <Globe className="h-4 w-4" />
+              </Link>
+            </Button>
+          )}
           <Link
             href={`/organizations/${organizationId}/proposals/new
               `}

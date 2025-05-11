@@ -94,10 +94,6 @@ export function OrganizationTasks({
             Manage and track tasks for your organization.
           </p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          New Task
-        </Button>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">

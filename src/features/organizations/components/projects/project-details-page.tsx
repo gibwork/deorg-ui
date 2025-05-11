@@ -68,7 +68,6 @@ export default function ProjectDetailsPage({
     (project: any) => project.accountAddress === projectId
   );
 
-  console.log(project, "project");
   const {
     data,
     error,
@@ -122,12 +121,6 @@ export default function ProjectDetailsPage({
           </div>
           <p className="text-muted-foreground mt-1">{project.description}</p>
         </div>
-        {members && (
-          <CreateTaskButton
-            members={members.filter((member) => member.role === "CONTRIBUTOR")}
-            projectId={projectId}
-          />
-        )}
       </div>
 
       {/* {project.status !== "pending_approval" && (

@@ -41,6 +41,27 @@ import {
 } from "@/features/organizations/actions/create-organization";
 import { useTransactionStore } from "@/features/transaction-toast/use-transaction-store";
 import { Skeleton } from "@/components/ui/skeleton";
+import { WalletButton } from "@/components/wallet-button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+
+const WalletConnectionOverlay = () => {
+  const walletModal = useWalletModal();
+
+  return (
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+      <div className="bg-card p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+        <h2 className="text-2xl font-semibold mb-4">Connect Your Wallet</h2>
+        <p className="text-muted-foreground mb-6">
+          You need to connect your wallet to create an organization.
+        </p>
+        <div className="w-full flex justify-center">
+          <WalletButton className="w-full" variant="default" />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const createOrganizationSchema = z.object({
   name: z
@@ -160,13 +181,6 @@ export function CreateOrganizationForm() {
   const currentValues = watch();
 
   const userData = queryClient.getQueryData<User>([`user-${userId}`]);
-
-  const {
-    selectedPriority,
-    maxPriorityFee,
-    exactPriorityFee,
-    isPriorityFeeModeMaxCap,
-  } = usePriorityFeeLevelStore();
   const {
     data: walletTokensData,
     error,
@@ -196,6 +210,9 @@ export function CreateOrganizationForm() {
     },
   });
 
+  const requiredTokenAmount = form.getValues("requiredTokenAmount");
+  const tokenAddress = form.getValues("tokenAddress");
+
   const solBalance = useMemo(() => {
     if (!walletTokensData) {
       return 0;
@@ -210,6 +227,35 @@ export function CreateOrganizationForm() {
       availableSOl?.tokenInfo.decimals
     );
   }, [walletTokensData]);
+
+  const requiredTokenBalance = useMemo(() => {
+    if (!walletTokensData) {
+      return 0;
+    }
+    const token = walletTokensData?.find(
+      (token: any) => token.address === tokenAddress
+    );
+    if (!token) return 0;
+    return formatTokenAmount(
+      token?.tokenInfo.balance || 0,
+      token?.tokenInfo.decimals
+    );
+  }, [walletTokensData, tokenAddress]);
+
+  const hasRequiredTokens = useMemo(() => {
+    if (!walletTokensData) {
+      return false;
+    }
+    if (!requiredTokenAmount || !tokenAddress) return true;
+    const token = walletTokensData?.find(
+      (token: any) => token.address === tokenAddress
+    );
+    if (!token) return false;
+    return (
+      formatTokenAmount(token.tokenInfo.balance, token.tokenInfo.decimals) >=
+      requiredTokenAmount
+    );
+  }, [walletTokensData, tokenAddress, requiredTokenAmount]);
 
   const debouncedTokenValidate = useDebounceCallback((tokenAddress: string) => {
     if (!tokenAddress) return;
@@ -361,6 +407,10 @@ export function CreateOrganizationForm() {
         });
         return;
       }
+
+      if (!hasRequiredTokens) {
+        return;
+      }
     }
 
     if (currentStep < FORM_STEPS.length) {
@@ -380,6 +430,7 @@ export function CreateOrganizationForm() {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
+      {/* {!publicKey && <WalletConnectionOverlay />} */}
       {/* Progress Steps */}
       <div className="mb-8">
         <div className="flex justify-between mb-2">
@@ -546,6 +597,33 @@ export function CreateOrganizationForm() {
                         />
                       </div>
                     </div>
+
+                    {!hasRequiredTokens && (
+                      <div className="mt-4">
+                        <Alert
+                          variant={
+                            hasRequiredTokens ? "default" : "destructive"
+                          }
+                        >
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertDescription>
+                            {hasRequiredTokens ? (
+                              <span>
+                                You have {tokenInfo.success.symbol} tokens in
+                                your wallet
+                              </span>
+                            ) : (
+                              <span>
+                                You need {form.getValues("requiredTokenAmount")}{" "}
+                                {tokenInfo.success.symbol} tokens, but you only
+                                have {requiredTokenBalance}{" "}
+                                {tokenInfo.success.symbol} in your wallet.
+                              </span>
+                            )}
+                          </AlertDescription>
+                        </Alert>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
