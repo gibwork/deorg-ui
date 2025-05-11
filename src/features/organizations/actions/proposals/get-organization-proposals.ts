@@ -6,6 +6,7 @@ import { ErrorResponse } from "@/types/types.error";
 
 export interface ProposalType {
   proposalAddress: string;
+  accountAddress: string;
   organization?: string;
   candidate?: string;
   proposer: string;
@@ -24,6 +25,7 @@ export interface ProposalType {
   createdBy?: string;
   requestedAmount?: Record<string, any>;
   updatedAt?: string;
+  voters?: string[];
 }
 
 export async function getOrganizationProposals(

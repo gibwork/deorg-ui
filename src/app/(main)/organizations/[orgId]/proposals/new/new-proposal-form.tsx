@@ -1071,7 +1071,7 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
                             >
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select a member" />
+                                  <SelectValue placeholder="Select a project" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
