@@ -19,8 +19,6 @@ import { useAuth } from "@clerk/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
 import { User } from "@/types/user.types";
 import { useWalletChange } from "@/features/auth/lib/use-wallet-change";
-import { verifyPrimaryWallet } from "@/actions/post/verify-primary-wallet";
-import { useVerifyWallet } from "@/features/auth/lib/verify-wallet";
 import { WalletButtonPopover } from "./wallet-button-popover";
 import { useUserData } from "@/hooks/use-user-data";
 import { ButtonProps } from "@/components/ui/button";

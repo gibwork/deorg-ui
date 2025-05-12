@@ -1,12 +1,9 @@
-import Header from "@/components/layout/header";
-import Sidebar from "@/components/layout/sidebar";
 import { auth } from "@clerk/nextjs/server";
 import { getQueryClient } from "@/components/providers/query";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import usersService from "@/services/user.service";
+import { getUserData } from "@/actions/get/get-user-data";
 import { getUserWalletBalance } from "@/actions/get/get-wallet-token-balances";
 import useNetwork from "@/hooks/use-network";
-import { getUserData } from "@/actions/get/get-user-data";
 export default async function MainLayout({
   children,
 }: Readonly<{

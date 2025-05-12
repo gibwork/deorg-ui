@@ -1,9 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {  
-  navItems,
-  OrganizationNavbarItems,
-} from "@/constants/data";
+import { navItems, OrganizationNavbarItems } from "@/constants/data";
 import { cn } from "@/lib/utils";
 import { SidebarNavItems } from "./sidebar-nav-items";
 import { Button, buttonVariants } from "../ui/button";
@@ -11,23 +8,18 @@ import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { Icons } from "../icons";
 import { useParams, usePathname } from "next/navigation";
-import { AuthenticationButtons } from "../../features/auth/components/authentication-buttons";
 import { Skeleton } from "../ui/skeleton";
 import { useQueryClient } from "@tanstack/react-query";
 import { User } from "@/types/user.types";
-import { useAuthModal } from "@/hooks/use-auth-modal";
 import { LogIn } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useUserRegistrationModal } from "@/hooks/use-registration-modall";
 
 export default function Sidebar() {
   const queryClient = useQueryClient();
   const pathname = usePathname();
   const params = useParams();
   const { user, isLoaded } = useUser();
-  const { onOpen } = useAuthModal();
   const { publicKey, disconnect } = useWallet();
-  const userRegistrationModal = useUserRegistrationModal();
   let usdcAmountUserHasEarned = "$0.00";
 
   const activeTab = pathname.split("?")[1]?.split("=")[1] || "overview";
@@ -36,14 +28,6 @@ export default function Sidebar() {
   if (userData?.totalAmountEarned && !isNaN(userData.totalAmountEarned)) {
     usdcAmountUserHasEarned = "$" + userData.totalAmountEarned.toFixed(2);
   }
-
-  useEffect(() => {
-    if (window.location.hash == "#/continue") {
-      userRegistrationModal.onOpen();
-    }
-
-    // es-lint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   if (!user?.id) {
     return null;
