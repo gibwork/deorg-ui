@@ -12,10 +12,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Icons } from "@/components/icons";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useOrganization } from "../hooks/use-organization";
 import { useMemberOrganizations } from "../hooks/use-member-organizations";
 import { SideBarLoading } from "@/components/layout/sidebar";
+import { OrganizationMetadata } from "@/types/types.organization";
+import { getOrganizationDetails } from "../actions/get-organization-details";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Organization = {
   id: string;
@@ -31,9 +34,24 @@ interface SlimOrgSidebarProps {
 export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
   const pathname = usePathname();
   const { data: memberOrganizations } = useMemberOrganizations();
+  const [orgMetadata, setOrgMetadata] = useState<{accountAddress: string, metadata: OrganizationMetadata}[] | null>(
+    null
+  );
 
   const organizations = useMemo(() => {
     if (memberOrganizations) {
+      const orgs = memberOrganizations.map(async (org) => {
+        const orgDetailsResponse = await getOrganizationDetails(org.accountAddress);
+        
+        if (orgDetailsResponse.success) {
+          const orgMetadataData = orgDetailsResponse.success.metadata || {};
+          setOrgMetadata((prev) => prev 
+            ? [...prev, {accountAddress: org.accountAddress, metadata: orgMetadataData}] 
+            : [{accountAddress: org.accountAddress, metadata: orgMetadataData}]);
+        }
+        return orgDetailsResponse;
+      });      
+
       return memberOrganizations;
     }
     return [];
@@ -74,29 +92,25 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
                       <Link
                         href={`/organizations/${org.accountAddress}`}
                         className={cn(
-                          "group relative flex h-10 w-10 items-center justify-center rounded-full border transition-all",
-                          isActive
-                            ? "border-primary bg-primary/10"
-                            : "border-transparent hover:border-muted-foreground/20 hover:bg-muted/20"
+                          "group relative flex h-10 w-10 items-center justify-center transition-all"
                         )}
                       >
-                        {org.logoUrl ? (
+                        {orgMetadata?.find((orgMeta) => orgMeta.accountAddress === org.accountAddress)?.metadata ? (
                           <Avatar
                             className={cn(
-                              "h-10 w-10 rounded-sm",
+                              "h-10 w-10 rounded-sm border-none bg-stone-200",
                               isActive ? "opacity-100" : "opacity-75"
                             )}
                           >
-                            <AvatarImage src={org.logoUrl} alt={org.name} />
+                            <AvatarImage 
+                            src={orgMetadata?.find((orgMeta) => orgMeta.accountAddress === org.accountAddress)?.metadata?.logoUrl ?? ""} alt={org.name} />
                             <AvatarFallback>
-                              {org.accountAddress?.charAt(0)}
+                              <Skeleton className="h-10 w-10 border-none bg-stone-200" />
                             </AvatarFallback>
                           </Avatar>
                         ) : (
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                            <span className="text-sm font-medium">
-                              {org.accountAddress?.charAt(0)}
-                            </span>
+                          <div className="flex h-10 w-10 items-center justify-center bg-stone-200">
+                            <Skeleton className="h-10 w-10 rounded-none bg-stone-200" />
                           </div>
                         )}
                         {isActive && (
