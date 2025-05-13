@@ -104,6 +104,7 @@ export default function CreateProjectForm() {
       updateStep(3, "loading", "Submitting transaction to the network...");
 
       const createProjectResponse = await createProject({
+        organizationId: params.orgId as string,
         transactionId: createProposalTx.transactionId,
         serializedTransaction: serializedSignedTx,
       });

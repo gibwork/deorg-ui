@@ -373,8 +373,12 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
         throw new Error(transactionResponse.error.message);
       }
 
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: ["organization_members", orgId],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["organization_proposals", orgId],
       });
 
       updateStep(4, "success");
@@ -463,6 +467,7 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
       updateStep(3, "loading", "Submitting transaction to the network...");
 
       const createProjectResponse = await createProject({
+        organizationId: orgId,
         transactionId: createProposalTx.transactionId,
         serializedTransaction: serializedSignedTx,
       });
@@ -473,6 +478,10 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
       if (createProjectResponse.error) {
         throw new Error(createProjectResponse.error.message);
       }
+
+      await queryClient.invalidateQueries({
+        queryKey: ["organization_proposals", orgId],
+      });
 
       updateStep(4, "success");
       updateStatus("success");
@@ -559,6 +568,7 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
       updateStep(3, "loading", "Submitting transaction to the network...");
 
       const createProjectResponse = await createTask({
+        organizationId: orgId,
         transactionId: createProposalTx.transactionId,
         serializedTransaction: serializedSignedTx,
       });
@@ -569,6 +579,10 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
       if (createProjectResponse.error) {
         throw new Error(createProjectResponse.error);
       }
+
+      await queryClient.invalidateQueries({
+        queryKey: ["organization_proposals", orgId],
+      });
 
       updateStep(4, "success");
       updateStatus("success");

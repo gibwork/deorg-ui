@@ -7,6 +7,7 @@ import { getOrganizationOverview } from "@/features/organizations/actions/get-or
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getOrganizationDetails } from "@/features/organizations/actions/get-organization-details";
 import { Organization } from "@/types/types.organization";
+import { getOrganizationProposals } from "@/features/organizations/actions/proposals/get-organization-proposals";
 function page({ params }: { params: { orgId: string } }) {
   return (
     <Suspense fallback={<LoadingSpinner />}>
@@ -38,6 +39,19 @@ async function OrganizationOverviewPage({
         const organization = await getOrganizationDetails(params.orgId);
         if (organization.error) throw new Error(organization.error);
         return organization.success as Organization;
+      },
+    }),
+    queryClient.prefetchQuery({
+      queryKey: ["organization_proposals", params.orgId],
+      queryFn: async () => {
+        const organizationProposals = await getOrganizationProposals(
+          params.orgId,
+          1,
+          "active"
+        );
+        if (organizationProposals.error)
+          throw new Error(organizationProposals.error.message);
+        return organizationProposals.success;
       },
     }),
   ]);

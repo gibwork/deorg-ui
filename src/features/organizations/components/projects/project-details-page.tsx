@@ -483,6 +483,7 @@ function TaskCard({ task, orgId, projectId, onTaskClick }: TaskCardProps) {
     const serializedSignedTx = serializedTx?.serialize().toString("base64");
 
     const createProjectResponse = await createProject({
+      organizationId: orgId,
       transactionId: success.transactionId,
       serializedTransaction: serializedSignedTx,
     });

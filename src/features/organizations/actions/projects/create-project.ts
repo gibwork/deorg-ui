@@ -1,16 +1,21 @@
 "use server";
-  
+
 import { ErrorResponse } from "@/types/types.error";
 import { auth } from "@clerk/nextjs/server";
 import axios from "axios";
 import { AxiosError } from "axios";
+import { revalidatePath } from "next/cache";
 
-export const createProject = async (payload: { transactionId: string, serializedTransaction: string }) => {
+export const createProject = async (payload: {
+  organizationId: string;
+  transactionId: string;
+  serializedTransaction: string;
+}) => {
   const { getToken } = auth();
   const token = await getToken();
 
   try {
-    console.log(`${process.env.API_URL}/projects`)
+    console.log(`${process.env.API_URL}/projects`);
     const { data } = await axios.post(
       `${process.env.API_URL}/projects`,
       payload,
@@ -22,6 +27,8 @@ export const createProject = async (payload: { transactionId: string, serialized
       }
     );
 
+    revalidatePath(`/organizations/${payload.organizationId}`);
+
     return {
       success: data,
     };
@@ -31,4 +38,4 @@ export const createProject = async (payload: { transactionId: string, serialized
       error: data,
     };
   }
-}
+};

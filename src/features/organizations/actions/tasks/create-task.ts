@@ -1,13 +1,14 @@
-"use server"
+"use server";
 
 import { auth } from "@clerk/nextjs/server";
 import axios from "axios";
-
+import { revalidatePath } from "next/cache";
 export async function createTask(dto: {
+  organizationId: string;
   transactionId: string;
   serializedTransaction: string;
 }) {
-    try {
+  try {
     const { getToken } = auth();
     const token = await getToken();
 
@@ -17,6 +18,8 @@ export async function createTask(dto: {
         Authorization: `Bearer ${token}`,
       },
     });
+
+    revalidatePath(`/organizations/${dto.organizationId}`);
 
     return { success: response.data };
   } catch (error) {
