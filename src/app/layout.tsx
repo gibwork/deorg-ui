@@ -4,7 +4,6 @@ import "@/styles/globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { WalletProvider } from "@/components/providers/wallet-provider";
 import { Toaster } from "@/components/ui/sonner";
-import SelectWalletModal from "@/components/modals/select-wallet-modal";
 import QueryProvider from "@/components/providers/query-provider";
 import { LoadingModal } from "@/components/modals/loading-modal";
 import { siteConfig } from "../../config/site";
@@ -70,7 +69,6 @@ export default function RootLayout({
             <WalletProvider>
               <QueryProvider>
                 <Toaster position="bottom-left" richColors />
-                <SelectWalletModal />
 
                 {children}
                 <LoadingModal />

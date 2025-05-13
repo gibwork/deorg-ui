@@ -6,13 +6,11 @@ import { useRouter } from "next/navigation";
 import { walletSignIn } from "@/actions/post/wallet-sign-in";
 import { useSignIn, useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
-import { useAuthModal } from "@/hooks/use-auth-modal";
 import { useTransactionStatus } from "@/hooks/use-transaction-status";
 
 export const useWalletAuth = () => {
   const { publicKey, signMessage, connected, disconnect } = useWallet();
   const walletModal = useWalletModal();
-  const authModal = useAuthModal();
   const transaction = useTransactionStatus();
   const { signIn, setActive } = useSignIn();
   const { user } = useUser();
@@ -59,7 +57,6 @@ export const useWalletAuth = () => {
         setActive({
           session: signInAttempt.createdSessionId,
         });
-        authModal.onClose();
       } else {
         // If the sign-in attempt is not complete, check why.
         // User may need to complete further steps.

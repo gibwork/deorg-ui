@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { update } from "@intercom/messenger-js-sdk";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useTransactionStatus } from "@/hooks/use-transaction-status";
 import { motion, AnimatePresence } from "framer-motion";
@@ -356,12 +355,12 @@ const WithdrawComponent = ({
       </div>
     );
   };
-  useEffect(() => {
-    // Hide Intercom launcher
-    update({ hide_default_launcher: true });
+  // useEffect(() => {
+  //   // Hide Intercom launcher
+  //   update({ hide_default_launcher: true });
 
-    return () => update({ hide_default_launcher: false });
-  }, []);
+  //   return () => update({ hide_default_launcher: false });
+  // }, []);
 
   return (
     <div className="space-y-5 md:mb-0 mt-5">

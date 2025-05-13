@@ -32,8 +32,6 @@ import { User } from "@/types/user.types";
 import { useAuth } from "@clerk/nextjs";
 import { useWalletTokenBalances } from "@/hooks/use-wallet-token-balances";
 import { formatTokenAmount } from "@/utils/format-amount";
-import { Deposit, depositToken } from "@/actions/post/create-task";
-import { usePriorityFeeLevelStore } from "@/features/priority-fee/lib/use-priority-fee-level";
 import { Transaction } from "@solana/web3.js";
 import {
   createOrganization,
