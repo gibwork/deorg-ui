@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   ChevronDown,
   FolderKanban,
+  Globe,
 } from "lucide-react";
 import {
   Sidebar,
@@ -40,6 +41,7 @@ import { useOrganizationProjects } from "../hooks/use-organization-projects";
 import { SlimOrgSidebar } from "./slim-org-sidebar";
 import { SideBarLoading } from "@/components/layout/sidebar";
 import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 export function OrganizationSidebar({ orgId }: { orgId: string }) {
   const pathname = usePathname();
   const { isMobile } = useSidebar();
@@ -78,9 +80,39 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
         <SidebarHeader className="pb-0">
           <div className="flex flex-row border-b border-stone-200 h-[50px]">
             <div className="h-[42px] w-[42px]">
-              <Image src={organization?.logoUrl ?? ""} alt={organization.name} width={42} height={42} className="rounded-lg p-1" />
+              {organization?.metadata?.logoUrl ?
+                (<Image src={organization?.metadata?.logoUrl ?? ""} alt={organization.name} width={42} height={42} className="rounded-lg p-1" />)
+                : <Skeleton className="h-8 w-8 m-1 rounded-sm bg-stone-200" />}
             </div>
-            <h1 className="text-lg font-bold pt-2">{organization.name}</h1>
+            <div className="flex flex-col ms-2">
+              <h1 className=" font-bold text-black">{organization.name}</h1>
+              {organization.metadata && (
+                <div className="flex flex-row items-center gap-2 opacity-60 cursor-pointer">
+                  {organization.metadata.twitterUrl && (
+                    <Link href={organization.metadata.twitterUrl} target="_blank">
+                      <span className="text-stone-500 cursor-pointer hover:fill-black">
+                        <Icons.twitter className="h-[.85rem] w-[.85rem]" fill="gray" />
+                      </span>
+                    </Link>
+                  )}
+                  {organization.metadata.discordUrl && (
+                    <Link href={organization.metadata.discordUrl} target="_blank">
+                      <span className="text-stone-500 cursor-pointer hover:fill-black">
+                        <Icons.discord className="h-[.85rem] w-[.85rem]" fill="gray" />
+                      </span>
+                    </Link>
+                  )}
+                  {organization.metadata.websiteUrl && (
+                    <Link href={organization.metadata.websiteUrl} target="_blank">
+                      <span className="text-stone-500 cursor-pointer hover:stroke-black">
+                        <Globe className="h-[.85rem] w-[.85rem]" stroke="gray" />
+                      </span>
+                    </Link>
+                  )}
+                </div>
+              )}
+
+            </div>
           </div>
           <div className="flex flex-col items-center justify-center py-2 border-b">
             <div className="flex flex-row items-center gap-2">
@@ -103,7 +135,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                   <SidebarMenuItem key={item.value} className="border-b border-stone-200">
                     <Accordion
                       type="single"
-                      collapsible                    
+                      collapsible
                       className="w-full"
                       defaultValue={isProjectsActive ? "projects" : undefined}
                     >

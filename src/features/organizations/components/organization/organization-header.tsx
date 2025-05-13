@@ -74,7 +74,7 @@ export function OrganizationHeader({
           </div> */}
 
         <div className="flex items-center gap-3">
-          {organization?.metadata?.twitterUrl && (
+          {/* {organization?.metadata?.twitterUrl && (
             <Button
               variant="outline"
               size="icon"
@@ -97,7 +97,7 @@ export function OrganizationHeader({
                 <Globe className="h-4 w-4" />
               </Link>
             </Button>
-          )}
+          )} */}
           <Link
             href={`/organizations/${organizationId}/proposals/new
               `}
