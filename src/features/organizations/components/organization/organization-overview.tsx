@@ -49,6 +49,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Organization } from "@/types/types.organization";
 import { OrganizationProposals } from "./organization-proposals";
+import {
+  depositOrganization,
+  depositOrganizationTransaction,
+} from "../../actions/deposit-organization";
 
 interface OrganizationOverviewProps {
   organization: {
@@ -77,54 +81,74 @@ function DepositModal({
   const { connection } = useConnection();
 
   const handleDeposit = async () => {
-    if (!publicKey || !amount || !organization) return;
+    if (!publicKey || !amount || !organization || !signTransaction) return;
 
     try {
       setIsLoading(true);
       setError(null);
 
       // Get the latest blockhash
-      const { blockhash } = await connection.getLatestBlockhash();
+      // const { blockhash } = await connection.getLatestBlockhash();
 
       // Get user's token account
-      const userTokenAccount = await getAssociatedTokenAddress(
-        new PublicKey(organization.tokenMint),
-        publicKey
-      );
+      // const userTokenAccount = await getAssociatedTokenAddress(
+      //   new PublicKey(organization.tokenMint),
+      //   publicKey
+      // );
 
-      // Convert amount to raw value using decimals
-      const rawAmount = Math.floor(
-        parseFloat(amount) * Math.pow(10, organization.treasuryBalance.decimals)
-      );
+      // // Convert amount to raw value using decimals
+      // const rawAmount = Math.floor(
+      //   parseFloat(amount) * Math.pow(10, organization.treasuryBalance.decimals)
+      // );
 
-      const transaction = new Transaction();
-      transaction.recentBlockhash = blockhash;
-      transaction.feePayer = publicKey;
+      // const transaction = new Transaction();
+      // transaction.recentBlockhash = blockhash;
+      // transaction.feePayer = publicKey;
 
-      console.log({
-        from: userTokenAccount.toBase58(), // from
-        to: organization.treasuryTokenAccount, // to
-        mint: organization.tokenMint, // mint
-        amount: rawAmount,
+      // console.log({
+      //   from: userTokenAccount.toBase58(), // from
+      //   to: organization.treasuryTokenAccount, // to
+      //   mint: organization.tokenMint, // mint
+      //   amount: rawAmount,
+      // });
+
+      // // Add transfer instruction
+      // const transferInstruction = createTransferInstruction(
+      //   userTokenAccount, // from
+      //   new PublicKey(organization.treasuryTokenAccount), // to
+      //   publicKey, // owner (signer)
+      //   BigInt(rawAmount)
+      // );
+
+      // transaction.add(transferInstruction);
+
+      // // Send transaction
+      // if (!signTransaction) throw new Error("Wallet not connected");
+      // const signedTx = await signTransaction(transaction);
+      // const signature = await connection.sendRawTransaction(
+      //   signedTx.serialize()
+      // );
+      // await connection.confirmTransaction(signature);
+
+      const data = await depositOrganizationTransaction({
+        organizationTokenAccount: organization.accountAddress,
+        tokenMint: organization.tokenMint,
+        amount: parseFloat(amount),
       });
 
-      // Add transfer instruction
-      const transferInstruction = createTransferInstruction(
-        userTokenAccount, // from
-        new PublicKey(organization.treasuryTokenAccount), // to
-        publicKey, // owner (signer)
-        BigInt(rawAmount)
+      const retreivedTx = Transaction.from(
+        Buffer.from(data.success.serializedTransaction, "base64")
       );
 
-      transaction.add(transferInstruction);
+      const signedTx = await signTransaction(retreivedTx);
 
-      // Send transaction
-      if (!signTransaction) throw new Error("Wallet not connected");
-      const signedTx = await signTransaction(transaction);
-      const signature = await connection.sendRawTransaction(
-        signedTx.serialize()
-      );
-      await connection.confirmTransaction(signature);
+      const serializedSignedTx = signedTx?.serialize().toString("base64");
+
+      const createProjectResponse = await depositOrganization({
+        serializedTransaction: serializedSignedTx,
+      });
+
+      console.log({ createProjectResponse });
 
       onClose();
     } catch (error) {
@@ -255,7 +279,7 @@ export function OrganizationOverview({
         ))}
       </div> */}
 
-      <Card>
+      {/* <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Treasury Balance</CardTitle>
@@ -292,7 +316,7 @@ export function OrganizationOverview({
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       <OrganizationProposals organizationId={organizationId} />
 

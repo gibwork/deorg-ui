@@ -19,7 +19,7 @@ type Props = {
 export const WalletProvider: FC<Props> = ({ children }) => {
   // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
   const networkState = useNetwork((state) => state.network);
-  const network = WalletAdapterNetwork.Devnet;
+  const network = WalletAdapterNetwork.Mainnet;
   // networkState === "devnet"
   //   ? WalletAdapterNetwork.Devnet
   //   : WalletAdapterNetwork.Mainnet;
