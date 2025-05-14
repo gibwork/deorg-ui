@@ -20,6 +20,7 @@ export interface ProposalType {
   id: string;
   title: string;
   description: string;
+  type: string;
   deadline?: string | null;
   organizationId?: string;
   createdBy?: string;

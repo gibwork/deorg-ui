@@ -77,8 +77,8 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
 
       <SlimOrgSidebar orgId={organization!.accountAddress!} className="shadow-md" />
       <Sidebar className="fixed top-0 left-16 max-h-full bg-white" style={{ height: "100vh" }}>
-        <SidebarHeader className="pb-0">
-          <div className="flex flex-row border-b border-stone-200 h-[50px]">
+        <SidebarHeader className="p-0 bg-white">
+          <div className="flex flex-row border-b border-stone-200 h-[50px] p-1">
             <div className="h-[42px] w-[42px]">
               {organization?.metadata?.logoUrl ?
                 (<Image src={organization?.metadata?.logoUrl ?? ""} alt={organization.name} width={42} height={42} className="rounded-lg p-1" />)
@@ -123,7 +123,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
           </div>
         </SidebarHeader>
 
-        <SidebarContent>
+        <SidebarContent className="bg-white">
           <SidebarMenu>
             {OrganizationNavbarItems.map((item) => {
               // Special handling for Projects item to make it collapsible
@@ -200,7 +200,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
           </SidebarMenu>
         </SidebarContent>
 
-        <SidebarFooter className="p-4 ">
+        <SidebarFooter className="p-4 bg-white">
           <Link
             href="/organizations"
             className={cn(

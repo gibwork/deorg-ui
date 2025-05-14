@@ -17,6 +17,7 @@ import {
   PlusCircle,
   Users,
   ArrowDownToLine,
+  ExternalLink,
 } from "lucide-react";
 import { ProjectDetailModal } from "./project-detail-modal";
 import { useOrganization } from "../../hooks/use-organization";
@@ -49,6 +50,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Organization } from "@/types/types.organization";
 import { OrganizationProposals } from "./organization-proposals";
+import Link from "next/link";
 
 interface OrganizationOverviewProps {
   organization: {
@@ -255,10 +257,10 @@ export function OrganizationOverview({
         ))}
       </div> */}
 
-      <Card>
-        <CardHeader>
+      <Card className="border-x-0 border-t-0 p-0 shadow-none mb-10 border-b border-stone-200 rounded-none pb-1">
+        <CardHeader className="px-0">
           <div className="flex items-center justify-between">
-            <CardTitle>Treasury Balance</CardTitle>
+            {/* <CardTitle>Treasury Balance</CardTitle> */}
             <Button
               variant="outline"
               size="sm"
@@ -268,11 +270,11 @@ export function OrganizationOverview({
               Deposit
             </Button>
           </div>
-          <CardDescription>
+          {/* <CardDescription>
             {`${organization?.name}'s treasury balance and transaction history`}
-          </CardDescription>
+          </CardDescription> */}
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -284,10 +286,14 @@ export function OrganizationOverview({
               </div>
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">Token Account</p>
-                <p className="text-sm font-mono">
+                <Link
+                  href={`https://solscan.io/token-account/${organization?.treasuryTokenAccount}`}
+                  target="_blank"
+                >
                   {organization?.treasuryTokenAccount?.slice(0, 8)}...
                   {organization?.treasuryTokenAccount?.slice(-8)}
-                </p>
+                  <ExternalLink className="h-4 w-4 ml-1 inline-block align-middle pb-1 mt-[0.2rem]" />
+                </Link>
               </div>
             </div>
           </div>

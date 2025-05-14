@@ -20,15 +20,15 @@ function OrganizationLayout({
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-gray-50 dark:bg-gray-900">
+      <div className="flex min-h-screen w-full bg-white dark:bg-gray-900">
         <OrganizationSidebar orgId={params.orgId} />
 
         <div className="flex-1 w-full">
-          <div className="container py-3 px-4 md:px-6 pb-10">
-            <OrganizationHeader organizationId={params.orgId} />
+          <OrganizationHeader organizationId={params.orgId} />
+          <div className="container py-0 px-4 md:px-6 pb-10">
             <div className="h-[calc(100vh-1rem)] ">
               <ScrollArea className="h-full">
-                <div className="mt-6 w-2/3 mx-auto ">
+                <div className="mt-6 w-3/4 mx-auto ">
                   <Unauthorized orgId={params.orgId}>{children}</Unauthorized>
                 </div>
               </ScrollArea>
