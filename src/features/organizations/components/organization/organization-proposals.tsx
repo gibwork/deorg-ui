@@ -18,6 +18,12 @@ import {
   ThumbsUp,
   Clock,
   ExternalLink,
+  CheckCircle,
+  Check,
+  ThumbsUpIcon,
+  X,
+  Loader2,
+  Circle,
 } from "lucide-react";
 import { CreateProposalModal } from "./create-proposal-modal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -38,6 +44,7 @@ import { LoaderButton } from "@/components/loader-button";
 import { useOrganizationMembers } from "../../hooks/use-organization-members";
 import { cn, truncate } from "@/lib/utils";
 import Link from "next/link";
+import { Icons } from "@/components/icons";
 export function OrganizationProposals({
   organizationId,
 }: {
@@ -69,13 +76,39 @@ export function OrganizationProposals({
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Proposals</h2>
-          <p className="text-muted-foreground">
+          {/* <p className="text-muted-foreground">
             Create and vote on funding proposals for your organization.
-          </p>
+          </p> */}
         </div>
       </div>
 
-      <Tabs defaultValue="active" className="w-full">
+      <div className="flex flex-col">
+        <div className="flex flex-col w-full gap-2 mb-8">
+          <p className="text-muted-foreground">ACTIVE</p>
+          {proposals?.activeProposals.map((proposal) => (
+            <ProposalCard
+              key={proposal.id}
+              proposal={proposal}
+              isActive={true}
+              organizationId={organizationId}
+            />
+          ))}
+        </div>
+
+        <div className="flex flex-col w-full gap-2">
+          <p className="text-muted-foreground">PAST</p>
+          {proposals?.pastProposals.map((proposal) => (
+            <ProposalCard
+              key={proposal.id}
+              proposal={proposal}
+              isActive={false}
+              organizationId={organizationId}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* <Tabs defaultValue="active" className="w-full">
         <TabsList>
           <TabsTrigger value="active">
             Active ({proposals?.activeProposals.length})
@@ -139,7 +172,7 @@ export function OrganizationProposals({
             ))
           )}
         </TabsContent>
-      </Tabs>
+      </Tabs> */}
 
       <CreateProposalModal
         isOpen={showCreateModal}
@@ -294,66 +327,106 @@ function ProposalCard({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-3">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle>{proposal.title || "Untitled"}</CardTitle>
+            <CardTitle className="text-lg font-medium whitespace-nowrap truncate ... w-[550px]">
+              <ProposalStatusBadge status={proposal.status} />{" "}
+              {proposal.title || "Untitled"}
+            </CardTitle>
             <CardDescription className="mt-1">
-              Proposed by {truncate(proposal.proposer, 8, 4)}
+              Proposed by {truncate(proposal.proposer, 8, 4)} {isActive && !hasVoted && (
+                <span className="text-muted-foreground"> | {" "}
+                  <DateComponent
+                    datetime={dayjs.unix(proposal.expiresAt).toISOString()}
+                    type="toDate"
+                  /> left to vote
+                </span>
+              )} | ADD {proposal.type}
             </CardDescription>
           </div>
-          <ProposalStatusBadge status={proposal.status} />
-          <Link
+          {/* <ProposalStatusBadge status={proposal.status} /> */}
+          {/* <Link
             href={`https://explorer.solana.com/address/${proposal.accountAddress}?cluster=devnet`}
             className="text-muted-foreground hover:text-primary ml-2"
           >
             <ExternalLink className="size-4" />
-          </Link>
+          </Link> */}
+          {isActive && !hasVoted && (
+            <div className="flex gap-2">
+              <Button
+                variant="default"
+                size="sm"
+                disabled={transactionStatus.isProcessing}
+                className="text-white font-medium bg-[#2e9668] hover:bg-[#3ab981] dark:text-green-400 dark:border-green-900 dark:hover:bg-green-950 dark:hover:text-green-300"
+                onClick={() => handleVote(true)}
+              >
+                YES
+                {/* Vote For */}
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                disabled={transactionStatus.isProcessing}
+                onClick={() => handleVote(false)}
+                className="text-white font-medium bg-[#e11c48] hover:bg-[#f43f5e] border-red-200 dark:text-red-400 dark:border-red-900 dark:hover:bg-red-950 dark:hover:text-red-300"
+              >
+                NO
+                {/* Vote Against */}
+              </Button>
+            </div>
+          )}
         </div>
       </CardHeader>
 
-      <CardContent>
-        {/* <p className="text-sm mb-4">{proposal.description}</p> */}
+      {isActive && (
+        <CardContent className="px-3">
+          {/* <p className="text-sm mb-4">{proposal.description}</p> */}
 
-        <>
-          <div className="space-y-4 mt-4">
-            <div className="flex justify-between text-sm">
-              <span>Voting Progress</span>
-              <span className="font-medium">
-                {approvalPercentage}% Approval
-              </span>
-            </div>
-            <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
-              <div
-                className="absolute h-full bg-theme transition-all duration-300"
-                style={{ width: `${approvalPercentage}%` }}
-              />
-              <div
-                className="absolute h-full bg-red-500 transition-all duration-300"
-                style={{
-                  width: `${disapprovalPercentage}%`,
-                  left: `${approvalPercentage}%`,
-                }}
-              />
-            </div>
-            {isActive && (
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <ThumbsUp className="h-3 w-3" />
-                  {proposal.votesFor} For
-                </span>
-                <span className="flex items-center gap-1">
-                  <ThumbsDown className="h-3 w-3" />
-                  {proposal.votesAgainst} Against
-                </span>
-                <span>{remainingVotes} Members Haven&apos;t Voted</span>
+          <>
+            <div className="space-y-2 mt-2">
+              {isActive && (
+                <div className="flex justify-between text-xs text-muted-foreground gap-4">
+                  <div className="flex">
+                    <span className="flex items-center gap-1">
+                      {proposal.type == "TASK" && (
+                        <div className="flex items-center opacity-85 gap-1">
+                          Results in <Icons.usdc className="size-3" />{" "}
+                          {(proposal.amount / 10 ** 6).toFixed(2)} reward after completion
+                        </div>
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex">
+                    <span className="flex items-center gap-1 me-2">
+                      {proposal.votesFor} YES
+                    </span>
+                    <span className="flex items-center gap-1">
+                      {proposal.votesAgainst} NO
+                    </span>
+                    {/* <span>{remainingVotes} Members Haven&apos;t Voted</span> */}
+                  </div>
+                </div>
+              )}
+              <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
+                <div
+                  className="absolute h-full bg-stone-500 transition-all duration-300"
+                  style={{ width: `${approvalPercentage + disapprovalPercentage}%` }}
+                />
+                {/* <div
+                  className="absolute h-full bg-stone-50 transition-all duration-300"
+                  style={{
+                    width: `${disapprovalPercentage}%`,
+                    left: `${approvalPercentage}%`,
+                  }}
+                /> */}
               </div>
-            )}
-          </div>
-        </>
-      </CardContent>
+            </div>
+          </>
+        </CardContent>
+      )}
 
-      {isActive && !hasVoted && (
+      {/* {isActive && !hasVoted && (
         <CardFooter className="flex  justify-between">
           <div className="mt-4 p-3 bg-amber-50 text-amber-800 rounded-md text-sm dark:bg-amber-900/20 dark:text-amber-400">
             <span className="font-medium">Time remaining:</span>{" "}
@@ -361,64 +434,49 @@ function ProposalCard({
               datetime={dayjs.unix(proposal.expiresAt).toISOString()}
               type="toDate"
             />
-            {/* {proposal.expiresAt &&
+            {proposal.expiresAt &&
                 `${dayjs
                   .unix(proposal.expiresAt)
-                  .format("MMM D, YYYY h:mm A")}`} */}
+                  .format("MMM D, YYYY h:mm A")}`}
           </div>
 
-          {isActive && !hasVoted && (
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={transactionStatus.isProcessing}
-                onClick={() => handleVote(false)}
-                className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:border-red-900 dark:hover:bg-red-950 dark:hover:text-red-300"
-              >
-                <ThumbsDown className="mr-2 h-4 w-4" />
-                Vote Against
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={transactionStatus.isProcessing}
-                className="text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700 dark:text-green-400 dark:border-green-900 dark:hover:bg-green-950 dark:hover:text-green-300"
-                onClick={() => handleVote(true)}
-              >
-                <ThumbsUp className="mr-2 h-4 w-4" />
-                Vote For
-              </Button>
-            </div>
-          )}
+
         </CardFooter>
-      )}
+      )} */}
     </Card>
   );
 }
 
 function ProposalStatusBadge({ status }: { status: string }) {
-  let className = "px-2.5 py-0.5 text-xs font-medium rounded-full ";
+  let className = "px-2.5 py-0.5 text-lg font-medium rounded-sm ";
+  let statusIcon;
 
   switch (status) {
-    case "voting":
+    case "active":
+      statusIcon = <Circle className="size-2 inline-block animate-ping fill-stone-500" />;
       className +=
-        "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+        "bg-stone-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
       break;
     case "approved":
+      statusIcon = <Check className="size-4 inline-block" />;
       className +=
-        "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+        "bg-[#2e9668] !px-4 align-middle text-white dark:bg-green-900/30 dark:text-green-400";
       break;
     case "rejected":
+      statusIcon = <X className="size-4 inline-block" />;
       className +=
-        "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+        "bg-red-100 !px-4 align-middle text-red-800 dark:bg-red-900/30 dark:text-red-400";
       break;
     default:
       className +=
-        "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+        "bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-300";
   }
 
   const statusText = status.charAt(0).toUpperCase() + status.slice(1);
 
-  return <span className={className}>{statusText}</span>;
+  return (
+    <span className={className + " mr-2"}>
+      {statusIcon ? statusIcon : statusText}
+    </span>
+  );
 }

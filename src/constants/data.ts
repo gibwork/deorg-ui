@@ -91,18 +91,18 @@ export const OrganizationNavbarItems = [
     value: "members",
     href: (orgId: string) => `/organizations/${orgId}/members`,
   },
-  {
-    label: "Activity",
-    icon: Clock,
-    value: "activity",
-    href: (orgId: string) => `/organizations/${orgId}/activity`,
-  },
-  {
-    label: "Transactions",
-    icon: DollarSign,
-    value: "transactions",
-    href: (orgId: string) => `/organizations/${orgId}/transactions`,
-  },
+  // {
+  //   label: "Activity",
+  //   icon: Clock,
+  //   value: "activity",
+  //   href: (orgId: string) => `/organizations/${orgId}/activity`,
+  // },
+  // {
+  //   label: "Transactions",
+  //   icon: DollarSign,
+  //   value: "transactions",
+  //   href: (orgId: string) => `/organizations/${orgId}/transactions`,
+  // },
   {
     label: "Settings",
     icon: Settings,

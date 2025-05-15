@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,11 @@ import {
 
 import { CreateTaskButton } from "./create-task-button";
 import { listTasks, Task } from "../../actions/tasks/list-tasks";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useOrganizationMembers } from "../../hooks/use-organization-members";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { compeleteTaskTransaction } from "../../actions/tasks/comlete-task";
@@ -48,6 +52,8 @@ import {
 import { useOrganizationProjects } from "../../hooks/use-organization-projects";
 import ProjectTaskModal from "../organization/project-task-modal";
 import { OrganizationTasksKanban } from "../organization/organization-tasks-kanban";
+import { io } from "socket.io-client";
+
 export default function ProjectDetailsPage({
   orgId,
   projectId,
@@ -56,6 +62,7 @@ export default function ProjectDetailsPage({
   projectId: string;
 }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
   const [showTaskDetailsModal, setShowTaskDetailsModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<any | null>(null);
@@ -90,6 +97,48 @@ export default function ProjectDetailsPage({
       return allPages?.length + 1;
     },
   });
+
+  useEffect(() => {
+    const socket = io(process.env.NEXT_PUBLIC_WEBSOCKET_URL);
+
+    socket.on(
+      "taskStatusChangeEvent",
+      (data: {
+        newStatus: string;
+        oldStatus: string;
+        project: string;
+        task: string;
+        timestamp: string;
+      }) => {
+        // Update the task status in the React Query cache
+        queryClient.setQueryData(
+          ["project_tasks", projectId],
+          (oldData: any) => {
+            if (!oldData) return oldData;
+
+            // Create a new array with the updated task
+            const updatedPages = oldData.pages.map((page: any[]) =>
+              page.map((task: any) =>
+                task.accountAddress === data.task
+                  ? { ...task, status: data.newStatus }
+                  : task
+              )
+            );
+
+            // Force a re-render by creating a new object
+            return {
+              ...oldData,
+              pages: updatedPages,
+            };
+          }
+        );
+      }
+    );
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [projectId, queryClient]);
 
   const tasks = data?.pages?.flatMap((page) => page) || [];
 
@@ -291,11 +340,13 @@ export default function ProjectDetailsPage({
               )}
             </div>
           ) : (
-            <OrganizationTasksKanban
-              columns={tasksByStatus}
-              orgId={orgId}
-              projectId={projectId}
-            />
+            <div className="transition-all duration-300 ease-in-out">
+              <OrganizationTasksKanban
+                columns={tasksByStatus}
+                orgId={orgId}
+                projectId={projectId}
+              />
+            </div>
           )}
         </TabsContent>
 
@@ -564,16 +615,12 @@ function TaskCard({ task, orgId, projectId, onTaskClick }: TaskCardProps) {
   return (
     <>
       <button
-        className="w-full"
-        // href={`/organizations/${orgId}/projects/${projectId}/tasks/${task.accountAddress}`}
+        className="w-full transition-all duration-300 ease-in-out transform hover:scale-[1.02]"
         onClick={() => {
           onTaskClick(task);
         }}
       >
-        <Card>
-          {/* <CardHeader className="pb-2">
-
-      </CardHeader> */}
+        <Card className="transition-all duration-300 ease-in-out">
           <CardContent className="p-2 px-4 my-2">
             <div className="flex justify-between flex-row gap-2">
               <CardTitle className="text-base font-normal">
@@ -585,7 +632,6 @@ function TaskCard({ task, orgId, projectId, onTaskClick }: TaskCardProps) {
               <div className="flex justify-between">
                 <TaskStatusBadge status={task.status} />
               </div>
-              {/* <p className="text-sm mb-4">Mock description</p> */}
               <div className="flex flex-wrap justify-between items-center">
                 <div className="flex items-center gap-2">
                   {task.assignee ? (
@@ -608,38 +654,11 @@ function TaskCard({ task, orgId, projectId, onTaskClick }: TaskCardProps) {
                   )}
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    {/* <Clock className="h-4 w-4" /> */}
-                    {/* <span>Due {formatDate(task.dueDate)}</span> */}
-                  </div>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground"></div>
                 </div>
               </div>
             </div>
           </CardContent>
-          {/* <div className="px-6 pb-4 flex justify-end gap-2">
-            {task.status === "ready" && (
-              <Button onClick={handleCompleteTask} size="sm">
-                Complete
-              </Button>
-            )}
-            {task.status === "completed" && (
-              <Button onClick={handleEnableTaskWithdraw} size="sm">
-                Enable task withdraw
-              </Button>
-            )}
-            {task.status === "completed" && (
-              <Button onClick={handleWithdrawTaskFunds} size="sm">
-                Withdraw task funds
-              </Button>
-            )}
-            <Button variant="outline" size="sm" asChild>
-              <Link
-                href={`/organizations/${orgId}/projects/${projectId}/tasks/${task.transferProposal}`}
-              >
-                View Details
-              </Link>
-            </Button>
-          </div> */}
         </Card>
       </button>
     </>

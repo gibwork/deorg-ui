@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Card } from "@/components/ui/card";
@@ -45,6 +45,11 @@ export function OrganizationTasksKanban({
   const transactionStatus = useTransactionStatus();
   const { startTransaction, updateStep, updateStatus, addWarning } =
     useTransactionStore.getState();
+
+  // Add effect to update columns when initialColumns change
+  useEffect(() => {
+    setColumns(initialColumns);
+  }, [initialColumns]);
 
   const handleCompleteTask = async (task: any) => {
     if (!signTransaction) return false;
@@ -231,46 +236,55 @@ export function OrganizationTasksKanban({
 
     const task = { ...sourceColumn[taskIndex] };
 
-    // Check if user is authorized to move the task
-    if (
-      source.droppableId === "ready" &&
-      destination.droppableId === "completed"
-    ) {
-      // Only task assignee can move from ready to completed
-      if (publicKey?.toString() !== task.assignee?.walletAddress) {
-        toast.error("Only the task assignee can mark a task as completed");
+    // Check if this is a socket update (no permission checks needed)
+    const isSocketUpdate =
+      !result.source.droppableId || !result.destination.droppableId;
+
+    if (!isSocketUpdate) {
+      // Only perform permission checks for manual drag operations
+      if (
+        source.droppableId === "ready" &&
+        destination.droppableId === "completed"
+      ) {
+        // Only task assignee can move from ready to completed
+        if (publicKey?.toString() !== task.assignee?.walletAddress) {
+          toast.error("Only the task assignee can mark a task as completed");
+          return;
+        }
+      } else if (
+        source.droppableId === "completed" &&
+        destination.droppableId === "paid"
+      ) {
+        // Only non-assignee members can move from completed to paid
+        if (publicKey?.toString() === task.assignee?.walletAddress) {
+          toast.error("Task assignee cannot enable task withdraw");
+          return;
+        }
+      }
+
+      // Prevent moving tasks back from paid state
+      if (source.droppableId === "paid") {
+        toast.error("Tasks cannot be moved back from paid state");
         return;
       }
-    } else if (
-      source.droppableId === "completed" &&
-      destination.droppableId === "paid"
-    ) {
-      // Only non-assignee members can move from completed to paid
-      if (publicKey?.toString() === task.assignee?.walletAddress) {
-        toast.error("Task assignee cannot enable task withdraw");
+
+      // Prevent moving tasks back from completed state
+      if (
+        source.droppableId === "completed" &&
+        destination.droppableId === "ready"
+      ) {
+        toast.error("Completed tasks cannot be moved back to ready state");
         return;
       }
-    }
 
-    // Prevent moving tasks back from paid state
-    if (source.droppableId === "paid") {
-      toast.error("Tasks cannot be moved back from paid state");
-      return;
-    }
-
-    // Prevent moving tasks back from completed state
-    if (
-      source.droppableId === "completed" &&
-      destination.droppableId === "ready"
-    ) {
-      toast.error("Completed tasks cannot be moved back to ready state");
-      return;
-    }
-
-    // Prevent direct movement from ready to paid
-    if (source.droppableId === "ready" && destination.droppableId === "paid") {
-      toast.error("Tasks must be completed before being marked as paid");
-      return;
+      // Prevent direct movement from ready to paid
+      if (
+        source.droppableId === "ready" &&
+        destination.droppableId === "paid"
+      ) {
+        toast.error("Tasks must be completed before being marked as paid");
+        return;
+      }
     }
 
     const originalColumns = { ...columns };
@@ -294,24 +308,27 @@ export function OrganizationTasksKanban({
       [destination.droppableId]: newDestinationColumn,
     });
 
-    let success = false;
+    // Only perform transactions for manual drag operations
+    if (!isSocketUpdate) {
+      let success = false;
 
-    // Handle the transaction based on the destination
-    if (destination.droppableId === "completed") {
-      success = await handleCompleteTask(task);
-      if (!success) {
-        toast.error("Failed to complete task. Please try again.");
+      // Handle the transaction based on the destination
+      if (destination.droppableId === "completed") {
+        success = await handleCompleteTask(task);
+        if (!success) {
+          toast.error("Failed to complete task. Please try again.");
+        }
+      } else if (destination.droppableId === "paid") {
+        success = await handleEnableTaskWithdraw(task);
+        if (!success) {
+          toast.error("Failed to enable task withdraw. Please try again.");
+        }
       }
-    } else if (destination.droppableId === "paid") {
-      success = await handleEnableTaskWithdraw(task);
-      if (!success) {
-        toast.error("Failed to enable task withdraw. Please try again.");
-      }
-    }
 
-    // If the transaction failed, revert the UI changes
-    if (!success) {
-      setColumns(originalColumns);
+      // If the transaction failed, revert the UI changes
+      if (!success) {
+        setColumns(originalColumns);
+      }
     }
   };
 
