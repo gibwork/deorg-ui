@@ -1,7 +1,6 @@
 "use client";
 import { LoaderButton } from "@/components/loader-button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useWalletAuth } from "@/features/auth/lib/wallet-auth";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@clerk/nextjs";
@@ -13,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useCheckMembership } from "@/features/organizations/hooks/use-check-membership";
 import { useQueryClient } from "@tanstack/react-query";
+import { useWalletAuthContext } from "@/features/auth/lib/wallet-auth-context";
 
 interface UnauthorizedProps {
   orgId: string;
@@ -23,7 +23,8 @@ export function Unauthorized({ orgId, children }: UnauthorizedProps) {
   const { userId, isLoaded } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { isLoading: isWalletAuthLoading, handleSignIn } = useWalletAuth();
+  const { isLoading: isWalletAuthLoading, handleSignIn } =
+    useWalletAuthContext();
   const [showJoinDialog, setShowJoinDialog] = useState(false);
   const { data: organization, isLoading: isOrganizationLoading } =
     useOrganization(orgId);

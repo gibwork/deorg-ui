@@ -20,7 +20,6 @@ import { Icons } from "../icons";
 import { SideBarLoading } from "./sidebar";
 import { useQueryClient } from "@tanstack/react-query";
 import { User } from "@/types/user.types";
-import { useAuthModal } from "@/hooks/use-auth-modal";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { usePathname } from "next/navigation";
 import { OrganizationSidebarMobile } from "@/features/organizations/components/organizations-sidebar-mobile";
@@ -33,7 +32,6 @@ export function MobileSidebar({ className }: SidebarProps) {
 
   const [open, setOpen] = useState(false);
   const { user, isLoaded } = useUser();
-  const { onOpen } = useAuthModal();
   const { disconnect } = useWallet();
   let usdcAmountUserHasEarned = "$0.00";
 
@@ -160,10 +158,9 @@ export function MobileSidebar({ className }: SidebarProps) {
                       <div className="my-auto me-1">
                         <Icons.usdc />
                       </div>
-                      <div>
-
-                      </div>
+                      <div></div>
                     </div>
+
                     <div className="flex justify-center text-sm font-light leading-3">
                       total volume
                     </div>
@@ -172,7 +169,6 @@ export function MobileSidebar({ className }: SidebarProps) {
                       className="text-white text-lg font-semibold mt-5 w-full"
                       onClick={() => {
                         disconnect();
-                        onOpen();
                       }}
                     >
                       <LogIn className="size-5 mr-2" />

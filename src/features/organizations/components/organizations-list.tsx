@@ -17,7 +17,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { LoaderButton } from "@/components/loader-button";
-import { useWalletAuth } from "@/features/auth/lib/wallet-auth";
+import { useWalletAuthContext } from "@/features/auth/lib/wallet-auth-context";
 import { Badge } from "@/components/ui/badge";
 
 import Image from "next/image";
@@ -25,7 +25,8 @@ import OrganizationLayoutHeader from "./organization-layout-header";
 const OrganizationsList = () => {
   const router = useRouter();
   const { isSignedIn } = useAuth();
-  const { isLoading: isWalletAuthLoading, handleSignIn } = useWalletAuth();
+  const { isLoading: isWalletAuthLoading, handleSignIn } =
+    useWalletAuthContext();
   const { userMemberships, setActive } =
     useOrganizationList(UserMembershipParams);
   const [selectedOrganization, setSelectedOrganization] =
@@ -157,9 +158,9 @@ const OrganizationsList = () => {
             </div>
           ) : organizations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {organizations.map((org: Organization) => (
+              {organizations.map((org: Organization, idx: number) => (
                 <Card
-                  key={org.id}
+                  key={idx}
                   className="p-4 hover:shadow-md transition-shadow cursor-pointer rounded-2xl shadow-md hover:bg-stone-200/10"
                   onClick={() =>
                     router.push(`/organizations/${org.accountAddress}`)

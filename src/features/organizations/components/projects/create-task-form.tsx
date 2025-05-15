@@ -29,6 +29,7 @@ import { createTaskTransaction } from "../../actions/tasks/create-task-transacti
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createTask } from "../../actions/tasks/create-task";
 import { Transaction } from "@solana/web3.js";
+import { useParams } from "next/navigation";
 const formSchema = z.object({
   title: z
     .string()
@@ -62,6 +63,7 @@ export function CreateTaskForm({
 }: CreateTaskFormProps) {
   const { signTransaction } = useWallet();
   const queryClient = useQueryClient();
+  const { orgId } = useParams();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -95,6 +97,7 @@ export function CreateTaskForm({
       const serializedTransaction = await signTransaction(retreivedTx);
 
       const task = await createTask({
+        organizationId: orgId as string,
         transactionId: success.transactionId,
         serializedTransaction: serializedTransaction
           ?.serialize()

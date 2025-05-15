@@ -4,12 +4,12 @@ import "@/styles/globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { WalletProvider } from "@/components/providers/wallet-provider";
 import { Toaster } from "@/components/ui/sonner";
-import SelectWalletModal from "@/components/modals/select-wallet-modal";
 import QueryProvider from "@/components/providers/query-provider";
 import { LoadingModal } from "@/components/modals/loading-modal";
 import { siteConfig } from "../../config/site";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ClerkProvider } from "@/components/providers/clerk-provider";
+import { WalletAuthProvider } from "@/features/auth/lib/wallet-auth-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -70,9 +70,8 @@ export default function RootLayout({
             <WalletProvider>
               <QueryProvider>
                 <Toaster position="bottom-left" richColors />
-                <SelectWalletModal />
 
-                {children}
+                <WalletAuthProvider>{children}</WalletAuthProvider>
                 <LoadingModal />
 
                 <NextTopLoader color="#8151fd" showSpinner={false} />

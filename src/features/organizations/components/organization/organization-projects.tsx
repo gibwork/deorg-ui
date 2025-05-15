@@ -87,6 +87,7 @@ export function OrganizationProjects({
         .toString("base64");
 
       const createProjectResponse = await createProject({
+        organizationId,
         transactionId: response.success.transactionId,
         serializedTransaction: serializedSignedTransaction,
       });

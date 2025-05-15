@@ -19,11 +19,10 @@ import { useAuth } from "@clerk/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
 import { User } from "@/types/user.types";
 import { useWalletChange } from "@/features/auth/lib/use-wallet-change";
-import { verifyPrimaryWallet } from "@/actions/post/verify-primary-wallet";
-import { useVerifyWallet } from "@/features/auth/lib/verify-wallet";
 import { WalletButtonPopover } from "./wallet-button-popover";
 import { useUserData } from "@/hooks/use-user-data";
 import { ButtonProps } from "@/components/ui/button";
+import { useWalletAuth } from "@/features/auth/lib/wallet-auth";
 
 export function WalletButton({
   className,
@@ -33,6 +32,8 @@ export function WalletButton({
 }: ButtonProps) {
   const { isManualChange, toggleManualChange, isVerifying, toggleVerifying } =
     useWalletChange();
+  const { isLoading } = useWalletAuth();
+
   const { userId, signOut } = useAuth();
   const {
     publicKey,
@@ -87,6 +88,7 @@ export function WalletButton({
           "text-sm h-7 md:h-9 flex items-center !p-1 md:!px-4 md:gap-2",
           className
         )}
+        disabled={isLoading}
         onClick={() => {
           toggleManualChange(true);
           toggleVerifying(true);
@@ -94,7 +96,12 @@ export function WalletButton({
         }}
         {...props}
       >
-        <WalletMinimalIcon className="p-1" />
+        {isLoading ? (
+          <Icons.spinner className="animate-spin w-4 h-4" />
+        ) : (
+          <WalletMinimalIcon className="p-1" />
+        )}
+
         <span className="hidden md:block">Connect Wallet</span>
       </Button>
     );
