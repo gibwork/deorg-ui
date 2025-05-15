@@ -44,6 +44,7 @@ import { LoaderButton } from "@/components/loader-button";
 import { useOrganizationMembers } from "../../hooks/use-organization-members";
 import { cn, truncate } from "@/lib/utils";
 import Link from "next/link";
+import { Icons } from "@/components/icons";
 export function OrganizationProposals({
   organizationId,
 }: {
@@ -331,11 +332,11 @@ function ProposalCard({
           <div>
             <CardTitle className="text-lg font-medium whitespace-nowrap truncate ... w-[550px]">
               <ProposalStatusBadge status={proposal.status} />{" "}
-              {proposal.title || "Untitled"} 
+              {proposal.title || "Untitled"}
             </CardTitle>
             <CardDescription className="mt-1">
               Proposed by {truncate(proposal.proposer, 8, 4)} {isActive && !hasVoted && (
-                <span className="text-muted-foreground"> |
+                <span className="text-muted-foreground"> | {" "}
                   <DateComponent
                     datetime={dayjs.unix(proposal.expiresAt).toISOString()}
                     type="toDate"
@@ -379,41 +380,47 @@ function ProposalCard({
       </CardHeader>
 
       {isActive && (
-        <CardContent className="px-4">
+        <CardContent className="px-3">
           {/* <p className="text-sm mb-4">{proposal.description}</p> */}
 
           <>
-            <div className="space-y-4">
-              <div className="flex justify-end text-sm">
-                {/* <span>Voting Progress</span> */}
-                {isActive && (
+            <div className="space-y-2 mt-2">
+              {isActive && (
                 <div className="flex justify-between text-xs text-muted-foreground gap-4">
-                  <span className="flex items-center gap-1">
-                  {proposal.votesFor} YES
-                  </span>
-                  <span className="flex items-center gap-1">
-                  {proposal.votesAgainst} NO
-                  </span>
-                  {/* <span>{remainingVotes} Members Haven&apos;t Voted</span> */}
+                  <div className="flex">
+                    <span className="flex items-center gap-1">
+                      {proposal.type == "TASK" && (
+                        <div className="flex items-center opacity-85 gap-1">
+                          Results in <Icons.usdc className="size-3" />{" "}
+                          {(proposal.amount / 10 ** 6).toFixed(2)} reward after completion
+                        </div>
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex">
+                    <span className="flex items-center gap-1 me-2">
+                      {proposal.votesFor} YES
+                    </span>
+                    <span className="flex items-center gap-1">
+                      {proposal.votesAgainst} NO
+                    </span>
+                    {/* <span>{remainingVotes} Members Haven&apos;t Voted</span> */}
+                  </div>
                 </div>
               )}
-                {/* <span className="font-light">
-                  {approvalPercentage}%                  
-                </span> */}
-              </div>
               <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
                 <div
-                  className="absolute h-full bg-[#2e9668] transition-all duration-300"
-                  style={{ width: `${approvalPercentage}%` }}
+                  className="absolute h-full bg-stone-500 transition-all duration-300"
+                  style={{ width: `${approvalPercentage + disapprovalPercentage}%` }}
                 />
-                <div
-                  className="absolute h-full bg-[#e11c48] transition-all duration-300"
+                {/* <div
+                  className="absolute h-full bg-stone-50 transition-all duration-300"
                   style={{
                     width: `${disapprovalPercentage}%`,
                     left: `${approvalPercentage}%`,
                   }}
-                />
-              </div>              
+                /> */}
+              </div>
             </div>
           </>
         </CardContent>
@@ -446,7 +453,7 @@ function ProposalStatusBadge({ status }: { status: string }) {
 
   switch (status) {
     case "active":
-      statusIcon = <Circle className="size-2 inline-block animate-ping fill-[#2e9668]" />; 
+      statusIcon = <Circle className="size-2 inline-block animate-ping fill-stone-500" />;
       className +=
         "bg-stone-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
       break;
