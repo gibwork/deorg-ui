@@ -93,10 +93,7 @@ export function WalletButtonPopover({ userData }: { userData?: User }) {
                 className="flex items-center gap-1"
                 onClick={() => {
                   disconnect();
-
-                  if (userData?.walletAddress) {
-                    signOut();
-                  }
+                  signOut();
                 }}
               >
                 <UnplugIcon className="h-4 w-4" />

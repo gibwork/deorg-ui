@@ -9,6 +9,7 @@ import { LoadingModal } from "@/components/modals/loading-modal";
 import { siteConfig } from "../../config/site";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ClerkProvider } from "@/components/providers/clerk-provider";
+import { WalletAuthProvider } from "@/features/auth/lib/wallet-auth-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -70,7 +71,7 @@ export default function RootLayout({
               <QueryProvider>
                 <Toaster position="bottom-left" richColors />
 
-                {children}
+                <WalletAuthProvider>{children}</WalletAuthProvider>
                 <LoadingModal />
 
                 <NextTopLoader color="#8151fd" showSpinner={false} />

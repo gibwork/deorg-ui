@@ -4,7 +4,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useRouter } from "next/navigation";
 import { walletSignIn } from "@/actions/post/wallet-sign-in";
-import { useSignIn, useUser } from "@clerk/nextjs";
+import { useAuth, useSignIn, useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { useTransactionStatus } from "@/hooks/use-transaction-status";
 
@@ -14,6 +14,7 @@ export const useWalletAuth = () => {
   const transaction = useTransactionStatus();
   const { signIn, setActive } = useSignIn();
   const { user } = useUser();
+  const { signOut } = useAuth();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -87,7 +88,7 @@ export const useWalletAuth = () => {
     if (connected && publicKey) {
       handleSignIn();
     }
-  }, [connected, publicKey]);
+  }, [publicKey]);
 
   return {
     isLoading,

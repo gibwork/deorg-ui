@@ -29,7 +29,12 @@ import {
 } from "@/components/ui/sidebar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { OrganizationNavbarItems } from "@/constants/data";
@@ -75,43 +80,74 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
         </div>
       )}
 
-      <SlimOrgSidebar orgId={organization!.accountAddress!} className="shadow-md" />
-      <Sidebar className="fixed top-0 left-16 max-h-full bg-white" style={{ height: "100vh" }}>
+      <SlimOrgSidebar
+        orgId={organization!.accountAddress!}
+        className="shadow-md"
+      />
+      <Sidebar
+        className="fixed top-0 left-16 max-h-full bg-white"
+        style={{ height: "100vh" }}
+      >
         <SidebarHeader className="p-0 bg-white">
           <div className="flex flex-row border-b border-stone-200 h-[50px] p-1">
             <div className="h-[42px] w-[42px]">
-              {organization?.metadata?.logoUrl ?
-                (<Image src={organization?.metadata?.logoUrl ?? ""} alt={organization.name} width={42} height={42} className="rounded-lg p-1" />)
-                : <Skeleton className="h-8 w-8 m-1 rounded-sm bg-stone-200" />}
+              {organization?.metadata?.logoUrl ? (
+                <Image
+                  src={organization?.metadata?.logoUrl ?? ""}
+                  alt={organization.name}
+                  width={42}
+                  height={42}
+                  className="rounded-lg p-1"
+                />
+              ) : (
+                <Skeleton className="h-8 w-8 m-1 rounded-sm bg-stone-200" />
+              )}
             </div>
             <div className="flex flex-col ms-2">
               <h1 className=" font-bold text-black">{organization.name}</h1>
               {organization.metadata && (
                 <div className="flex flex-row items-center gap-2 opacity-60 cursor-pointer">
                   {organization.metadata.twitterUrl && (
-                    <Link href={organization.metadata.twitterUrl} target="_blank">
+                    <Link
+                      href={organization.metadata.twitterUrl}
+                      target="_blank"
+                    >
                       <span className="text-stone-500 cursor-pointer hover:fill-black">
-                        <Icons.twitter className="h-[.85rem] w-[.85rem]" fill="gray" />
+                        <Icons.twitter
+                          className="h-[.85rem] w-[.85rem]"
+                          fill="gray"
+                        />
                       </span>
                     </Link>
                   )}
                   {organization.metadata.discordUrl && (
-                    <Link href={organization.metadata.discordUrl} target="_blank">
+                    <Link
+                      href={organization.metadata.discordUrl}
+                      target="_blank"
+                    >
                       <span className="text-stone-500 cursor-pointer hover:fill-black">
-                        <Icons.discord className="h-[.85rem] w-[.85rem]" fill="gray" />
+                        <Icons.discord
+                          className="h-[.85rem] w-[.85rem]"
+                          fill="gray"
+                        />
                       </span>
                     </Link>
                   )}
                   {organization.metadata.websiteUrl && (
-                    <Link href={organization.metadata.websiteUrl} target="_blank">
+                    <Link
+                      href={organization.metadata.websiteUrl}
+                      target="_blank"
+                    >
                       <span className="text-stone-500 cursor-pointer hover:stroke-black">
-                        <Globe className="h-[.85rem] w-[.85rem]" stroke="gray" />
+                        <Globe
+                          className="h-[.85rem] w-[.85rem]"
+                          stroke="gray"
+                        />
                       </span>
                     </Link>
                   )}
                 </div>
               )}
-
             </div>
           </div>
           <div className="flex flex-col items-center justify-center py-2 border-b">
@@ -128,11 +164,49 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
             {OrganizationNavbarItems.map((item) => {
               // Special handling for Projects item to make it collapsible
               if (item.value === "projects") {
-                const isProjectsActive = pathname === item.href(orgId) ||
+                const isProjectsActive =
+                  pathname === item.href(orgId) ||
                   pathname.includes(`/organizations/${orgId}/projects/`);
 
+                // If there are no active projects, show a direct link
+                if (!projectsData?.activeProjects?.length) {
+                  return (
+                    <SidebarMenuItem
+                      key={item.value}
+                      className="border-b border-stone-200"
+                    >
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isProjectsActive}
+                        tooltip={item.label}
+                        className="h-10"
+                      >
+                        <Link
+                          href={item.href(orgId)}
+                          className={cn(
+                            isProjectsActive && " !text-black",
+                            "rounded-none"
+                          )}
+                        >
+                          <item.icon
+                            className={cn(
+                              "h-8 w-8",
+                              isProjectsActive && "stroke-black"
+                            )}
+                          />
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                }
+
+                // If there are active projects, show the dropdown
                 return (
-                  <SidebarMenuItem key={item.value} className="border-b border-stone-200">
+                  <SidebarMenuItem
+                    key={item.value}
+                    className="border-b border-stone-200"
+                  >
                     <Accordion
                       type="single"
                       collapsible
@@ -140,36 +214,56 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                       defaultValue={isProjectsActive ? "projects" : undefined}
                     >
                       <AccordionItem value="projects" className="border-none">
-                        <AccordionTrigger className={cn("py-0 hover:bg-stone-100", isProjectsActive && "bg-stone-100")}>
+                        <AccordionTrigger
+                          className={cn(
+                            "py-0 hover:bg-stone-100",
+                            isProjectsActive && "bg-stone-100"
+                          )}
+                        >
                           <SidebarMenuButton
                             isActive={isProjectsActive}
                             tooltip={item.label}
                             className="h-10 w-full flex justify-between"
                           >
                             <div className="flex items-center gap-2">
-                              <item.icon className={cn("h-4 w-4", isProjectsActive && "stroke-black")} />
-                              <span className={cn(isProjectsActive && "!text-black")}>Projects</span>
+                              <item.icon
+                                className={cn(
+                                  "h-4 w-4",
+                                  isProjectsActive && "stroke-black"
+                                )}
+                              />
+                              <span
+                                className={cn(
+                                  isProjectsActive && "!text-black"
+                                )}
+                              >
+                                Projects
+                              </span>
                             </div>
                           </SidebarMenuButton>
                         </AccordionTrigger>
                         <AccordionContent>
                           <div className="flex flex-col gap-2 ml-10 mt-1">
-
                             {/* Display active projects if we have any */}
-                            {projectsData?.activeProjects?.map((project: any) => (
-                              <Link
-                                key={project.uuid || project.accountAddress}
-                                href={`/organizations/${orgId}/projects/${project.accountAddress}`}
-                                className={cn(
-                                  "flex px-2 py-1 text-sm rounded-md items-center",
-                                  pathname === `/organizations/${orgId}/projects/${project.accountAddress}`
-                                    ? "text-sidebar-accent-foreground font-medium"
-                                    : "hover:bg-sidebar-accent/50"
-                                )}
-                              >
-                                {project.title.length > 20 ? project.title.substring(0, 20) + '...' : project.title}
-                              </Link>
-                            ))}
+                            {projectsData?.activeProjects?.map(
+                              (project: any) => (
+                                <Link
+                                  key={project.uuid || project.accountAddress}
+                                  href={`/organizations/${orgId}/projects/${project.accountAddress}`}
+                                  className={cn(
+                                    "flex px-2 py-1 text-sm rounded-md items-center",
+                                    pathname ===
+                                      `/organizations/${orgId}/projects/${project.accountAddress}`
+                                      ? "text-sidebar-accent-foreground font-medium"
+                                      : "hover:bg-sidebar-accent/50"
+                                  )}
+                                >
+                                  {project.title.length > 20
+                                    ? project.title.substring(0, 20) + "..."
+                                    : project.title}
+                                </Link>
+                              )
+                            )}
                           </div>
                         </AccordionContent>
                       </AccordionItem>
@@ -182,15 +276,23 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
               const isActive = pathname === item.href(orgId);
 
               return (
-                <SidebarMenuItem key={item.value} className="border-b border-stone-200">
+                <SidebarMenuItem
+                  key={item.value}
+                  className="border-b border-stone-200"
+                >
                   <SidebarMenuButton
                     asChild
                     isActive={isActive}
                     tooltip={item.label}
                     className="h-10"
                   >
-                    <Link href={item.href(orgId)} className={cn(isActive && " !text-black", "rounded-none")}>
-                      <item.icon className={cn("h-8 w-8", isActive && "stroke-black")} />
+                    <Link
+                      href={item.href(orgId)}
+                      className={cn(isActive && " !text-black", "rounded-none")}
+                    >
+                      <item.icon
+                        className={cn("h-8 w-8", isActive && "stroke-black")}
+                      />
                       <span>{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
