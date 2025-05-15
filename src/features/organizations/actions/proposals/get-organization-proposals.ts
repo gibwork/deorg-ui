@@ -21,6 +21,7 @@ export interface ProposalType {
   title: string;
   description: string;
   type: string;
+  amount: number;
   deadline?: string | null;
   organizationId?: string;
   createdBy?: string;
