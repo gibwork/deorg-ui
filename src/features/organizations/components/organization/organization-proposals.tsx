@@ -295,6 +295,10 @@ function ProposalCard({
         queryKey: ["organization_proposals", organizationId],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["project_tasks"],
+      });
+
       updateStep(4, "success");
       updateStatus("success");
     } catch (error) {
