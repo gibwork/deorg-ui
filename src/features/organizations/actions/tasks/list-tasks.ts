@@ -1,4 +1,4 @@
-"use server"
+"use server";
 
 import { auth } from "@clerk/nextjs/server";
 import axios from "axios";
@@ -8,6 +8,7 @@ export type Task = {
   project: string;
   title: string;
   paymentAmount: number;
+  description: string;
   assignee: {
     id: string;
     externalId: string;
@@ -31,7 +32,7 @@ export type Task = {
   }[];
   transferProposal: string;
   vault: string;
-  reviewer?: string
+  reviewer?: string;
   tokenInfo: {
     mint: string;
     symbol: string;
@@ -41,17 +42,21 @@ export type Task = {
   };
 };
 
-export async function listTasks(projectAccountAddress: string): Promise<Task[]> {
+export async function listTasks(
+  projectAccountAddress: string
+): Promise<Task[]> {
   const { getToken } = auth();
   const token = await getToken();
 
-  const response = await axios.get(`${process.env.API_URL}/tasks/project/${projectAccountAddress}`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await axios.get(
+    `${process.env.API_URL}/tasks/project/${projectAccountAddress}`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
   return response.data;
 }
-  
