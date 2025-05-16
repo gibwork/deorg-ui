@@ -67,6 +67,7 @@ export function OrganizationProposals({
       if (proposals.error) throw new Error(proposals.error.message);
       return proposals.success;
     },
+    refetchInterval: 1000,
   });
 
   if (isLoading) return <div>Loading...</div>;
@@ -335,14 +336,19 @@ function ProposalCard({
               {proposal.title || "Untitled"}
             </CardTitle>
             <CardDescription className="mt-1">
-              Proposed by {truncate(proposal.proposer, 8, 4)} {isActive && !hasVoted && (
-                <span className="text-muted-foreground"> | {" "}
+              Proposed by {truncate(proposal.proposer, 8, 4)}{" "}
+              {isActive && !hasVoted && (
+                <span className="text-muted-foreground">
+                  {" "}
+                  |{" "}
                   <DateComponent
                     datetime={dayjs.unix(proposal.expiresAt).toISOString()}
                     type="toDate"
-                  /> left to vote
+                  />{" "}
+                  left to vote
                 </span>
-              )} | ADD {proposal.type}
+              )}{" "}
+              | ADD {proposal.type}
             </CardDescription>
           </div>
           {/* <ProposalStatusBadge status={proposal.status} /> */}
@@ -392,7 +398,8 @@ function ProposalCard({
                       {proposal.type == "TASK" && (
                         <div className="flex items-center opacity-85 gap-1">
                           Results in <Icons.usdc className="size-3" />{" "}
-                          {(proposal.amount / 10 ** 6).toFixed(2)} reward after completion
+                          {(proposal.amount / 10 ** 6).toFixed(2)} reward after
+                          completion
                         </div>
                       )}
                     </span>
@@ -411,7 +418,9 @@ function ProposalCard({
               <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
                 <div
                   className="absolute h-full bg-stone-500 transition-all duration-300"
-                  style={{ width: `${approvalPercentage + disapprovalPercentage}%` }}
+                  style={{
+                    width: `${approvalPercentage + disapprovalPercentage}%`,
+                  }}
                 />
                 {/* <div
                   className="absolute h-full bg-stone-50 transition-all duration-300"
@@ -453,7 +462,9 @@ function ProposalStatusBadge({ status }: { status: string }) {
 
   switch (status) {
     case "active":
-      statusIcon = <Circle className="size-2 inline-block animate-ping fill-stone-500" />;
+      statusIcon = (
+        <Circle className="size-2 inline-block animate-ping fill-stone-500" />
+      );
       className +=
         "bg-stone-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
       break;
