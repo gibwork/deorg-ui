@@ -148,6 +148,3 @@ bun dev
 
 This project was built during the Colosseum Breakout Hackathon. We welcome contributions and feedback!
 
-## License
-
-[MIT License](LICENSE) 
