@@ -32,6 +32,7 @@ import { useTransactionStatus } from "@/hooks/use-transaction-status";
 import { useTransactionStore } from "@/features/transaction-toast/use-transaction-store";
 import { useParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { formatTokenAmount } from "@/utils/format-amount";
 
 function ProjectTaskModal({
   project,
@@ -298,7 +299,8 @@ function ProjectTaskModal({
         <DialogHeader>
           <DialogTitle>{task.title}</DialogTitle>
           <DialogDescription>
-            {project.title} • 8 hours estimated • {task.tokenInfo.uiBalance}{" "}
+            {project.title} • 8 hours estimated •{" "}
+            {formatTokenAmount(task.paymentAmount, task.tokenInfo.decimals)}{" "}
             {task.tokenInfo.symbol} reward
           </DialogDescription>
         </DialogHeader>
