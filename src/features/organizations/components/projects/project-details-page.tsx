@@ -53,6 +53,7 @@ import { useOrganizationProjects } from "../../hooks/use-organization-projects";
 import ProjectTaskModal from "../organization/project-task-modal";
 import { OrganizationTasksKanban } from "../organization/organization-tasks-kanban";
 import { io } from "socket.io-client";
+import { formatTokenAmount } from "@/utils/format-amount";
 
 export default function ProjectDetailsPage({
   orgId,
@@ -513,106 +514,7 @@ interface TaskCardProps {
 }
 
 function TaskCard({ task, orgId, projectId, onTaskClick }: TaskCardProps) {
-  const { signTransaction } = useWallet();
-
-  const handleCompleteTask = async () => {
-    if (!signTransaction) return;
-
-    const { success, error } = await compeleteTaskTransaction(
-      task.accountAddress
-    );
-    if (!success) {
-      toast.error("Failed to complete task");
-      return;
-    }
-
-    const retreivedTx = Transaction.from(
-      Buffer.from(success.serializedTransaction, "base64")
-    );
-
-    const serializedTx = await signTransaction(retreivedTx);
-
-    const serializedSignedTx = serializedTx?.serialize().toString("base64");
-
-    const createProjectResponse = await createProject({
-      organizationId: orgId,
-      transactionId: success.transactionId,
-      serializedTransaction: serializedSignedTx,
-    });
-
-    if (createProjectResponse.error) {
-      toast.error("Failed to complete task");
-      return;
-    }
-
-    toast.success("Task completed successfully");
-  };
-
-  const handleEnableTaskWithdraw = async () => {
-    if (!signTransaction) return;
-
-    const { success, error } = await enableTaskWithdrawTransaction(
-      task.accountAddress
-    );
-    if (!success) {
-      toast.error("Failed to enable task withdraw");
-      return;
-    }
-
-    const retreivedTx = Transaction.from(
-      Buffer.from(success.serializedTransaction, "base64")
-    );
-
-    const serializedTx = await signTransaction(retreivedTx);
-
-    const serializedSignedTx = serializedTx?.serialize().toString("base64");
-
-    const enableTaskWithdrawResponse = await enableTaskWithdraw({
-      transactionId: success.transactionId,
-      serializedTransaction: serializedSignedTx,
-    });
-
-    if (enableTaskWithdrawResponse.error) {
-      toast.error("Failed to enable task withdraw");
-      return;
-    }
-
-    toast.success("Task withdraw enabled successfully");
-  };
-
-  const handleWithdrawTaskFunds = async () => {
-    if (!signTransaction) return;
-
-    const { success, error } = await withdrawTaskFundsTransaction(
-      task.accountAddress
-    );
-
-    if (!success) {
-      toast.error("Failed to withdraw task funds");
-      return;
-    }
-
-    const retreivedTx = Transaction.from(
-      Buffer.from(success.serializedTransaction, "base64")
-    );
-
-    const serializedTx = await signTransaction(retreivedTx);
-
-    const serializedSignedTx = serializedTx?.serialize().toString("base64");
-
-    const withdrawTaskFundsResponse = await withdrawTaskFunds({
-      transactionId: success.transactionId,
-      serializedTransaction: serializedSignedTx,
-    });
-
-    if (withdrawTaskFundsResponse.error) {
-      toast.error("Failed to withdraw task funds");
-      return;
-    }
-
-    toast.success("Task funds withdrawn successfully");
-  };
-
+  console.log(task);
   return (
     <>
       <button
@@ -628,7 +530,14 @@ function TaskCard({ task, orgId, projectId, onTaskClick }: TaskCardProps) {
                 {task.title}
               </CardTitle>
               <div className="text-sm font-medium">
-                {task.tokenInfo.uiBalance} {task.tokenInfo.symbol}
+                <span>
+                  {" "}
+                  {formatTokenAmount(
+                    task.paymentAmount,
+                    task.tokenInfo.decimals
+                  )}{" "}
+                  {task.tokenInfo.symbol}
+                </span>{" "}
               </div>
               <div className="flex justify-between">
                 <TaskStatusBadge status={task.status} />

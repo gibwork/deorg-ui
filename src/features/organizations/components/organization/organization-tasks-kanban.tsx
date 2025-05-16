@@ -21,6 +21,8 @@ import {
   enableTaskWithdrawTransaction,
   enableTaskWithdraw,
 } from "../../actions/tasks/enable-task-withdraw";
+import { formatTokenAmount } from "@/utils/format-amount";
+import { truncate } from "@/lib/utils";
 
 interface KanbanBoardProps {
   columns: {
@@ -318,12 +320,12 @@ export function OrganizationTasksKanban({
       if (destination.droppableId === "completed") {
         success = await handleCompleteTask(task);
         if (!success) {
-          toast.error("Failed to complete task. Please try again.");
+          console.log("Failed to complete task");
         }
       } else if (destination.droppableId === "paid") {
         success = await handleEnableTaskWithdraw(task);
         if (!success) {
-          toast.error("Failed to enable task withdraw. Please try again.");
+          console.log("Failed to pay task");
         }
       }
 
@@ -413,7 +415,12 @@ function KanbanCard({ task, orgId, projectId, isDragging }: KanbanCardProps) {
         <h4 className="font-medium text-sm">{task.title}</h4>
       </div>
       <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
-        {task.tokenInfo.uiBalance} {task.tokenInfo.symbol}
+        <span>
+          {" "}
+          {formatTokenAmount(task.paymentAmount, task.tokenInfo.decimals)}{" "}
+          {task.tokenInfo.symbol}
+        </span>{" "}
+        | <span>{truncate(task.accountAddress, 4, 4)}</span>
       </p>
       <div className="flex justify-between items-center">
         <Avatar className="h-6 w-6">
