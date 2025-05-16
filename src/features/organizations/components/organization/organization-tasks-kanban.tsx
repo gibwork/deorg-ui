@@ -30,12 +30,14 @@ interface KanbanBoardProps {
   };
   orgId: string;
   projectId: string;
+  onTaskClick: (task: any) => void;
 }
 
 export function OrganizationTasksKanban({
   columns: initialColumns,
   orgId,
   projectId,
+  onTaskClick,
 }: KanbanBoardProps) {
   const [columns, setColumns] = useState(initialColumns);
   const [isDragging, setIsDragging] = useState(false);
@@ -92,9 +94,9 @@ export function OrganizationTasksKanban({
         throw new Error(completeTaskResponse.error);
       }
 
-      queryClient.invalidateQueries({
-        queryKey: ["project_tasks", projectId],
-      });
+      // queryClient.invalidateQueries({
+      //   queryKey: ["project_tasks", projectId],
+      // });
 
       updateStep(4, "success");
       updateStatus("success");
@@ -167,9 +169,9 @@ export function OrganizationTasksKanban({
         throw new Error(enableTaskWithdrawResponse.error);
       }
 
-      queryClient.invalidateQueries({
-        queryKey: ["project_tasks", projectId],
-      });
+      // queryClient.invalidateQueries({
+      //   queryKey: ["project_tasks", projectId],
+      // });
 
       updateStep(4, "success");
       updateStatus("success");
@@ -364,6 +366,7 @@ export function OrganizationTasksKanban({
                     >
                       {(provided, snapshot) => (
                         <div
+                          onClick={() => onTaskClick(task)}
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}

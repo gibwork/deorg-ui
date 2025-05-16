@@ -345,6 +345,7 @@ export default function ProjectDetailsPage({
                 columns={tasksByStatus}
                 orgId={orgId}
                 projectId={projectId}
+                onTaskClick={handleTaskCardClick}
               />
             </div>
           )}
