@@ -1,10 +1,42 @@
-# DeOrg - Decentralized Organizations
+<p align="center">
+  <a href="https://deorg-ui.vercel.app" target="blank"><img src="https://pbs.twimg.com/profile_images/1921044848229957632/y56N34ux_400x400.jpg" width="200" alt="Deorg Logo" /></a>
+</p>
+
+
+ 
+
+
+
+<div align="center">
+  <h1>
+  DeOrg - Decentralized Organizations
+  </h1>
+
+
+  <a href="https://x.com/deorgdotxyz">
+    <img alt="Twitter" src="https://img.shields.io/twitter/url.svg?label=%40deorgdotxyz&style=social&url=https%3A%2F%2Ftwitter.com%2Fdeorgdotxyz" />
+  </a>
+  <br />
+  <p>
+    <strong>
+     
+DeOrg revolutionizes how decentralized organizations operate by providing a seamless platform for on-chain governance and collaboration. Built on blockchain technology, DeOrg empowers communities to create, manage, and scale their organizations with transparent governance, efficient project management, and secure treasury operations.
+    </strong>
+  </p>
+  <p>
 
 Built during [Colosseum Breakout Hackathon](https://www.colosseum.org/breakout)
+  </p>
+</div>
 
-## About
 
-DeOrg revolutionizes how decentralized organizations operate by providing a seamless platform for on-chain governance and collaboration. Built on blockchain technology, DeOrg empowers communities to create, manage, and scale their organizations with transparent governance, efficient project management, and secure treasury operations.
+
+
+
+
+
+
+
 
 ## Key Features
 
