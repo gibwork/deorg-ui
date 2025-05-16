@@ -21,6 +21,8 @@ import {
   enableTaskWithdrawTransaction,
   enableTaskWithdraw,
 } from "../../actions/tasks/enable-task-withdraw";
+import { formatTokenAmount } from "@/utils/format-amount";
+import { truncate } from "@/lib/utils";
 
 interface KanbanBoardProps {
   columns: {
@@ -340,6 +342,8 @@ export function OrganizationTasksKanban({
     paid: "Paid",
   };
 
+  console.log(columns);
+
   return (
     <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -413,7 +417,12 @@ function KanbanCard({ task, orgId, projectId, isDragging }: KanbanCardProps) {
         <h4 className="font-medium text-sm">{task.title}</h4>
       </div>
       <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
-        {task.tokenInfo.uiBalance} {task.tokenInfo.symbol}
+        <span>
+          {" "}
+          {formatTokenAmount(task.paymentAmount, task.tokenInfo.decimals)}{" "}
+          {task.tokenInfo.symbol}
+        </span>{" "}
+        | <span>{truncate(task.accountAddress, 4, 4)}</span>
       </p>
       <div className="flex justify-between items-center">
         <Avatar className="h-6 w-6">
