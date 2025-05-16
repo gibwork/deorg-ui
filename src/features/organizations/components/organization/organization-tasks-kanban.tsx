@@ -320,12 +320,12 @@ export function OrganizationTasksKanban({
       if (destination.droppableId === "completed") {
         success = await handleCompleteTask(task);
         if (!success) {
-          toast.error("Failed to complete task. Please try again.");
+          console.log("Failed to complete task");
         }
       } else if (destination.droppableId === "paid") {
         success = await handleEnableTaskWithdraw(task);
         if (!success) {
-          toast.error("Failed to enable task withdraw. Please try again.");
+          console.log("Failed to pay task");
         }
       }
 
@@ -341,8 +341,6 @@ export function OrganizationTasksKanban({
     completed: "Completed",
     paid: "Paid",
   };
-
-  console.log(columns);
 
   return (
     <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
