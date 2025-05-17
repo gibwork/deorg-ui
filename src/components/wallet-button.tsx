@@ -22,7 +22,7 @@ import { useWalletChange } from "@/features/auth/lib/use-wallet-change";
 import { WalletButtonPopover } from "./wallet-button-popover";
 import { useUserData } from "@/hooks/use-user-data";
 import { ButtonProps } from "@/components/ui/button";
-import { useWalletAuth } from "@/features/auth/lib/wallet-auth";
+import { useWalletAuthContext } from "@/features/auth/lib/wallet-auth-context";
 
 export function WalletButton({
   className,
@@ -32,7 +32,7 @@ export function WalletButton({
 }: ButtonProps) {
   const { isManualChange, toggleManualChange, isVerifying, toggleVerifying } =
     useWalletChange();
-  const { isLoading } = useWalletAuth();
+  const { isLoading } = useWalletAuthContext();
 
   const { userId, signOut } = useAuth();
   const {
