@@ -26,7 +26,7 @@ export const truncateContent = (content: string, limit = 155) => {
 
   const lastSpaceIndex = truncated.lastIndexOf(" ");
 
-  return truncated.substring(0, lastSpaceIndex) + " | Gibwork";
+  return truncated.substring(0, lastSpaceIndex) + " | DeOrg";
 };
 
 export const TipTapEditorCssClasses =
