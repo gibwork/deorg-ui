@@ -34,8 +34,9 @@ function OrganizationLayoutHeader() {
   const pathname = usePathname();
 
   return (
-    <div className=" h-[20vh] w-screen bg-[radial-gradient(169.40%_89.55%_at_94.76%_6.29%,rgba(129,81,253,0.20)_0%,rgba(255,255,255,0.00)_100%)] ">
-      <div className="flex items-center justify-between px-4 py-2 md:p-4 ">
+    <div className="w-screen relative">
+      <div className="absolute inset-0 h-[20vh] bg-[radial-gradient(169.40%_89.55%_at_94.76%_6.29%,rgba(129,81,253,0.20)_0%,rgba(255,255,255,0.00)_100%)]"></div>
+      <div className="flex items-center justify-between px-4 py-2 md:p-4 relative">
         <Popover>
           <PopoverTrigger asChild>
             <button className="IconButton" aria-label="Update dimensions">
