@@ -115,7 +115,7 @@ export default function ProjectDetailsPage({
     completed: tasks.filter(
       (task) => task.status === "completed" && !task.reviewer
     ),
-    paid: tasks.filter((task) => !!task.reviewer),
+    paid: tasks.filter((task) => task.status === "paid"),
   };
 
   const handleTaskCardClick = (task: Task) => {
