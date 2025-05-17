@@ -88,7 +88,7 @@ export const useWalletAuth = () => {
     if (connected && publicKey) {
       handleSignIn();
     }
-  }, [publicKey]);
+  }, [publicKey, connected]);
 
   return {
     isLoading,

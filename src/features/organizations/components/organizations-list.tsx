@@ -84,11 +84,11 @@ const OrganizationsList = () => {
   }
 
   return (
-    <section className="h-[20vh] w-screen bg-[radial-gradient(169.40%_89.55%_at_94.76%_6.29%,rgba(129,81,253,0.20)_0%,rgba(255,255,255,0.00)_100%)]">
+    <section className="pb-20">
       {/* header here */}
       <OrganizationLayoutHeader />
 
-      <div className="flex flex-row gap-5 border-b-2 border-gray-200 justify-between mt-2">
+      <div className="flex flex-row gap-5 border-b-2 border-gray-200 justify-between mt-2 pb-20">
         <div className="mx-auto w-full max-w-screen-lg flex items-center gap-5 ">
           <div className="flex justify-between">
             <div className="w-full sm:w-2/4 p-4 mt-10">
