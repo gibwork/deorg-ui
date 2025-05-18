@@ -18,22 +18,6 @@ module.exports = {
       },
       {
         protocol: "https",
-        hostname: "gibwork-dev.s3.amazonaws.com",
-      },
-      {
-        protocol: "https",
-        hostname: "test.ui.gib.work",
-      },
-      {
-        protocol: "https",
-        hostname: "app.gib.work",
-      },
-      {
-        protocol: "https",
-        hostname: "v2.gib.work",
-      },
-      {
-        protocol: "https",
         hostname: "plus.unsplash.com",
       },
     ],
