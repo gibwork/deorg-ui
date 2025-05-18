@@ -38,8 +38,11 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
+import { useOrganization } from "../../hooks/use-organization";
 
 export default function OrganizationAssets({ orgId }: { orgId: string }) {
+  const { data: organization } = useOrganization(orgId);
+
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showSendDialog, setShowSendDialog] = useState(false);
   const [selectedToken, setSelectedToken] = useState("sol");
@@ -140,7 +143,13 @@ export default function OrganizationAssets({ orgId }: { orgId: string }) {
             <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$384.00</div>
+            <div className="text-2xl font-bold">
+              $
+              {(organization?.treasuryBalances.reduce(
+                (acc, token) => acc + Number(token.raw),
+                0
+              ) || 0) / Math.pow(10, 6)}
+            </div>
           </CardContent>
         </Card>
 
@@ -149,7 +158,9 @@ export default function OrganizationAssets({ orgId }: { orgId: string }) {
             <CardTitle className="text-sm font-medium">Token Count</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">
+              {organization?.treasuryBalances.length}
+            </div>
           </CardContent>
         </Card>
 
@@ -182,31 +193,31 @@ export default function OrganizationAssets({ orgId }: { orgId: string }) {
               <div className="col-span-1"></div>
             </div>
 
-            {tokens.map((token) => (
+            {organization?.treasuryBalances.map((token) => (
               <div
-                key={token.symbol}
+                key={token.tokenAccount}
                 className="grid grid-cols-12 p-4 items-center border-b last:border-0"
               >
                 <div className="col-span-5 flex items-center gap-3">
                   <Image
-                    src={token.icon || "/placeholder.svg"}
-                    alt={token.name}
+                    src={token.token.logoURI || "/placeholder.svg"}
+                    alt={token.token.name}
                     className="w-8 h-8 rounded-full"
                     width={32}
                     height={32}
                   />
                   <div>
-                    <div className="font-medium">{token.symbol}</div>
+                    <div className="font-medium">{token.token.name}</div>
                     <div className="text-sm text-muted-foreground">
-                      {token.name}
+                      {token.token.symbol}
                     </div>
                   </div>
                 </div>
                 <div className="col-span-3 text-right font-medium">
-                  {token.balance.toLocaleString()}
+                  {token.ui}
                 </div>
                 <div className="col-span-3 text-right font-medium">
-                  ${token.usdValue.toLocaleString()}
+                  ${token.ui}
                 </div>
                 <div className="col-span-1 flex justify-end">
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
