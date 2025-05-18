@@ -4,6 +4,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getUserData } from "@/actions/get/get-user-data";
 import { getUserWalletBalance } from "@/actions/get/get-wallet-token-balances";
 import useNetwork from "@/hooks/use-network";
+import Banner from "@/features/banner/banner";
 export default async function MainLayout({
   children,
 }: Readonly<{
@@ -36,10 +37,7 @@ export default async function MainLayout({
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <main className="flex flex-col min-h-screen w-full overflow-hidden">
-        {/* <Header /> */}
-
         <div className="flex h-screen overflow-hidden">
-          {/* <Sidebar /> */}
           <div className="w-full">{children}</div>
         </div>
       </main>

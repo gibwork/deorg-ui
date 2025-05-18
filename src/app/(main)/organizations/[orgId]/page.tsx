@@ -58,9 +58,7 @@ async function OrganizationOverviewPage({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ScrollArea className="h-full">
-        <OrganizationOverview organizationId={params.orgId} />
-      </ScrollArea>
+      <OrganizationOverview organizationId={params.orgId} />
     </HydrationBoundary>
   );
 }

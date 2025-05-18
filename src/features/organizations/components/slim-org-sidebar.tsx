@@ -37,7 +37,7 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
     return (
       <div
         className={cn(
-          "fixed top-0 left-0 z-30 flex h-full w-16 flex-col items-center border-r bg-background py-2 bg-stone-100 border-e-2",
+          " z-30 flex h-full w-16 flex-col items-center border-r bg-background py-2 bg-stone-100 border-e-2",
           className
         )}
       >
@@ -53,7 +53,7 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
   return (
     <div
       className={cn(
-        "fixed top-0 left-0 z-30 flex h-full w-16 flex-col items-center border-r bg-background py-2 bg-stone-100 border-e-2",
+        " bg-background p-1 z-30 flex h-screen w-16 flex-col items-center border-r  py-2  border-e-2",
         className
       )}
     >
@@ -86,30 +86,37 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
                       <TooltipTrigger asChild>
                         <Link
                           href={`/organizations/${org.accountAddress}`}
-                          className={cn(
-                            "group relative flex h-10 w-10 items-center justify-center transition-all"
-                          )}
+                          className="group relative flex items-center"
                         >
-                          <Avatar
+                          {isActive && (
+                            <span className="absolute -right-0.5 -top-0.5 h-3 w-3 z-50 rounded-full border-2 border-background bg-primary" />
+                          )}
+                          <div
                             className={cn(
-                              "h-10 w-10 rounded-sm border-none bg-stone-200",
-                              isActive ? "opacity-100" : "opacity-75"
+                              "relative group flex size-10 rounded-[6px] group-hover:rounded-[10px] transition-all overflow-hidden",
+                              isActive && "bg-primary/10 text-primary"
                             )}
                           >
-                            <AvatarImage
-                              src={
-                                org?.metadata?.logoUrl ??
-                                "/images/usdc-icon.png"
-                              }
-                              alt={org.name}
-                            />
-                            <AvatarFallback>
-                              <Skeleton className="h-10 w-10 border-none bg-stone-200" />
-                            </AvatarFallback>
-                          </Avatar>
-                          {isActive && (
-                            <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-background bg-primary" />
-                          )}
+                            <div className="w-full h-full">
+                              <Avatar
+                                className={cn(
+                                  "h-10 w-10 rounded-sm border-none ",
+                                  isActive ? "opacity-100" : "opacity-75"
+                                )}
+                              >
+                                <AvatarImage
+                                  src={
+                                    org?.metadata?.logoUrl ??
+                                    "/images/usdc-icon.png"
+                                  }
+                                  alt={org.name}
+                                />
+                                <AvatarFallback>
+                                  <Skeleton className="h-10 w-10 border-none bg-stone-200" />
+                                </AvatarFallback>
+                              </Avatar>
+                            </div>
+                          </div>
                         </Link>
                       </TooltipTrigger>
                       <TooltipContent

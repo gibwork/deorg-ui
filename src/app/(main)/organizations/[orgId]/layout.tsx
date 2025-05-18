@@ -19,24 +19,22 @@ function OrganizationLayout({
   const { userId } = auth();
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-white dark:bg-gray-900">
-        <OrganizationSidebar orgId={params.orgId} />
+    <div className="flex min-h-screen w-full bg-white dark:bg-gray-900 p-2">
+      <OrganizationSidebar orgId={params.orgId} />
 
-        <div className="flex-1 w-full">
-          <OrganizationHeader organizationId={params.orgId} />
-          <div className="container py-0 px-4 md:px-6 pb-10">
-            <div className="h-[calc(100vh-1rem)] ">
-              <ScrollArea className="h-full">
-                <div className="mt-6 w-3/4 mx-auto ">
-                  <Unauthorized orgId={params.orgId}>{children}</Unauthorized>
-                </div>
-              </ScrollArea>
-            </div>
+      <div className="flex-1 w-full">
+        <OrganizationHeader organizationId={params.orgId} />
+        <div className="container py-0 px-4 md:px-6 pb-10">
+          <div className="h-[calc(100vh-1rem)] ">
+            <ScrollArea className="h-full">
+              <div className="mt-6 w-3/4 mx-auto ">
+                <Unauthorized orgId={params.orgId}>{children}</Unauthorized>
+              </div>
+            </ScrollArea>
           </div>
         </div>
       </div>
-    </SidebarProvider>
+    </div>
   );
 }
 

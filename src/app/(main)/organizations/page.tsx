@@ -28,9 +28,11 @@ async function Organizations() {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ScrollArea className="h-full">
-        <OrganizationsList />
-      </ScrollArea>
+      <div className="h-[calc(100vh-1rem)] ">
+        <ScrollArea className="h-full">
+          <OrganizationsList />
+        </ScrollArea>
+      </div>
     </HydrationBoundary>
   );
 }
