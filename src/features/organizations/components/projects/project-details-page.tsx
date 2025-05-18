@@ -305,9 +305,9 @@ export function TaskStatusBadge({ status }: { status: string }) {
   }
 
   const statusMap: Record<string, string> = {
-    to_do: "To Do",
-    in_progress: "In Progress",
+    ready: "In Progress",
     completed: "Completed",
+    paid: "Paid",
   };
 
   return <Badge className={className}>{statusMap[status] || status}</Badge>;

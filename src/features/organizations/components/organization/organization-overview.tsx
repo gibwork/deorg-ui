@@ -195,35 +195,6 @@ export function OrganizationOverview({
     error,
   } = useOrganization(organizationId);
 
-  const stats = [
-    { label: "Active Proposals", value: 3, icon: FileText },
-    { label: "Open Tasks", value: 12, icon: ListChecks },
-    { label: "Contributors", value: organization?.members.length, icon: Users },
-    // {
-    //   label: "Treasury Balance",
-    //   value: `${organization?.token?.amount} SOL`,
-    //   icon: BarChart3,
-    // },
-  ];
-
-  const {
-    data: organizationOverview,
-    isLoading: isOrganizationOverviewLoading,
-    error: organizationOverviewError,
-  } = useQuery({
-    queryKey: ["organizationOverview", organizationId],
-    queryFn: async () => {
-      const organization = await getOrganizationOverview(organizationId);
-      if (organization.error) throw new Error(organization.error);
-      return organization.success;
-    },
-  });
-
-  const handleViewProject = (project: any) => {
-    setSelectedProject(project);
-    setShowProjectDetail(true);
-  };
-
   if (error) {
     return (
       <div className="space-y-6">

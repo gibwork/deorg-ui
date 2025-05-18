@@ -29,7 +29,7 @@ export const usePriorityFeeLevelStore = create<PriorityState>()(
         set({ isPriorityFeeModeMaxCap: value }),
     }),
     {
-      name: "gibwork-priority-fee",
+      name: "deorg-priority-fee",
       storage: createJSONStorage(() => localStorage),
     }
   )

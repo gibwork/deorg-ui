@@ -5,6 +5,7 @@ import OrganizationsList from "@/features/organizations/components/organizations
 import { HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { dehydrate } from "@tanstack/react-query";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function page() {
   return (
@@ -27,7 +28,9 @@ async function Organizations() {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <OrganizationsList />
+      <ScrollArea className="h-full">
+        <OrganizationsList />
+      </ScrollArea>
     </HydrationBoundary>
   );
 }

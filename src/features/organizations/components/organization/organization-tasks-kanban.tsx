@@ -337,7 +337,7 @@ export function OrganizationTasksKanban({
   };
 
   const columnTitles = {
-    ready: "Ready",
+    ready: "In Progress",
     completed: "Completed",
     paid: "Paid",
   };

@@ -85,7 +85,7 @@ export const useWalletAuth = () => {
   }, [walletModal]);
 
   useEffect(() => {
-    if (connected && publicKey) {
+    if (connected && !!publicKey) {
       handleSignIn();
     }
   }, [publicKey]);

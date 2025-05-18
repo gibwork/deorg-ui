@@ -22,7 +22,7 @@ import {
   Wallet,
 } from "lucide-react";
 
-export const gibworkLogoImgUrl = "https://media.gib.work/work-logo.png";
+export const workLogoImgUrl = "https://media.gib.work/work-logo.png";
 export const checkImgUrl = "https://cdn.gib.work/images/check-image.png";
 
 export const navItems: NavItem[] = [
