@@ -269,6 +269,13 @@ export function CreateOrganizationForm() {
       toast.dismiss();
       const transactionId = startTransaction(`Create organization`);
 
+      const requiredTokenData = {
+        mintAddress: data.tokenAddress,
+        symbol: tokenInfo?.success?.symbol!,
+        imageUrl: tokenInfo?.success?.logoURI!,
+        amount: data.requiredTokenAmount!,
+      };
+
       updateStep(1, "loading", "Preparing transaction details...");
       const prepareCreateOrganizationResponse = await prepareCreateOrganization(
         {
@@ -286,6 +293,7 @@ export function CreateOrganizationForm() {
           discordUrl: data.discordUrl,
           telegramUrl: data.telegramUrl,
           description: data.description,
+          token: requiredTokenData,
           // rolePromotionRequirement: data.rolePromotionRequirement,
         }
       );
@@ -304,13 +312,6 @@ export function CreateOrganizationForm() {
       );
 
       const serializedTx = await signTransaction(retreivedTx);
-
-      const requiredTokenData = {
-        mintAddress: data.tokenAddress,
-        symbol: tokenInfo?.success?.symbol!,
-        imageUrl: tokenInfo?.success?.logoURI!,
-        amount: data.requiredTokenAmount!,
-      };
 
       const confirmTxPayload = {
         transactionId: prepareCreateOrganizationResponse.success.transactionId,

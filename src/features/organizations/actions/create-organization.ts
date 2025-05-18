@@ -65,6 +65,7 @@ export type CreateOrganizationFormDataType = {
   twitterUrl?: string;
   discordUrl?: string;
   telegramUrl?: string;
+  token?: RequiredToken | null;
   // rolePromotionRequirement: "majority" | "supermajority" | "consensus";
 };
 
