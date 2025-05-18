@@ -17,16 +17,6 @@ import {
   FolderKanban,
   Globe,
 } from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarTrigger,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
-} from "@/components/ui/sidebar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -47,9 +37,11 @@ import { SlimOrgSidebar } from "./slim-org-sidebar";
 import { SideBarLoading } from "@/components/layout/sidebar";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMediaQuery } from "usehooks-ts";
+
 export function OrganizationSidebar({ orgId }: { orgId: string }) {
   const pathname = usePathname();
-  const { isMobile } = useSidebar();
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const { data: organization } = useOrganization(orgId);
   const { data: projectsData } = useOrganizationProjects(orgId, "active");
 
@@ -76,19 +68,17 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
     <>
       {!isMobile && (
         <div className="fixed top-4 left-4 z-40 md:hidden">
-          <SidebarTrigger />
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <ChevronDown className="h-4 w-4" />
+          </Button>
         </div>
       )}
 
-      <SlimOrgSidebar
-        orgId={organization!.accountAddress!}
-        className="shadow-md"
-      />
-      <Sidebar
-        className="fixed top-0 left-16 max-h-full bg-white"
-        style={{ height: "100vh" }}
-      >
-        <SidebarHeader className="p-0 bg-white">
+      <SlimOrgSidebar orgId={organization!.accountAddress!} />
+
+      <div className=" w-64 h-screen flex flex-col ">
+        {/* Header */}
+        <div className="p-0 bg-white flex-shrink-0 ">
           <div className="flex flex-row border-b border-stone-200 h-[50px] p-1">
             <div className="h-[42px] w-[42px]">
               {organization?.metadata?.logoUrl ? (
@@ -103,8 +93,8 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                 <Skeleton className="h-8 w-8 m-1 rounded-sm bg-stone-200" />
               )}
             </div>
-            <div className="flex flex-col ms-2">
-              <h1 className=" font-bold text-black">{organization.name}</h1>
+            <div className="flex flex-col ms-2 ">
+              <h1 className="font-bold text-black">{organization.name}</h1>
               {organization.metadata && (
                 <div className="flex flex-row items-center gap-2 opacity-60 cursor-pointer">
                   {organization.metadata.twitterUrl && (
@@ -150,63 +140,49 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
               )}
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center py-2 border-b">
+          <div className="flex flex-col items-center justify-center py-2 border-b border-r">
             <div className="flex flex-row items-center gap-2">
               <Icons.usdc className="h-8 w-8" />
               <span className="text-3xl font-bold text-black">$100.17</span>
             </div>
             <span className="text-sm text-stone-500">Total Earned</span>
           </div>
-        </SidebarHeader>
+        </div>
 
-        <SidebarContent className="bg-white">
-          <SidebarMenu>
+        {/* Content */}
+        <div className="border-r overflow-y-auto flex-1">
+          <nav className="">
             {OrganizationNavbarItems.map((item) => {
-              // Special handling for Projects item to make it collapsible
               if (item.value === "projects") {
                 const isProjectsActive =
                   pathname === item.href(orgId) ||
                   pathname.includes(`/organizations/${orgId}/projects/`);
 
-                // If there are no active projects, show a direct link
                 if (!projectsData?.activeProjects?.length) {
                   return (
-                    <SidebarMenuItem
+                    <Link
                       key={item.value}
-                      className="border-b border-stone-200"
+                      href={item.href(orgId)}
+                      className={cn(
+                        "flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200",
+                        isProjectsActive
+                          ? "bg-stone-100 text-black"
+                          : "text-stone-600 hover:bg-stone-50"
+                      )}
                     >
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isProjectsActive}
-                        tooltip={item.label}
-                        className="h-10"
-                      >
-                        <Link
-                          href={item.href(orgId)}
-                          className={cn(
-                            isProjectsActive && " !text-black",
-                            "rounded-none"
-                          )}
-                        >
-                          <item.icon
-                            className={cn(
-                              "h-8 w-8",
-                              isProjectsActive && "stroke-black"
-                            )}
-                          />
-                          <span>{item.label}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                      <item.icon
+                        className={cn(
+                          "h-4 w-4 mr-3",
+                          isProjectsActive && "stroke-black"
+                        )}
+                      />
+                      {item.label}
+                    </Link>
                   );
                 }
 
-                // If there are active projects, show the dropdown
                 return (
-                  <SidebarMenuItem
-                    key={item.value}
-                    className="border-b border-stone-200"
-                  >
+                  <div key={item.value} className="border-b border-stone-200">
                     <Accordion
                       type="single"
                       collapsible
@@ -216,35 +192,26 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                       <AccordionItem value="projects" className="border-none">
                         <AccordionTrigger
                           className={cn(
-                            "py-0 hover:bg-stone-100",
+                            "py-3 px-4 hover:bg-stone-100",
                             isProjectsActive && "bg-stone-100"
                           )}
                         >
-                          <SidebarMenuButton
-                            isActive={isProjectsActive}
-                            tooltip={item.label}
-                            className="h-10 w-full flex justify-between"
-                          >
-                            <div className="flex items-center gap-2">
-                              <item.icon
-                                className={cn(
-                                  "h-4 w-4",
-                                  isProjectsActive && "stroke-black"
-                                )}
-                              />
-                              <span
-                                className={cn(
-                                  isProjectsActive && "!text-black"
-                                )}
-                              >
-                                Projects
-                              </span>
-                            </div>
-                          </SidebarMenuButton>
+                          <div className="flex items-center gap-2">
+                            <item.icon
+                              className={cn(
+                                "h-4 w-4",
+                                isProjectsActive && "stroke-black"
+                              )}
+                            />
+                            <span
+                              className={cn(isProjectsActive && "!text-black")}
+                            >
+                              Projects
+                            </span>
+                          </div>
                         </AccordionTrigger>
                         <AccordionContent>
                           <div className="flex flex-col gap-2 ml-10 mt-1">
-                            {/* Display active projects if we have any */}
                             {projectsData?.activeProjects?.map(
                               (project: any) => (
                                 <Link
@@ -268,41 +235,35 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                         </AccordionContent>
                       </AccordionItem>
                     </Accordion>
-                  </SidebarMenuItem>
+                  </div>
                 );
               }
 
-              // Regular menu items
               const isActive = pathname === item.href(orgId);
 
               return (
-                <SidebarMenuItem
+                <Link
                   key={item.value}
-                  className="border-b border-stone-200"
+                  href={item.href(orgId)}
+                  className={cn(
+                    "flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200",
+                    isActive
+                      ? "bg-stone-100 text-black"
+                      : "text-stone-600 hover:bg-stone-50"
+                  )}
                 >
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive}
-                    tooltip={item.label}
-                    className="h-10"
-                  >
-                    <Link
-                      href={item.href(orgId)}
-                      className={cn(isActive && " !text-black", "rounded-none")}
-                    >
-                      <item.icon
-                        className={cn("h-8 w-8", isActive && "stroke-black")}
-                      />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                  <item.icon
+                    className={cn("h-4 w-4 mr-3", isActive && "stroke-black")}
+                  />
+                  {item.label}
+                </Link>
               );
             })}
-          </SidebarMenu>
-        </SidebarContent>
+          </nav>
+        </div>
 
-        <SidebarFooter className="p-4 bg-white">
+        {/* Footer */}
+        {/* <div className="p-4 bg-white border-t border-stone-200 flex-shrink-0">
           <Link
             href="/organizations"
             className={cn(
@@ -315,8 +276,8 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
               <span className="text-sm">Organizations</span>
             </div>
           </Link>
-        </SidebarFooter>
-      </Sidebar>
+        </div> */}
+      </div>
     </>
   );
 }
