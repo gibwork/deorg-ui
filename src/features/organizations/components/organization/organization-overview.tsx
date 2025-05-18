@@ -45,6 +45,7 @@ import {
   createTransferInstruction,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
+import { useToast } from "@/components/ui/use-toast";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -94,9 +95,11 @@ function DepositModal({
         publicKey
       );
 
+      const treasuryTokenAccount = organization.treasuryBalances[0]!;
+
       // Convert amount to raw value using decimals
       const rawAmount = Math.floor(
-        parseFloat(amount) * Math.pow(10, organization.treasuryBalance.decimals)
+        parseFloat(amount) * Math.pow(10, treasuryTokenAccount.decimals)
       );
 
       const transaction = new Transaction();
@@ -105,7 +108,7 @@ function DepositModal({
 
       console.log({
         from: userTokenAccount.toBase58(), // from
-        to: organization.treasuryTokenAccount, // to
+        to: treasuryTokenAccount.tokenAccount, // to
         mint: organization.tokenMint, // mint
         amount: rawAmount,
       });
@@ -113,7 +116,7 @@ function DepositModal({
       // Add transfer instruction
       const transferInstruction = createTransferInstruction(
         userTokenAccount, // from
-        new PublicKey(organization.treasuryTokenAccount), // to
+        new PublicKey(treasuryTokenAccount.tokenAccount), // to
         publicKey, // owner (signer)
         BigInt(rawAmount)
       );
@@ -188,6 +191,7 @@ export function OrganizationOverview({
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [showProjectDetail, setShowProjectDetail] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
+  const { toast } = useToast();
 
   const {
     data: organization,
@@ -251,20 +255,58 @@ export function OrganizationOverview({
               <div>
                 <p className="text-sm text-muted-foreground">Current Balance</p>
                 <p className="text-2xl font-bold">
-                  {organization?.treasuryBalance?.ui || 0}{" "}
+                  {organization?.treasuryBalances[0]?.ui || 0}{" "}
                   {organization?.token?.symbol || "SOL"}
                 </p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">Token Account</p>
-                <Link
-                  href={`https://solscan.io/token-account/${organization?.treasuryTokenAccount}`}
-                  target="_blank"
-                >
-                  {organization?.treasuryTokenAccount?.slice(0, 8)}...
-                  {organization?.treasuryTokenAccount?.slice(-8)}
-                  <ExternalLink className="h-4 w-4 ml-1 inline-block align-middle pb-1 mt-[0.2rem]" />
-                </Link>
+                <div className="flex items-center justify-end gap-2">
+                  <Link
+                    href={`https://solscan.io/account/${organization?.treasuryBalances[0]?.tokenAccount}?cluster=devnet`}
+                    target="_blank"
+                  >
+                    {organization?.treasuryBalances[0]?.tokenAccount?.slice(
+                      0,
+                      8
+                    )}
+                    ...
+                    {organization?.treasuryBalances[0]?.tokenAccount?.slice(-8)}
+                    <ExternalLink className="h-4 w-4 ml-1 inline-block align-middle pb-1 mt-[0.2rem]" />
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => {
+                      if (organization?.treasuryBalances[0]?.tokenAccount) {
+                        navigator.clipboard.writeText(
+                          organization.treasuryBalances[0].tokenAccount
+                        );
+                        toast({
+                          title: "Copied!",
+                          description: "Address copied to clipboard",
+                        });
+                      }
+                    }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4"
+                    >
+                      <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                    </svg>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

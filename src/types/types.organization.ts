@@ -104,12 +104,13 @@ export interface Organization {
   token?: RequiredToken | null;
   multisigWallet?: string;
   hasTreasuryRegistryAccount: boolean;
-  treasuryTokenAccount: string;
-  treasuryBalance: {
+  treasuryBalances: Array<{
+    tokenAccount: string;
+    mint: string;
     raw: string;
     ui: number;
     decimals: number;
-  };
+  }>;
   contributorProposalThresholdPercentage?: number;
   contributorProposalValidityPeriod?: number;
   treasuryTransferQuorumPercentage?: number;
