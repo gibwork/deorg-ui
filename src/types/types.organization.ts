@@ -105,11 +105,18 @@ export interface Organization {
   multisigWallet?: string;
   hasTreasuryRegistryAccount: boolean;
   treasuryBalances: Array<{
-    tokenAccount: string;
+    decimals: number;
     mint: string;
     raw: string;
+    token: {
+      address: string;
+      name: string;
+      symbol: string;
+      decimals: number;
+      logoURI: string;
+    };
+    tokenAccount: string;
     ui: number;
-    decimals: number;
   }>;
   contributorProposalThresholdPercentage?: number;
   contributorProposalValidityPeriod?: number;
