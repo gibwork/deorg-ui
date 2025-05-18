@@ -70,7 +70,7 @@ export function MobileSidebar({ className }: SidebarProps) {
                 className="rounded-md me-2 mt-1 dark:bg-white"
               />
               <h2 className="text-2xl md:text-4xl font-bold tracking-tight">
-                gibwork
+                DeOrg
               </h2>
             </Link>
           </div>

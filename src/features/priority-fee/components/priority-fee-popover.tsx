@@ -94,7 +94,7 @@ export function PriorityFeePopover() {
           <div>
             <p className="text-xl font-medium">Priority Fee</p>
             <p className=" text-muted-foreground pt-1">
-              Fee settings are applied across all Gibwork features, including
+              Fee settings are applied across all DeOrg features, including
               Deposit, Withdraw, and Refund.
             </p>
           </div>
@@ -128,8 +128,7 @@ export function PriorityFeePopover() {
                   </TabsList>
                 </Tabs>
                 <p className=" text-muted-foreground pt-1 ">
-                  Gibwork submits your transaction through RPC with priority
-                  fees.
+                  DeOrg submits your transaction through RPC with priority fees.
                 </p>
                 <Separator className="mt-2" />
               </motion.div>
@@ -163,9 +162,9 @@ export function PriorityFeePopover() {
             </div>
             <p className="text-muted-foreground pt-1">
               {isSelectedPriorityFeeModeMaxCap
-                ? `Gibwork auto-optimizes priority fees for your transaction. Set a
+                ? `DeOrg auto-optimizes priority fees for your transaction. Set a
               max cap to prevent overpaying.`
-                : `Gibwork will use the exact fee you set.`}
+                : `DeOrg will use the exact fee you set.`}
             </p>
           </div>
 
