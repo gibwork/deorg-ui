@@ -62,11 +62,11 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
           href="/"
           className="flex items-center justify-center shadow-md box-shadow-md"
         >
-          <Icons.workLogo width={42} height={42} className="rounded-md" />
+          <img src="https://deorg-dev.s3.us-east-1.amazonaws.com/deorg-logo.jpg" className="h-10 w-10 rounded-md" />
         </Link>
       </div>
 
-      <ScrollArea className="flex-1 w-full border-t border-stone-200 pt-6">
+      <ScrollArea className="flex-1 w-full pt-6">
         <div className="flex flex-col items-center gap-4 px-2">
           {isLoading
             ? Array.from({ length: 3 }).map((_, i) => (
