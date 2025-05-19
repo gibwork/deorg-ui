@@ -1,28 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
-import {
-  BarChart3,
-  Clock,
-  FileText,
-  ListChecks,
-  PlusCircle,
-  Users,
-  ArrowDownToLine,
-  ExternalLink,
-} from "lucide-react";
+
 import { ProjectDetailModal } from "./project-detail-modal";
 import { useOrganization } from "../../hooks/use-organization";
-import { useQuery } from "@tanstack/react-query";
-import { getOrganizationOverview } from "../../actions/get-organization-overview";
 import {
   Dialog,
   DialogContent,
@@ -34,34 +17,239 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import {
-  Connection,
-  PublicKey,
-  Transaction,
-  SystemProgram,
-} from "@solana/web3.js";
-import {
-  TOKEN_PROGRAM_ID,
   createTransferInstruction,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
-import { useToast } from "@/components/ui/use-toast";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Organization } from "@/types/types.organization";
 import { OrganizationProposals } from "./organization-proposals";
-import Link from "next/link";
 
-interface OrganizationOverviewProps {
-  organization: {
-    name: string;
-    description: string;
-    members: number;
-    contributors: number;
-    balance: number;
-    multisigAddress: string;
-  };
+import Image from "next/image";
+import { useCheckMembership } from "../../hooks/use-check-membership";
+import { useAuth } from "@clerk/nextjs";
+import { FollowOrganizationButton } from "../follow-organization-button";
+
+export function OrganizationOverview({
+  organizationId,
+}: {
+  organizationId: string;
+}) {
+  const [selectedProject, setSelectedProject] = useState<any | null>(null);
+  const [showProjectDetail, setShowProjectDetail] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const { userId } = useAuth();
+
+  const {
+    data: organization,
+    isLoading,
+    error,
+  } = useOrganization(organizationId);
+
+  const { data: membershipData, isLoading: isMembershipLoading } =
+    useCheckMembership(organizationId, { enabled: !!userId });
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            Failed to load organization details. Please try again later.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  console.log(organization);
+
+  if (organization)
+    return (
+      <div className="space-y-6 pb-20">
+        {/* header */}
+
+        <div className="bg-white dark:bg-gray-950 rounded-lg border p-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex w-full gap-3">
+              <div className="h-20 w-20">
+                <Image
+                  src={
+                    organization?.metadata?.logoUrl ??
+                    organization.token?.imageUrl!
+                  }
+                  alt={organization?.name}
+                  width={100}
+                  height={100}
+                  className="rounded-lg "
+                />
+              </div>
+
+              <div className="flex flex-col  w-full">
+                <h1 className="text-2xl font-bold">{organization?.name}</h1>
+
+                <div className="flex flex-row items-center gap-3 text-sm text-stone-500">
+                  <span className="flex items-center gap-1">
+                    {organization.contributors?.length || 0} contributors
+                  </span>
+                  •
+                  <span className="flex items-center gap-1">
+                    {organization.members?.length || 0} Followers
+                  </span>
+                </div>
+              </div>
+
+              {!isMembershipLoading ? (
+                <div className="inline-flex justify-end ">
+                  <FollowOrganizationButton
+                    organizationId={organizationId}
+                    isFollowing={membershipData?.isMember}
+                  />
+                </div>
+              ) : (
+                <></>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <OrganizationProposals organizationId={organizationId} />
+
+        {/* <div className="grid gap-4 md:grid-cols-2">
+        <Card className="col-span-1">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Recent Activity</CardTitle>
+              <Button variant="ghost" size="sm">
+                View All
+              </Button>
+            </div>
+            <CardDescription>
+              Recent actions in your organization
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {organizationOverview?.recentActivity.map((activity, i) => (
+                <div key={i} className="flex items-start gap-4">
+                  <div className="rounded-full p-2 bg-muted">
+                    {activity.type === "proposal" && (
+                      <FileText className="h-4 w-4" />
+                    )}
+                    {activity.type === "task" && (
+                      <ListChecks className="h-4 w-4" />
+                    )}
+                    {activity.type === "member" && (
+                      <Users className="h-4 w-4" />
+                    )}
+                    {activity.type === "transaction" && (
+                      <BarChart3 className="h-4 w-4" />
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">{activity.title}</p>
+                    <div className="flex items-center text-xs text-muted-foreground">
+                      <Clock className="mr-1 h-3 w-3" />
+                      {activity.time}
+                    </div>
+                  </div>
+                  <div className="ml-auto">
+                    <Badge status={activity.status} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-1">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Quick Actions</CardTitle>
+            </div>
+            <CardDescription>
+              Common tasks for organization management
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <Button
+                variant="outline"
+                className="h-auto flex-col items-start p-4 justify-start text-left"
+              >
+                <div className="flex items-center w-full">
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  <span>New Proposal</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Create a proposal
+                </p>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="h-auto flex-col items-start p-4 justify-start text-left"
+              >
+                <div className="flex items-center w-full">
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  <span>New Task</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Create a task for contributors
+                </p>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="h-auto flex-col items-start p-4 justify-start text-left"
+              >
+                <div className="flex items-center w-full">
+                  <Users className="h-4 w-4 mr-2" />
+                  <span>Manage Roles</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Update member permissions
+                </p>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="h-auto flex-col items-start p-4 justify-start text-left"
+              >
+                <div className="flex items-center w-full">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  <span>Treasury</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Manage organization funds
+                </p>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div> */}
+
+        {selectedProject && (
+          <ProjectDetailModal
+            isOpen={showProjectDetail}
+            onClose={() => setShowProjectDetail(false)}
+            project={selectedProject}
+          />
+        )}
+
+        {showDepositModal && (
+          <DepositModal
+            isOpen={showDepositModal}
+            onClose={() => setShowDepositModal(false)}
+            organization={organization!}
+          />
+        )}
+      </div>
+    );
 }
 
 function DepositModal({
@@ -180,271 +368,6 @@ function DepositModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
-
-export function OrganizationOverview({
-  organizationId,
-}: {
-  organizationId: string;
-}) {
-  const [selectedProject, setSelectedProject] = useState<any | null>(null);
-  const [showProjectDetail, setShowProjectDetail] = useState(false);
-  const [showDepositModal, setShowDepositModal] = useState(false);
-  const { toast } = useToast();
-
-  const {
-    data: organization,
-    isLoading,
-    error,
-  } = useOrganization(organizationId);
-
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            Failed to load organization details. Please try again later.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6 pb-20">
-      {/* <OrganizationHeader organizationId={organizationId} /> */}
-      {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {stats.map((stat, i) => (
-          <Card key={i}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.label}
-              </CardTitle>
-              <stat.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-            </CardContent>
-          </Card>
-        ))}
-      </div> */}
-
-      <Card className="border-x-0 border-t-0 p-0 shadow-none mb-10 border-b border-stone-200 rounded-none pb-1">
-        <CardHeader className="px-0">
-          <div className="flex items-center justify-between">
-            {/* <CardTitle>Treasury Balance</CardTitle> */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowDepositModal(true)}
-            >
-              <ArrowDownToLine className="h-4 w-4 mr-2" />
-              Deposit
-            </Button>
-          </div>
-          {/* <CardDescription>
-            {`${organization?.name}'s treasury balance and transaction history`}
-          </CardDescription> */}
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Current Balance</p>
-                <p className="text-2xl font-bold">
-                  {organization?.treasuryBalances[0]?.ui || 0}{" "}
-                  {organization?.token?.symbol || "SOL"}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Token Account</p>
-                <div className="flex items-center justify-end gap-2">
-                  <Link
-                    href={`https://solscan.io/account/${organization?.treasuryBalances[0]?.tokenAccount}?cluster=devnet`}
-                    target="_blank"
-                  >
-                    {organization?.treasuryBalances[0]?.tokenAccount?.slice(
-                      0,
-                      8
-                    )}
-                    ...
-                    {organization?.treasuryBalances[0]?.tokenAccount?.slice(-8)}
-                    <ExternalLink className="h-4 w-4 ml-1 inline-block align-middle pb-1 mt-[0.2rem]" />
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => {
-                      if (organization?.treasuryBalances[0]?.tokenAccount) {
-                        navigator.clipboard.writeText(
-                          organization.treasuryBalances[0].tokenAccount
-                        );
-                        toast({
-                          title: "Copied!",
-                          description: "Address copied to clipboard",
-                        });
-                      }
-                    }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-4 w-4"
-                    >
-                      <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-                      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-                    </svg>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <OrganizationProposals organizationId={organizationId} />
-
-      {/* <div className="grid gap-4 md:grid-cols-2">
-        <Card className="col-span-1">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Recent Activity</CardTitle>
-              <Button variant="ghost" size="sm">
-                View All
-              </Button>
-            </div>
-            <CardDescription>
-              Recent actions in your organization
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {organizationOverview?.recentActivity.map((activity, i) => (
-                <div key={i} className="flex items-start gap-4">
-                  <div className="rounded-full p-2 bg-muted">
-                    {activity.type === "proposal" && (
-                      <FileText className="h-4 w-4" />
-                    )}
-                    {activity.type === "task" && (
-                      <ListChecks className="h-4 w-4" />
-                    )}
-                    {activity.type === "member" && (
-                      <Users className="h-4 w-4" />
-                    )}
-                    {activity.type === "transaction" && (
-                      <BarChart3 className="h-4 w-4" />
-                    )}
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">{activity.title}</p>
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Clock className="mr-1 h-3 w-3" />
-                      {activity.time}
-                    </div>
-                  </div>
-                  <div className="ml-auto">
-                    <Badge status={activity.status} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="col-span-1">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Quick Actions</CardTitle>
-            </div>
-            <CardDescription>
-              Common tasks for organization management
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                variant="outline"
-                className="h-auto flex-col items-start p-4 justify-start text-left"
-              >
-                <div className="flex items-center w-full">
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  <span>New Proposal</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Create a proposal
-                </p>
-              </Button>
-
-              <Button
-                variant="outline"
-                className="h-auto flex-col items-start p-4 justify-start text-left"
-              >
-                <div className="flex items-center w-full">
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  <span>New Task</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Create a task for contributors
-                </p>
-              </Button>
-
-              <Button
-                variant="outline"
-                className="h-auto flex-col items-start p-4 justify-start text-left"
-              >
-                <div className="flex items-center w-full">
-                  <Users className="h-4 w-4 mr-2" />
-                  <span>Manage Roles</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Update member permissions
-                </p>
-              </Button>
-
-              <Button
-                variant="outline"
-                className="h-auto flex-col items-start p-4 justify-start text-left"
-              >
-                <div className="flex items-center w-full">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  <span>Treasury</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Manage organization funds
-                </p>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div> */}
-
-      {selectedProject && (
-        <ProjectDetailModal
-          isOpen={showProjectDetail}
-          onClose={() => setShowProjectDetail(false)}
-          project={selectedProject}
-        />
-      )}
-
-      {showDepositModal && (
-        <DepositModal
-          isOpen={showDepositModal}
-          onClose={() => setShowDepositModal(false)}
-          organization={organization!}
-        />
-      )}
-    </div>
   );
 }
 

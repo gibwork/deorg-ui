@@ -2,39 +2,21 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import {
-  BarChart3,
-  Calendar,
-  FileText,
-  Home,
-  ListChecks,
-  Settings,
-  Users,
-  Activity,
-  ArrowLeftToLine,
-  ArrowLeft,
-  ChevronDown,
-  FolderKanban,
-  Globe,
-} from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ChevronDown, Globe } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { OrganizationNavbarItems } from "@/constants/data";
 import { useOrganization } from "../hooks/use-organization";
-import { OrgsSwitcher } from "./orgs-switcher";
+
 import { Icons } from "@/components/icons";
-import { useMemo, useState } from "react";
 import { useOrganizationProjects } from "../hooks/use-organization-projects";
 import { SlimOrgSidebar } from "./slim-org-sidebar";
-import { SideBarLoading } from "@/components/layout/sidebar";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMediaQuery } from "usehooks-ts";
@@ -44,21 +26,6 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { data: organization } = useOrganization(orgId);
   const { data: projectsData } = useOrganizationProjects(orgId, "active");
-
-  const mockOrgs = useMemo(() => {
-    return [
-      {
-        name: organization?.name,
-        logoUrl: organization?.logoUrl,
-        id: organization?.id,
-      },
-      {
-        name: "Organization",
-        logoUrl: organization?.logoUrl,
-        id: "123",
-      },
-    ];
-  }, [organization]);
 
   if (organization)
     return (
@@ -78,17 +45,16 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
           <div className="p-0 bg-white flex-shrink-0 ">
             <div className="flex flex-row border-b border-stone-200 h-[50px] p-1">
               <div className="h-[42px] w-[42px]">
-                {organization?.metadata?.logoUrl ? (
-                  <Image
-                    src={organization?.metadata?.logoUrl ?? ""}
-                    alt={organization.name}
-                    width={42}
-                    height={42}
-                    className="rounded-lg p-1"
-                  />
-                ) : (
-                  <Skeleton className="h-8 w-8 m-1 rounded-sm bg-stone-200" />
-                )}
+                <Image
+                  src={
+                    organization?.metadata?.logoUrl ??
+                    organization?.token?.imageUrl!
+                  }
+                  alt={organization.name}
+                  width={42}
+                  height={42}
+                  className="rounded-lg p-1"
+                />
               </div>
               <div className="flex flex-col ms-2 ">
                 <h1 className="font-bold text-black">{organization.name}</h1>

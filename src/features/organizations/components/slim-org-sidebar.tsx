@@ -93,7 +93,7 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
                                 <AvatarImage
                                   src={
                                     org?.metadata?.logoUrl ??
-                                    "/images/usdc-icon.png"
+                                    org.token?.imageUrl!
                                   }
                                   alt={org.name}
                                 />

@@ -46,7 +46,7 @@ export function Unauthorized({ orgId, children }: UnauthorizedProps) {
   // Show loading spinner while any data is loading
   if (!isLoaded || isOrganizationLoading || isMembershipLoading) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="flex min-h-screen w-full items-center justify-center ">
         <LoadingSpinner />
       </div>
     );
@@ -55,7 +55,7 @@ export function Unauthorized({ orgId, children }: UnauthorizedProps) {
   // Show connect wallet alert for unauthenticated users
   if (!userId) {
     return (
-      <div className="flex min-h-screen w-full bg-gray-50 dark:bg-gray-900">
+      <div className="flex min-h-screen w-full ">
         <div className="flex-1 w-full">
           <div className="container py-3 px-4 md:px-6">
             <div className="flex items-center justify-center">
@@ -84,43 +84,41 @@ export function Unauthorized({ orgId, children }: UnauthorizedProps) {
     );
   }
 
-  // Show join organization alert for non-members
-  if (organization && !membershipData?.isMember) {
-    return (
-      <div className="flex min-h-screen w-full bg-gray-50 dark:bg-gray-900">
-        <div className="flex-1 w-full">
-          <div className="container py-3 px-4 md:px-6">
-            <div className="flex items-center justify-center">
-              <div className="max-w-md w-full space-y-6">
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Join Organization</AlertTitle>
-                  <AlertDescription>
-                    You need to join this organization to view its details.
-                  </AlertDescription>
-                </Alert>
-                <div className="flex justify-center">
-                  <Button onClick={() => setShowJoinDialog(true)}>
-                    Join Organization
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {organization && (
-          <JoinOrganizationDialog
-            organization={organization}
-            isOpen={showJoinDialog}
-            onOpenChange={setShowJoinDialog}
-            onSuccess={handleJoinSuccess}
-          />
-        )}
-      </div>
-    );
-  }
+  // // Show join organization alert for non-members
+  // if (organization && !membershipData?.isMember) {
+  //   return (
+  //     <div className="flex min-h-screen w-full bg-gray-50 dark:bg-gray-900">
+  //       <div className="flex-1 w-full">
+  //         <div className="container py-3 px-4 md:px-6">
+  //           <div className="flex items-center justify-center">
+  //             <div className="max-w-md w-full space-y-6">
+  //               <Alert>
+  //                 <AlertCircle className="h-4 w-4" />
+  //                 <AlertTitle>Join Organization</AlertTitle>
+  //                 <AlertDescription>
+  //                   You need to join this organization to view its details.
+  //                 </AlertDescription>
+  //               </Alert>
+  //               <div className="flex justify-center">
+  //                 <Button onClick={() => setShowJoinDialog(true)}>
+  //                   Join Organization
+  //                 </Button>
+  //               </div>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </div>
+  //       {organization && (
+  //         <JoinOrganizationDialog
+  //           organization={organization}
+  //           isOpen={showJoinDialog}
+  //           onOpenChange={setShowJoinDialog}
+  //           onSuccess={handleJoinSuccess}
+  //         />
+  //       )}
+  //     </div>
+  //   );
+  // }
 
-  if (membershipData?.isMember) {
-    return <>{children}</>;
-  }
+  return <>{children}</>;
 }
