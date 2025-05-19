@@ -27,7 +27,6 @@ export function OrgsSwitcher({ orgs }: { orgs: any }) {
   const router = useRouter();
   const activeOrg = orgs[0];
 
-  console.log(orgs, "orgs");
   if (!activeOrg) {
     return null;
   }

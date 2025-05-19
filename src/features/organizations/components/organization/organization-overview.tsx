@@ -66,8 +66,6 @@ export function OrganizationOverview({
     );
   }
 
-  console.log(organization);
-
   if (organization)
     return (
       <div className="space-y-6 pb-20">
@@ -294,12 +292,12 @@ function DepositModal({
       transaction.recentBlockhash = blockhash;
       transaction.feePayer = publicKey;
 
-      console.log({
-        from: userTokenAccount.toBase58(), // from
-        to: treasuryTokenAccount.tokenAccount, // to
-        mint: organization.tokenMint, // mint
-        amount: rawAmount,
-      });
+      // console.log({
+      //   from: userTokenAccount.toBase58(), // from
+      //   to: treasuryTokenAccount.tokenAccount, // to
+      //   mint: organization.tokenMint, // mint
+      //   amount: rawAmount,
+      // });
 
       // Add transfer instruction
       const transferInstruction = createTransferInstruction(

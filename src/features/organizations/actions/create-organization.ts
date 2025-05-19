@@ -38,8 +38,6 @@ export const createOrganization = async (
       }
     );
 
-    console.log(data);
-
     revalidatePath(`/`);
     revalidatePath(`/organizations`);
     return { success: data };
