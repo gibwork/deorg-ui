@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -33,12 +33,13 @@ import {
   ArrowUp,
   Copy,
   ExternalLink,
-  Plus,
   RefreshCw,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { useOrganization } from "../../hooks/use-organization";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function OrganizationAssets({ orgId }: { orgId: string }) {
   const { data: organization } = useOrganization(orgId);
@@ -48,31 +49,6 @@ export default function OrganizationAssets({ orgId }: { orgId: string }) {
   const [selectedToken, setSelectedToken] = useState("sol");
   const [amount, setAmount] = useState("");
   const [recipient, setRecipient] = useState("");
-
-  // Mock data
-  const tokens = [
-    {
-      symbol: "SOL",
-      name: "Solana",
-      balance: 2.24,
-      usdValue: 224.0,
-      icon: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png?height=80&width=80&quality=50",
-    },
-    {
-      symbol: "USDC",
-      name: "USD Coin",
-      balance: 150.0,
-      usdValue: 150.0,
-      icon: "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png?height=80&width=80&quality=50",
-    },
-    {
-      symbol: "BONK",
-      name: "Bonk",
-      balance: 1000000,
-      usdValue: 10.0,
-      icon: "https://arweave.net/hQiPZOsRZXGXBJd_82PhVdlM_hACsT_q6wqwf5cSY7I?ext=png?height=80&width=80&quality=50",
-    },
-  ];
 
   const transactions = [
     {
@@ -181,7 +157,7 @@ export default function OrganizationAssets({ orgId }: { orgId: string }) {
         <TabsList>
           <TabsTrigger value="tokens">Tokens</TabsTrigger>
           {/* <TabsTrigger value="nfts">NFTs</TabsTrigger> */}
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          {/* <TabsTrigger value="transactions">Transactions</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="tokens" className="space-y-4 mt-6">
@@ -200,8 +176,8 @@ export default function OrganizationAssets({ orgId }: { orgId: string }) {
               >
                 <div className="col-span-5 flex items-center gap-3">
                   <Image
-                    src={token.token.logoURI || "/placeholder.svg"}
-                    alt={token.token.name}
+                    src={token?.token?.logoURI || "/images/usdc-icon.png"}
+                    alt={token?.token?.name || "Token"}
                     className="w-8 h-8 rounded-full"
                     width={32}
                     height={32}
@@ -220,10 +196,19 @@ export default function OrganizationAssets({ orgId }: { orgId: string }) {
                   ${token.ui}
                 </div>
                 <div className="col-span-1 flex justify-end">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Link
+                    href={`https://explorer.solana.com/address/${token.tokenAccount}?cluster=devnet`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      buttonVariants({ variant: "ghost" }),
+                      "h-8 w-8 p-0"
+                    )}
+                    title="View on Explorer"
+                  >
                     <ExternalLink className="h-4 w-4" />
                     <span className="sr-only">View on Explorer</span>
-                  </Button>
+                  </Link>
                 </div>
               </div>
             ))}
