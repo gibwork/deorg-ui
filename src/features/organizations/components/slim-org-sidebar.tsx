@@ -15,6 +15,7 @@ import { Icons } from "@/components/icons";
 import { useMemberOrganizations } from "../hooks/use-member-organizations";
 import { SideBarLoading } from "@/components/layout/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
 
 interface SlimOrgSidebarProps {
   className?: string;
@@ -29,27 +30,6 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
     error,
   } = useMemberOrganizations();
 
-  if (!memberOrganizations) {
-    return <SideBarLoading />;
-  }
-
-  if (error) {
-    return (
-      <div
-        className={cn(
-          " z-30 flex h-full w-16 flex-col items-center border-r bg-background py-2 bg-stone-100 border-e-2",
-          className
-        )}
-      >
-        <div className="flex flex-col items-center gap-4 px-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-10 w-10 rounded-sm bg-stone-200" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       className={cn(
@@ -62,20 +42,26 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
           href="/"
           className="flex items-center justify-center shadow-md box-shadow-md"
         >
-          <img src="https://deorg-dev.s3.us-east-1.amazonaws.com/deorg-logo.jpg" className="h-10 w-10 rounded-md" />
+          <Image
+            src="https://deorg-dev.s3.us-east-1.amazonaws.com/deorg-logo.jpg"
+            className="h-10 w-10 rounded-md"
+            alt="Deorg Logo"
+            width={40}
+            height={40}
+          />
         </Link>
       </div>
 
       <ScrollArea className="flex-1 w-full pt-6">
         <div className="flex flex-col items-center gap-4 px-2">
-          {isLoading
+          {!memberOrganizations && isLoading
             ? Array.from({ length: 3 }).map((_, i) => (
                 <Skeleton
                   key={i}
                   className="h-10 w-10 rounded-sm bg-stone-200"
                 />
               ))
-            : memberOrganizations.map((org) => {
+            : memberOrganizations?.map((org) => {
                 const isActive = pathname.includes(
                   `/organizations/${org.accountAddress}`
                 );
