@@ -94,7 +94,7 @@ export interface Organization {
   createdBy?: string;
   name: string;
   description?: string;
-  logoUrl?: string;
+  logoUrl: string;
   members: Member[];
   contributors?: string[]; // public-keys
   projects?: ProjectDetails[];

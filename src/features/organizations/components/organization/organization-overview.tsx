@@ -76,10 +76,7 @@ export function OrganizationOverview({
             <div className="flex w-full gap-3">
               <div className="h-20 w-20">
                 <Image
-                  src={
-                    organization?.metadata?.logoUrl ??
-                    organization.token?.imageUrl!
-                  }
+                  src={organization?.metadata?.logoUrl ?? organization.logoUrl}
                   alt={organization?.name}
                   width={100}
                   height={100}

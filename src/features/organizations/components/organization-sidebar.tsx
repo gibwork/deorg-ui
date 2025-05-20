@@ -46,10 +46,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
             <div className="flex flex-row border-b border-stone-200 h-[50px] p-1">
               <div className="h-[42px] w-[42px]">
                 <Image
-                  src={
-                    organization?.metadata?.logoUrl ??
-                    organization?.token?.imageUrl!
-                  }
+                  src={organization?.metadata?.logoUrl ?? organization?.logoUrl}
                   alt={organization.name}
                   width={42}
                   height={42}
