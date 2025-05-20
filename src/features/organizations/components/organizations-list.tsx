@@ -96,12 +96,8 @@ const OrganizationsList = () => {
                 Where On-chain Communities Thrive
               </h1>
               <p className="text-gray-500 mt-4">
-                DeOrg makes it easy to create, organize, and grow your on-chain
-                community with{" "}
-                <span className="font-medium text-black">
-                  actionable governance
-                </span>
-                .
+                DeOrg is a Task protocol for communities to propose, fund and
+                complete work transparently onchain.
               </p>
               <Link
                 href="/organizations/create"
@@ -134,14 +130,14 @@ const OrganizationsList = () => {
               >
                 Explore
               </Badge>
-              {isSignedIn && (
+              {/* {isSignedIn && (
                 <Badge
                   variant="default"
                   className="rounded-sm bg-stone-50 px-4 text-stone-600 hover:bg-stone-100 gap-1 text-lg"
                 >
                   Yours
                 </Badge>
-              )}
+              )} */}
             </div>
           </div>
 

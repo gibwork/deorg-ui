@@ -84,29 +84,83 @@ export function OrganizationProposals({
       </div>
 
       <div className="flex flex-col">
-        <div className="flex flex-col w-full gap-2 mb-8">
-          <p className="text-muted-foreground">ACTIVE</p>
-          {proposals?.activeProposals.map((proposal) => (
-            <ProposalCard
-              key={proposal.id}
-              proposal={proposal}
-              isActive={true}
-              organizationId={organizationId}
-            />
-          ))}
-        </div>
+        {proposals?.activeProposals.length === 0 &&
+        proposals?.pastProposals.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="rounded-full bg-muted p-3">
+              <PlusCircle className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="mt-4 text-lg font-semibold">No proposals yet</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Create a new proposal to get started
+            </p>
+            <Button onClick={() => setShowCreateModal(true)} className="mt-4">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create Proposal
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col w-full gap-2 mb-8">
+              <p className="text-muted-foreground">ACTIVE</p>
+              {proposals?.activeProposals.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center border rounded-lg">
+                  <div className="rounded-full bg-muted p-3">
+                    <Clock className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold">
+                    No active proposals
+                  </h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Create a new proposal to get started
+                  </p>
+                  <Button
+                    onClick={() => setShowCreateModal(true)}
+                    className="mt-4"
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create Proposal
+                  </Button>
+                </div>
+              ) : (
+                proposals?.activeProposals.map((proposal) => (
+                  <ProposalCard
+                    key={proposal.id}
+                    proposal={proposal}
+                    isActive={true}
+                    organizationId={organizationId}
+                  />
+                ))
+              )}
+            </div>
 
-        <div className="flex flex-col w-full gap-2">
-          <p className="text-muted-foreground">PAST</p>
-          {proposals?.pastProposals.map((proposal) => (
-            <ProposalCard
-              key={proposal.id}
-              proposal={proposal}
-              isActive={false}
-              organizationId={organizationId}
-            />
-          ))}
-        </div>
+            <div className="flex flex-col w-full gap-2">
+              <p className="text-muted-foreground">PAST</p>
+              {proposals?.pastProposals.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center border rounded-lg">
+                  <div className="rounded-full bg-muted p-3">
+                    <Clock className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold">
+                    No past proposals
+                  </h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Past proposals will appear here once voting is complete
+                  </p>
+                </div>
+              ) : (
+                proposals?.pastProposals.map((proposal) => (
+                  <ProposalCard
+                    key={proposal.id}
+                    proposal={proposal}
+                    isActive={false}
+                    organizationId={organizationId}
+                  />
+                ))
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* <Tabs defaultValue="active" className="w-full">
