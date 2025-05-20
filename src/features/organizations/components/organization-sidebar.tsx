@@ -20,12 +20,28 @@ import { SlimOrgSidebar } from "./slim-org-sidebar";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMediaQuery } from "usehooks-ts";
-
+import { useMemberTasks } from "../hooks/use-member-tasks";
+import { TaskStatus } from "@/types/types.task";
 export function OrganizationSidebar({ orgId }: { orgId: string }) {
   const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { data: organization } = useOrganization(orgId);
   const { data: projectsData } = useOrganizationProjects(orgId, "active");
+  const { data: tasksData } = useMemberTasks();
+
+  //Get Total Earned in USDC
+  function getTotalEarned() {
+    let amount = 0;
+    tasksData?.forEach((task) => {
+      if (task.tokenInfo.symbol === "USDC" && task.status === TaskStatus.Paid) {
+        const decimals = task.tokenInfo.decimals;
+        const usdAmount = task.paymentAmount / 10 ** decimals;
+        amount += usdAmount;
+      }
+    });
+
+    return amount.toFixed(2);
+  }
 
   if (organization)
     return (
@@ -106,7 +122,9 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
             <div className="flex flex-col items-center justify-center py-2 border-b border-r">
               <div className="flex flex-row items-center gap-2">
                 <Icons.usdc className="h-8 w-8" />
-                <span className="text-3xl font-bold text-black">$0.00</span>
+                <span className="text-3xl font-bold text-black">
+                  {getTotalEarned()}
+                </span>
               </div>
               <span className="text-sm text-stone-500">Total Earned</span>
             </div>
