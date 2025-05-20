@@ -1,4 +1,3 @@
-import { Token } from "./types.work";
 import { User } from "./user.types";
 
 export interface Vote {
