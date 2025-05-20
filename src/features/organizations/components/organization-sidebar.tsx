@@ -106,7 +106,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
             <div className="flex flex-col items-center justify-center py-2 border-b border-r">
               <div className="flex flex-row items-center gap-2">
                 <Icons.usdc className="h-8 w-8" />
-                <span className="text-3xl font-bold text-black">$100.17</span>
+                <span className="text-3xl font-bold text-black">$0.00</span>
               </div>
               <span className="text-sm text-stone-500">Total Earned</span>
             </div>
