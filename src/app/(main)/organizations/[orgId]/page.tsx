@@ -26,14 +26,6 @@ async function OrganizationOverviewPage({
   const queryClient = getQueryClient();
   await Promise.all([
     queryClient.prefetchQuery({
-      queryKey: ["organizationOverview", params.orgId],
-      queryFn: async () => {
-        const organization = await getOrganizationOverview(params.orgId);
-        if (organization.error) throw new Error(organization.error);
-        return organization.success;
-      },
-    }),
-    queryClient.prefetchQuery({
       queryKey: ["organization", params.orgId],
       queryFn: async () => {
         const organization = await getOrganizationDetails(params.orgId);

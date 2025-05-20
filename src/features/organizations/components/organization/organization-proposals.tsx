@@ -50,8 +50,6 @@ export function OrganizationProposals({
 }: {
   organizationId: string;
 }) {
-  const [showCreateModal, setShowCreateModal] = useState(false);
-
   const {
     data: proposals,
     isLoading,
@@ -94,10 +92,13 @@ export function OrganizationProposals({
             <p className="mt-2 text-sm text-muted-foreground">
               Create a new proposal to get started
             </p>
-            <Button onClick={() => setShowCreateModal(true)} className="mt-4">
+            <Link
+              href={`/organizations/${organizationId}/proposals/new`}
+              className={cn(buttonVariants({ variant: "default" }), "mt-4")}
+            >
               <PlusCircle className="mr-2 h-4 w-4" />
               Create Proposal
-            </Button>
+            </Link>
           </div>
         ) : (
           <>
@@ -114,13 +115,16 @@ export function OrganizationProposals({
                   <p className="mt-2 text-sm text-muted-foreground">
                     Create a new proposal to get started
                   </p>
-                  <Button
-                    onClick={() => setShowCreateModal(true)}
-                    className="mt-4"
+                  <Link
+                    href={`/organizations/${organizationId}/proposals/new`}
+                    className={cn(
+                      buttonVariants({ variant: "default" }),
+                      "mt-4"
+                    )}
                   >
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Create Proposal
-                  </Button>
+                  </Link>
                 </div>
               ) : (
                 proposals?.activeProposals.map((proposal) => (
@@ -162,80 +166,6 @@ export function OrganizationProposals({
           </>
         )}
       </div>
-
-      {/* <Tabs defaultValue="active" className="w-full">
-        <TabsList>
-          <TabsTrigger value="active">
-            Active ({proposals?.activeProposals.length})
-          </TabsTrigger>
-          <TabsTrigger value="past">
-            Past ({proposals?.pastProposals.length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="active" className="space-y-4 mt-6">
-          {proposals?.activeProposals.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="rounded-full bg-muted p-3">
-                <PlusCircle className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <h3 className="mt-4 text-lg font-semibold">
-                No active proposals
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Create a new proposal to get started
-              </p>
-              <Link
-                href={`/organizations/${organizationId}/proposals/new`}
-                className={cn(buttonVariants({ variant: "default" }), "mt-4")}
-              >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Create Proposal
-              </Link>
-            </div>
-          ) : (
-            proposals?.activeProposals.map((proposal) => (
-              <ProposalCard
-                key={proposal.id}
-                proposal={proposal}
-                isActive={true}
-                organizationId={organizationId}
-              />
-            ))
-          )}
-        </TabsContent>
-
-        <TabsContent value="past" className="space-y-4 mt-6">
-          {proposals?.pastProposals.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="rounded-full bg-muted p-3">
-                <Clock className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <h3 className="mt-4 text-lg font-semibold">No past proposals</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Past proposals will appear here once voting is complete
-              </p>
-            </div>
-          ) : (
-            proposals?.pastProposals.map((proposal) => (
-              <ProposalCard
-                key={proposal.id}
-                proposal={proposal}
-                isActive={false}
-                organizationId={organizationId}
-              />
-            ))
-          )}
-        </TabsContent>
-      </Tabs> */}
-
-      <CreateProposalModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onSubmit={(data) => {
-          setShowCreateModal(false);
-        }}
-      />
     </div>
   );
 }
