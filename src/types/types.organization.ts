@@ -1,4 +1,3 @@
-import { Token } from "./types.work";
 import { User } from "./user.types";
 
 export interface Vote {
@@ -107,7 +106,7 @@ export interface Organization {
   treasuryBalances: Array<{
     decimals: number;
     mint: string;
-    raw: string;
+    raw: number;
     token: {
       address: string;
       name: string;

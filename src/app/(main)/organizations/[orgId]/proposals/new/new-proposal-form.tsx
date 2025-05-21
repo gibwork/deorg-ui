@@ -67,7 +67,10 @@ const proposalFormSchema = z
     amount: z.coerce.number().optional(),
     selectedMember: z.string().optional(),
     role: z.string().optional(),
-    projectName: z.string().optional(),
+    projectName: z
+      .string()
+      .max(32, "Project name must be at most 32 characters")
+      .optional(),
     projectDescription: z.string().optional(),
     projectDuration: z.string().optional(),
     projectMembers: z.array(z.string()).optional(),
@@ -79,7 +82,10 @@ const proposalFormSchema = z
       .number({ message: "Required." })
       .min(7, { message: "Minimum 7 days" })
       .optional(),
-    taskName: z.string().optional(),
+    taskName: z
+      .string()
+      .max(32, "Task name must be at most 32 characters")
+      .optional(),
     taskDescription: z.string().optional(),
     taskDeadline: z.string().optional(),
     taskPriority: z.string().default("medium"),

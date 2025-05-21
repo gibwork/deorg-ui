@@ -40,6 +40,7 @@ import Image from "next/image";
 import { useOrganization } from "../../hooks/use-organization";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { DepositModal } from "../modals/deposit-modal";
 
 export default function OrganizationAssets({ orgId }: { orgId: string }) {
   const { data: organization } = useOrganization(orgId);
@@ -318,57 +319,13 @@ export default function OrganizationAssets({ orgId }: { orgId: string }) {
       </Tabs>
 
       {/* Deposit Dialog */}
-      <Dialog open={showDepositDialog} onOpenChange={setShowDepositDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Deposit Assets</DialogTitle>
-            <DialogDescription>
-              Deposit tokens to your organization&apos;s wallet.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="token">Select Token</Label>
-              <Select value={selectedToken} onValueChange={setSelectedToken}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select token" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sol">SOL</SelectItem>
-                  <SelectItem value="usdc">USDC</SelectItem>
-                  <SelectItem value="bonk">BONK</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="p-4 bg-muted rounded-md">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Deposit Address</span>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                  <Copy className="h-3 w-3" />
-                  <span className="sr-only">Copy</span>
-                </Button>
-              </div>
-              <code className="text-xs break-all">FoXx...zDyj</code>
-              <div className="mt-2 text-xs text-muted-foreground">
-                Send only {selectedToken.toUpperCase()} to this address. Sending
-                other tokens may result in permanent loss.
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowDepositDialog(false)}
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
+      {showDepositDialog && (
+        <DepositModal
+          isOpen={showDepositDialog}
+          onClose={() => setShowDepositDialog(false)}
+          organization={organization!}
+        />
+      )}
       {/* Send Dialog */}
       <Dialog open={showSendDialog} onOpenChange={setShowSendDialog}>
         <DialogContent>
