@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronDown, Globe, Settings, Users, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { DepositModal } from "./modals/deposit-modal";
 import {
   Accordion,
   AccordionContent,
@@ -29,6 +30,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
   const { data: projectsData } = useOrganizationProjects(orgId, "active");
   const { data: tasksData } = useMemberTasks();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
   
 
   //Get Total Earned in USDC
@@ -133,22 +135,28 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
             )}
             {!isMobile ? (
               <div className="flex flex-row text-center h-[70px] border-b border-r">
-                <div className="flex flex-col w-1/3 border-r">
-                  <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
+                <div className="flex flex-col w-1/3 border-r group cursor-pointer">
+                  <div className="p-2 py-4 flex flex-col items-center justify-center font-light group-hover:bg-black group-hover:text-white transition-all duration-300">
                     {organization.contributors?.length || 0}
-                    <span className="text-xs font-semibold">contributors</span>
+                    <span className="text-xs font-semibold group-hover:hidden">contributors</span>
+                    <span className="text-xs font-semibold hidden group-hover:block">view</span>
                   </div>
                 </div>
-                <div className="flex flex-col w-1/3 border-r">
-                  <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
+                <div className="flex flex-col w-1/3 border-r group cursor-pointer">
+                  <div className="p-2 py-4 flex flex-col items-center justify-center font-light group-hover:bg-black group-hover:text-white transition-all duration-300">
                     {organization.members?.length || 0}
-                    <span className="text-xs font-semibold">followers</span>
+                    <span className="text-xs font-semibold group-hover:hidden">followers</span>
+                    <span className="text-xs font-semibold hidden group-hover:block">follow</span>
                   </div>
                 </div>
-                <div className="flex flex-col w-1/3 border-r">
-                  <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
+                <div 
+                  className="flex flex-col w-1/3 border-r group cursor-pointer"
+                  onClick={() => organization && setShowDepositModal(true)}
+                >
+                  <div className="p-2 py-4 flex flex-col items-center justify-center font-light group-hover:bg-black group-hover:text-white transition-all duration-300">
                     {getTotalUSDCInTreasury()}
-                    <span className="text-xs font-semibold">treasury</span>
+                    <span className="text-xs font-semibold group-hover:hidden">treasury</span>
+                    <span className="text-xs font-semibold hidden group-hover:block">deposit</span>
                   </div>
                 </div>
               </div>
@@ -279,6 +287,15 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
             </nav>
           </div>
         </div >
+
+        {/* Deposit Modal */}
+        {showDepositModal && (
+          <DepositModal
+            isOpen={showDepositModal}
+            onClose={() => setShowDepositModal(false)}
+            organization={organization}
+          />
+        )}
       </>
     );
 }
