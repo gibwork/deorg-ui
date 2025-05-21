@@ -60,14 +60,14 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
 
         <SlimOrgSidebar orgId={organization!.accountAddress!} />
 
-        <div className="w-64 h-screen flex flex-col ">
+        <div className={`${isMobile ? "w-20" : "w-64"} h-screen flex-shrink-0 flex flex-col`}>
           {/* Header */}
           <div className="p-0 bg-white flex-shrink-0">
             <div
               className={`flex flex-row border-b border-r border-stone-200 h-[50px] p-1 hover:bg-black ${dropdownOpen ? 'bg-black text-white' : ''} transition-all duration-300 hover:text-white hover:cursor-pointer`}
-              onClick={() => setDropdownOpen(!dropdownOpen)}
+              onClick={() => !isMobile ? setDropdownOpen(!dropdownOpen) : null}
             >
-              <div className="flex flex-col w-1/5">
+              <div className={`flex flex-col ${isMobile ? "w-full" : "w-1/5"} justify-center items-center`}>
                 <Image
                   src={
                     organization?.metadata?.logoUrl ??
@@ -79,18 +79,20 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                   className="rounded-lg p-1"
                 />
               </div>
-              <div className="flex flex-col w-4/5">
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-medium overflow-hidden text-ellipsis whitespace-nowrap align-baseline mt-1">
-                    {organization.name}
-                  </span>
-                  <div className="mt-2">
-                    <ChevronDown className={`h-6 w-6 transition-transform ms-1 ${dropdownOpen ? 'rotate-180 transition-all duration-300' : ''}`} />
+              {!isMobile && (
+                <div className="flex flex-col w-4/5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-medium overflow-hidden text-ellipsis whitespace-nowrap align-baseline mt-1">
+                      {organization.name}
+                    </span>
+                    <div className="mt-2">
+                      <ChevronDown className={`h-6 w-6 transition-transform ms-1 ${dropdownOpen ? 'rotate-180 transition-all duration-300' : ''}`} />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
-            {dropdownOpen && organization.metadata && (
+            {dropdownOpen && organization.metadata && !isMobile && (
               <div className="border-b border-r border-stone-200">
                 {organization.metadata.twitterUrl && (
                   <Link 
@@ -129,26 +131,28 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                 )}
               </div>
             )}
-            <div className="flex flex-row text-center h-[80px] border-b border-r">
-              <div className="flex flex-col w-1/3 border-r">
-                <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
-                  {organization.contributors?.length || 0}
-                  <span className="text-xs font-semibold">contributors</span>
+            {!isMobile ? (
+              <div className="flex flex-row text-center h-[80px] border-b border-r">
+                <div className="flex flex-col w-1/3 border-r">
+                  <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
+                    {organization.contributors?.length || 0}
+                    <span className="text-xs font-semibold">contributors</span>
+                  </div>
+                </div>
+                <div className="flex flex-col w-1/3 border-r">
+                  <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
+                    {organization.members?.length || 0}
+                    <span className="text-xs font-semibold">followers</span>
+                  </div>
+                </div>
+                <div className="flex flex-col w-1/3 border-r">
+                  <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
+                    {getTotalUSDCInTreasury()}
+                    <span className="text-xs font-semibold">treasury</span>
+                  </div>
                 </div>
               </div>
-              <div className="flex flex-col w-1/3 border-r">
-                <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
-                  {organization.members?.length || 0}
-                  <span className="text-xs font-semibold">followers</span>
-                </div>
-              </div>
-              <div className="flex flex-col w-1/3 border-r">
-                <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
-                  {getTotalUSDCInTreasury()}
-                  <span className="text-xs font-semibold">treasury</span>
-                </div>
-              </div>
-            </div>
+            ) : null}
           </div>
 
           {/* Content */}
@@ -160,29 +164,33 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                     pathname === item.href(orgId) ||
                     pathname.includes(`/organizations/${orgId}/projects/`);
 
-                  if (!projectsData?.activeProjects?.length) {
+                  // On mobile, always show a simple link that goes to the projects page
+                  if (isMobile || !projectsData?.activeProjects?.length) {
                     return (
                       <Link
                         key={item.value}
                         href={item.href(orgId)}
                         className={cn(
-                          "flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200",
+                          "flex items-center py-3 text-sm font-medium border-b border-stone-200",
                           isProjectsActive
                             ? "bg-stone-100 text-black"
-                            : "text-stone-600 hover:bg-stone-50"
+                            : "text-stone-600 hover:bg-stone-50",
+                          isMobile ? "justify-center w-full px-2" : "px-4"
                         )}
                       >
                         <item.icon
                           className={cn(
-                            "h-4 w-4 mr-3",
-                            isProjectsActive && "stroke-black"
+                            "h-4 w-4",
+                            isProjectsActive && "stroke-black",
+                            !isMobile && "mr-3"
                           )}
                         />
-                        {item.label}
+                        {!isMobile && item.label}
                       </Link>
                     );
                   }
 
+                  // Only show the accordion on desktop
                   return (
                     <div key={item.value} className="border-b border-stone-200">
                       <Accordion
@@ -194,14 +202,14 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                         <AccordionItem value="projects" className="border-none">
                           <AccordionTrigger
                             className={cn(
-                              "py-3 px-4 hover:bg-stone-100",
+                              "py-3 px-4 hover:bg-stone-100 text-sm",
                               isProjectsActive && "bg-stone-100"
                             )}
                           >
                             <div className="flex items-center gap-2">
                               <item.icon
                                 className={cn(
-                                  "h-4 w-4",
+                                  "h-4 w-4 mr-1",
                                   isProjectsActive && "stroke-black"
                                 )}
                               />
@@ -250,16 +258,21 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                     key={item.value}
                     href={item.href(orgId)}
                     className={cn(
-                      "flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200",
+                      "flex items-center py-3 text-sm font-medium border-b border-stone-200",
                       isActive
                         ? "bg-stone-100 text-black"
-                        : "text-stone-600 hover:bg-stone-50"
+                        : "text-black hover:bg-stone-50",
+                      isMobile ? "justify-center w-full px-2" : "px-4"
                     )}
                   >
                     <item.icon
-                      className={cn("h-4 w-4 mr-3", isActive && "stroke-black")}
+                      className={cn(
+                        "h-4 w-4", 
+                        isActive && "stroke-black",
+                        !isMobile && "mr-3"
+                      )}
                     />
-                    {item.label}
+                    {!isMobile && item.label}
                   </Link>
                 );
               })}
