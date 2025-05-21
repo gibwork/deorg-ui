@@ -164,7 +164,10 @@ const OrganizationsList = () => {
                 >
                   <div className="flex items-center gap-4 mb-4">
                     <Avatar className="h-12 w-12 md:h-14 md:w-14">
-                      <AvatarImage src={org.logoUrl} alt={org.name} />
+                      <AvatarImage
+                        src={org.metadata?.logoUrl || org.logoUrl}
+                        alt={org.name}
+                      />
                       <AvatarFallback>
                         {org.name.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
