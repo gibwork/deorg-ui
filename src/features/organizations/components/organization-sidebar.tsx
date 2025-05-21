@@ -174,7 +174,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                           "flex items-center py-3 text-sm font-medium border-b border-stone-200",
                           isProjectsActive
                             ? "bg-stone-100 text-black"
-                            : "text-stone-600 hover:bg-stone-50",
+                            : "text-black hover:bg-stone-50",
                           isMobile ? "justify-center w-full px-2" : "px-4"
                         )}
                       >
