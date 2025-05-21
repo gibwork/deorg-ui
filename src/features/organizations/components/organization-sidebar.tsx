@@ -29,15 +29,18 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
   const { data: projectsData } = useOrganizationProjects(orgId, "active");
   const { data: tasksData } = useMemberTasks();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  
 
   //Get Total Earned in USDC
-  function getTotalEarned() {
+  function getTotalUSDCInTreasury() {
     let amount = 0;
-    tasksData?.forEach((task) => {
-      if (task.tokenInfo.symbol === "USDC" && task.status === TaskStatus.Paid) {
-        const decimals = task.tokenInfo.decimals;
-        const usdAmount = task.paymentAmount / 10 ** decimals;
-        amount += usdAmount;
+    organization?.treasuryBalances?.forEach((balance) => {
+      if (balance?.token?.symbol === "USDC") {
+        const decimals = balance?.token.decimals;
+        if (balance?.raw && balance?.raw > 0) {
+          const usdAmount = balance?.raw / 10 ** decimals;
+          amount += usdAmount;
+        }
       }
     });
 
@@ -129,20 +132,20 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
             <div className="flex flex-row text-center h-[80px] border-b border-r">
               <div className="flex flex-col w-1/3 border-r">
                 <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
-                  2
-                  <span className="text-sm font-semibold">contributor</span>
+                  {organization.contributors?.length || 0}
+                  <span className="text-xs font-semibold">contributors</span>
                 </div>
               </div>
               <div className="flex flex-col w-1/3 border-r">
                 <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
-                  8
-                  <span className="text-sm font-semibold">followers</span>
+                  {organization.members?.length || 0}
+                  <span className="text-xs font-semibold">followers</span>
                 </div>
               </div>
               <div className="flex flex-col w-1/3 border-r">
                 <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
-                  20.5K
-                  <span className="text-sm font-semibold">treasury</span>
+                  {getTotalUSDCInTreasury()}
+                  <span className="text-xs font-semibold">treasury</span>
                 </div>
               </div>
             </div>
