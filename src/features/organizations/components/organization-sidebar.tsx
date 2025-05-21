@@ -2,7 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, Globe } from "lucide-react";
+import { ChevronDown, Globe, Settings, Users, LogOut } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -18,7 +19,6 @@ import { Icons } from "@/components/icons";
 import { useOrganizationProjects } from "../hooks/use-organization-projects";
 import { SlimOrgSidebar } from "./slim-org-sidebar";
 import Image from "next/image";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useMediaQuery } from "usehooks-ts";
 import { useMemberTasks } from "../hooks/use-member-tasks";
 import { TaskStatus } from "@/types/types.task";
@@ -28,6 +28,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
   const { data: organization } = useOrganization(orgId);
   const { data: projectsData } = useOrganizationProjects(orgId, "active");
   const { data: tasksData } = useMemberTasks();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   //Get Total Earned in USDC
   function getTotalEarned() {
@@ -56,11 +57,14 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
 
         <SlimOrgSidebar orgId={organization!.accountAddress!} />
 
-        <div className=" w-64 h-screen flex flex-col ">
+        <div className="w-64 h-screen flex flex-col ">
           {/* Header */}
-          <div className="p-0 bg-white flex-shrink-0 ">
-            <div className="flex flex-row border-b border-stone-200 h-[50px] p-1">
-              <div className="h-[42px] w-[42px]">
+          <div className="p-0 bg-white flex-shrink-0">
+            <div
+              className={`flex flex-row border-b border-r border-stone-200 h-[50px] p-1 hover:bg-black ${dropdownOpen ? 'bg-black text-white' : ''} transition-all duration-300 hover:text-white hover:cursor-pointer`}
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
+              <div className="flex flex-col w-1/5">
                 <Image
                   src={
                     organization?.metadata?.logoUrl ??
@@ -72,61 +76,75 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                   className="rounded-lg p-1"
                 />
               </div>
-              <div className="flex flex-col ms-2 ">
-                <h1 className="font-bold text-black">{organization.name}</h1>
-                {organization.metadata && (
-                  <div className="flex flex-row items-center gap-2 opacity-60 cursor-pointer">
-                    {organization.metadata.twitterUrl && (
-                      <Link
-                        href={organization.metadata.twitterUrl}
-                        target="_blank"
-                      >
-                        <span className="text-stone-500 cursor-pointer hover:fill-black">
-                          <Icons.twitter
-                            className="h-[.85rem] w-[.85rem]"
-                            fill="gray"
-                          />
-                        </span>
-                      </Link>
-                    )}
-                    {organization.metadata.discordUrl && (
-                      <Link
-                        href={organization.metadata.discordUrl}
-                        target="_blank"
-                      >
-                        <span className="text-stone-500 cursor-pointer hover:fill-black">
-                          <Icons.discord
-                            className="h-[.85rem] w-[.85rem]"
-                            fill="gray"
-                          />
-                        </span>
-                      </Link>
-                    )}
-                    {organization.metadata.websiteUrl && (
-                      <Link
-                        href={organization.metadata.websiteUrl}
-                        target="_blank"
-                      >
-                        <span className="text-stone-500 cursor-pointer hover:stroke-black">
-                          <Globe
-                            className="h-[.85rem] w-[.85rem]"
-                            stroke="gray"
-                          />
-                        </span>
-                      </Link>
-                    )}
+              <div className="flex flex-col w-4/5">
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-medium overflow-hidden text-ellipsis whitespace-nowrap align-baseline mt-1">
+                    {organization.name}
+                  </span>
+                  <div className="mt-2">
+                    <ChevronDown className={`h-6 w-6 transition-transform ms-1 ${dropdownOpen ? 'rotate-180 transition-all duration-300' : ''}`} />
                   </div>
-                )}
+                </div>
               </div>
             </div>
-            <div className="flex flex-col items-center justify-center py-2 border-b border-r">
-              <div className="flex flex-row items-center gap-2">
-                <Icons.usdc className="h-8 w-8" />
-                <span className="text-3xl font-bold text-black">
-                  {getTotalEarned()}
-                </span>
+            {dropdownOpen && organization.metadata && (
+              <div className="border-b border-r border-stone-200">
+                {organization.metadata.twitterUrl && (
+                  <Link 
+                    href={organization.metadata.twitterUrl} className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 text-stone-600 group hover:bg-stone-50 hover:text-black transition-all duration-300"
+                    target="_blank">
+                    <Icons.twitter
+                      className="h-4 w-4 me-4 group-hover:fill-black transition-all duration-300"
+                      fill="gray"
+                    />
+                    Follow on X
+                  </Link>
+                )}
+                {organization.metadata.discordUrl && (
+                  <Link
+                    href={organization.metadata.discordUrl} className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 text-stone-600 group hover:bg-stone-50 hover:text-black transition-all duration-300"
+                    target="_blank"
+                  >
+                    <Icons.discord
+                      className="h-4 w-4 me-4 group-hover:fill-black transition-all duration-300"
+                      fill="gray"
+                    />
+                    Join Discord
+                  </Link>
+                )}
+                {organization.metadata.websiteUrl && (
+                  <Link
+                    href={organization.metadata.websiteUrl} className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 text-stone-600 group hover:bg-stone-50 hover:text-black transition-all duration-300"
+                    target="_blank"
+                  >
+                    <Globe
+                      className="h-4 w-4 me-4 group-hover:stroke-black transition-all duration-300"
+                      stroke="gray"
+                    />
+                    Visit Website
+                  </Link>
+                )}
               </div>
-              <span className="text-sm text-stone-500">Total Earned</span>
+            )}
+            <div className="flex flex-row text-center h-[80px] border-b border-r">
+              <div className="flex flex-col w-1/3 border-r">
+                <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
+                  2
+                  <span className="text-sm font-semibold">contributor</span>
+                </div>
+              </div>
+              <div className="flex flex-col w-1/3 border-r">
+                <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
+                  8
+                  <span className="text-sm font-semibold">followers</span>
+                </div>
+              </div>
+              <div className="flex flex-col w-1/3 border-r">
+                <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
+                  20.5K
+                  <span className="text-sm font-semibold">treasury</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -244,23 +262,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
               })}
             </nav>
           </div>
-
-          {/* Footer */}
-          {/* <div className="p-4 bg-white border-t border-stone-200 flex-shrink-0">
-          <Link
-            href="/organizations"
-            className={cn(
-              buttonVariants({ variant: "outline" }),
-              "w-full flex items-center justify-between"
-            )}
-          >
-            <div className="flex items-center">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              <span className="text-sm">Organizations</span>
-            </div>
-          </Link>
-        </div> */}
-        </div>
+        </div >
       </>
     );
 }

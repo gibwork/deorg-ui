@@ -19,7 +19,7 @@ function OrganizationLayout({
   const { userId } = auth();
 
   return (
-    <div className="flex min-h-screen w-full bg-white dark:bg-gray-900 p-2">
+    <div className="flex min-h-screen w-full bg-white dark:bg-gray-900">
       <OrganizationSidebar orgId={params.orgId} />
 
       <div className="flex-1 w-full">

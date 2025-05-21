@@ -37,7 +37,7 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
         className
       )}
     >
-      <div className="h-[50px]">
+      {/* <div className="h-[50px]">
         <Link
           href="/"
           className="flex items-center justify-center shadow-md box-shadow-md"
@@ -50,9 +50,9 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
             height={40}
           />
         </Link>
-      </div>
+      </div> */}
 
-      <ScrollArea className="flex-1 w-full pt-6">
+      <ScrollArea className="flex-1 w-full">
         <div className="flex flex-col items-center gap-4 px-2">
           {!memberOrganizations && isLoading
             ? Array.from({ length: 3 }).map((_, i) => (
