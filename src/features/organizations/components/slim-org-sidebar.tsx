@@ -65,7 +65,7 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
   return (
     <div
       className={cn(
-        "bg-background p-1 z-30 flex h-screen w-16 flex-shrink-0 flex-col items-center border-r py-2 border-e-2",
+        " bg-background p-1 z-30 flex h-screen w-16 flex-col items-center border-r  py-2  border-e-2",
         className
       )}
     >

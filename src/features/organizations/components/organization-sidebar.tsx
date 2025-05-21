@@ -132,7 +132,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
               </div>
             )}
             {!isMobile ? (
-              <div className="flex flex-row text-center h-[80px] border-b border-r">
+              <div className="flex flex-row text-center h-[70px] border-b border-r">
                 <div className="flex flex-col w-1/3 border-r">
                   <div className="p-2 py-4 flex flex-col items-center justify-center font-light">
                     {organization.contributors?.length || 0}
