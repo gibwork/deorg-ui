@@ -22,6 +22,10 @@ import { useWalletTokenBalances } from "@/hooks/use-wallet-token-balances";
 import { useAuth } from "@clerk/nextjs";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Button } from "@/components/ui/button";
+import { Organization } from "@/types/types.organization";
+import { getAllOrganizations } from "../actions/get-all-organizations";
+import { useQuery } from "@tanstack/react-query";
+
 interface SlimOrgSidebarProps {
   className?: string;
   orgId: string;
@@ -34,6 +38,14 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
     isLoading,
     error,
   } = useMemberOrganizations();
+
+  const { data: organizations } = useQuery({
+    queryKey: ["organizations"],
+    queryFn: async () => {
+      const organizations = await getAllOrganizations();
+      return organizations.success;
+    },
+  });
 
   const { publicKey, disconnect } = useWallet();
   const { userId, signOut, isSignedIn } = useAuth();
@@ -57,21 +69,6 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
         className
       )}
     >
-      {/* <div className="h-[50px]">
-        <Link
-          href="/"
-          className="flex items-center justify-center shadow-md box-shadow-md"
-        >
-          <Image
-            src="https://deorg-dev.s3.us-east-1.amazonaws.com/deorg-logo.jpg"
-            className="h-10 w-10 rounded-md"
-            alt="Deorg Logo"
-            width={40}
-            height={40}
-          />
-        </Link>
-      </div> */}
-
       <ScrollArea className="flex-1 w-full">
         <div className="flex flex-col items-center gap-4 px-2">
           {!memberOrganizations && isLoading
@@ -81,61 +78,117 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
                 className="h-10 w-10 rounded-sm bg-stone-200"
               />
             ))
-            : memberOrganizations?.map((org) => {
-              const isActive = pathname.includes(
-                `/organizations/${org.accountAddress}`
-              );
+            : (isSignedIn && publicKey
+              ? memberOrganizations?.map((org) => {
+                const isActive = pathname.includes(
+                  `/organizations/${org.accountAddress}`
+                );
 
-              return (
-                <TooltipProvider key={org.id} delayDuration={300}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Link
-                        href={`/organizations/${org.accountAddress}`}
-                        className="group relative flex items-center"
-                      >
-                        {isActive && (
-                          <span className="absolute -right-0.5 -top-0.5 h-3 w-3 z-50 rounded-full border-2 border-background bg-primary" />
-                        )}
-                        <div
-                          className={cn(
-                            "relative group flex size-10 rounded-[6px] group-hover:rounded-[10px] transition-all overflow-hidden",
-                            isActive && "bg-primary/10 text-primary"
-                          )}
+                return (
+                  <TooltipProvider key={org.id} delayDuration={300}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link
+                          href={`/organizations/${org.accountAddress}`}
+                          className="group relative flex items-center"
                         >
-                          <div className="w-full h-full">
-                            <Avatar
-                              className={cn(
-                                "h-10 w-10 rounded-sm border-none ",
-                                isActive ? "opacity-100" : "opacity-75"
-                              )}
-                            >
-                              <AvatarImage
-                                src={
-                                  org?.metadata?.logoUrl ??
-                                  org.token?.imageUrl!
-                                }
-                                alt={org.name}
-                              />
-                              <AvatarFallback>
-                                <Skeleton className="h-10 w-10 border-none bg-stone-200" />
-                              </AvatarFallback>
-                            </Avatar>
+                          {isActive && (
+                            <span className="absolute -right-0.5 -top-0.5 h-3 w-3 z-50 rounded-full border-2 border-background bg-primary" />
+                          )}
+                          <div
+                            className={cn(
+                              "relative group flex size-10 rounded-[6px] group-hover:rounded-[10px] transition-all overflow-hidden",
+                              isActive && "bg-primary/10 text-primary"
+                            )}
+                          >
+                            <div className="w-full h-full">
+                              <Avatar
+                                className={cn(
+                                  "h-10 w-10 rounded-sm border-none ",
+                                  isActive ? "opacity-100" : "opacity-75"
+                                )}
+                              >
+                                <AvatarImage
+                                  src={
+                                    org?.metadata?.logoUrl ??
+                                    org.token?.imageUrl!
+                                  }
+                                  alt={org.name}
+                                />
+                                <AvatarFallback>
+                                  <Skeleton className="h-10 w-10 border-none bg-stone-200" />
+                                </AvatarFallback>
+                              </Avatar>
+                            </div>
                           </div>
-                        </div>
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="right"
-                      align="center"
-                      className="font-medium"
-                    >
-                      {truncate(org.accountAddress, 6, 4)}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              );
-            })}
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="right"
+                        align="center"
+                        className="font-medium"
+                      >
+                        {truncate(org.accountAddress, 6, 4)}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                );
+              })
+              : organizations?.map((org: Organization) => {
+                  const isActive = pathname.includes(
+                    `/organizations/${org.accountAddress}`
+                  );
+
+                  return (
+                    <TooltipProvider key={org.id} delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                        <Link
+                          href={`/organizations/${org.accountAddress}`}
+                          className="group relative flex items-center"
+                        >
+                          {isActive && (
+                            <span className="absolute -right-0.5 -top-0.5 h-3 w-3 z-50 rounded-full border-2 border-background bg-primary" />
+                          )}
+                          <div
+                            className={cn(
+                              "relative group flex size-10 rounded-[6px] group-hover:rounded-[10px] transition-all overflow-hidden",
+                              isActive && "bg-primary/10 text-primary"
+                            )}
+                          >
+                            <div className="w-full h-full">
+                              <Avatar
+                                className={cn(
+                                  "h-10 w-10 rounded-sm border-none ",
+                                  isActive ? "opacity-100" : "opacity-75"
+                                )}
+                              >
+                                <AvatarImage
+                                  src={
+                                    org?.metadata?.logoUrl ??
+                                    org.token?.imageUrl!
+                                  }
+                                  alt={org.name}
+                                />
+                                <AvatarFallback>
+                                  <Skeleton className="h-10 w-10 border-none bg-stone-200" />
+                                </AvatarFallback>
+                              </Avatar>
+                            </div>
+                          </div>
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="right"
+                        align="center"
+                        className="font-medium"
+                      >
+                        {truncate(org.accountAddress, 6, 4)}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                );
+              }))}
         </div>
       </ScrollArea>
 
