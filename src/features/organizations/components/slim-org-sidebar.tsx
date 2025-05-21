@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Organization } from "@/types/types.organization";
 import { getAllOrganizations } from "../actions/get-all-organizations";
 import { useQuery } from "@tanstack/react-query";
+import { PlusCircleIcon, CompassIcon } from "lucide-react";
 
 interface SlimOrgSidebarProps {
   className?: string;
@@ -189,7 +190,33 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
                   </TooltipProvider>
                 );
               }))}
-        </div>
+        
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/organizations/create" className="group relative flex items-center group hover:bg-black transition-all shadow-md w-full h-10 rounded-md justify-center">                  
+                  <PlusCircleIcon className="h-6 w-6 stroke-black group-hover:stroke-white transition-all" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>
+                Create Organization
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/organizations" className="group relative flex items-center group hover:bg-black hover:border-none transition-all shadow-md w-full h-10 rounded-md justify-center">                  
+                  <CompassIcon className="h-6 w-6 stroke-black group-hover:stroke-white transition-all" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>
+                Explore Organizations
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>        
       </ScrollArea>
 
       <div className="mb-9 relative bg-black rounded-l-lg group">
