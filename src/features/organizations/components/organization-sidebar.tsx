@@ -95,7 +95,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
               )}
             </div>
             {dropdownOpen && organization.metadata && !isMobile && (
-              <div className="border-b border-r border-stone-200">
+              <div className="border-r border-stone-200">
                 {organization.metadata.twitterUrl && (
                   <Link 
                     href={organization.metadata.twitterUrl} className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 group hover:bg-stone-50 transition-all duration-300"
