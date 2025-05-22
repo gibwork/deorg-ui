@@ -3,16 +3,23 @@ import { joinOrganization } from "../actions/join-organization";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { LoaderButton } from "@/components/loader-button";
+import { useWalletAuthContext } from "@/features/auth/lib/wallet-auth-context";
+import { useAuth } from "@clerk/nextjs";
+import { useCheckMembership } from "../hooks/use-check-membership";
 
 export const FollowOrganizationButton = ({
   organizationId,
-  isFollowing: initialIsFollowing,
 }: {
   organizationId: string;
-  isFollowing: boolean;
 }) => {
-  const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
+  const { data: membershipData, isLoading: isMembershipLoading } =
+    useCheckMembership(organizationId);
   const queryClient = useQueryClient();
+  const { userId } = useAuth();
+  const { handleSignIn } = useWalletAuthContext();
+  const { publicKey } = useWallet();
 
   const joinOrgMutation = useMutation({
     mutationFn: joinOrganization,
@@ -25,32 +32,39 @@ export const FollowOrganizationButton = ({
           queryKey: ["member_organizations"],
         }),
         queryClient.invalidateQueries({
-          queryKey: ["organization_membership", organizationId],
+          queryKey: [
+            "organization_membership",
+            organizationId,
+            publicKey?.toString(),
+          ],
         }),
       ]);
     },
     onError: (error) => {
       // Revert the following state on error
-      setIsFollowing(false);
       toast.error(error.message || "Failed to join organization");
     },
   });
 
   const handleJoin = async () => {
-    // Optimistically updating the UI here
-    setIsFollowing(true);
+    if (!userId) {
+      await handleSignIn();
+    }
 
     joinOrgMutation.mutate(organizationId);
   };
 
   return (
-    <Button
-      variant={`${isFollowing ? "outline" : "default"}`}
+    <LoaderButton
+      variant={`${membershipData?.isMember ? "outline" : "default"}`}
       size={"sm"}
-      disabled={joinOrgMutation.isPending || isFollowing}
+      disabled={joinOrgMutation.isPending || membershipData?.isMember}
       onClick={handleJoin}
+      isLoading={joinOrgMutation.isPending}
     >
-      <span className="font-mono">{isFollowing ? "Following" : "Follow"}</span>
-    </Button>
+      <span className="font-mono">
+        {membershipData?.isMember ? "Following" : "Follow"}
+      </span>
+    </LoaderButton>
   );
 };

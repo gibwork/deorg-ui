@@ -1,19 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import { Organization } from "@/types/types.organization";
-import { getMemberOrganizations } from "../actions/members/get-member-organizations";
-import { useAuth } from "@clerk/nextjs";
 import { getMemberTasks } from "../actions/members/get-member-tasks";
 import { Task } from "@/types/types.task";
-
+import { useWallet } from "@solana/wallet-adapter-react";
 export function useMemberTasks() {
-  const { userId } = useAuth();
+  const { publicKey } = useWallet();
   return useQuery({
-    queryKey: ["member_tasks", userId],
+    queryKey: ["member_tasks", publicKey],
     queryFn: async () => {
-      const tasks = await getMemberTasks();
+      const tasks = await getMemberTasks(publicKey?.toString() ?? "");
       if (tasks.error) throw new Error(tasks.error.message);
       return tasks.success as Task[];
     },
-    enabled: !!userId,
+    enabled: !!publicKey,
   });
 }

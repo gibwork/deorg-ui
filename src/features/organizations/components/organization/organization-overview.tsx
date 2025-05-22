@@ -32,6 +32,7 @@ import Image from "next/image";
 import { useCheckMembership } from "../../hooks/use-check-membership";
 import { useAuth } from "@clerk/nextjs";
 import { FollowOrganizationButton } from "../follow-organization-button";
+import { LoaderButton } from "@/components/loader-button";
 
 export function OrganizationOverview({
   organizationId,
@@ -41,8 +42,7 @@ export function OrganizationOverview({
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [showProjectDetail, setShowProjectDetail] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
-  const { userId } = useAuth();
-
+  const { publicKey } = useWallet();
   const {
     data: organization,
     isLoading,
@@ -50,7 +50,7 @@ export function OrganizationOverview({
   } = useOrganization(organizationId);
 
   const { data: membershipData, isLoading: isMembershipLoading } =
-    useCheckMembership(organizationId, { enabled: !!userId });
+    useCheckMembership(organizationId);
 
   if (error) {
     return (
@@ -100,13 +100,17 @@ export function OrganizationOverview({
 
               {!isMembershipLoading ? (
                 <div className="inline-flex justify-end ">
-                  <FollowOrganizationButton
-                    organizationId={organizationId}
-                    isFollowing={membershipData?.isMember}
-                  />
+                  <FollowOrganizationButton organizationId={organizationId} />
                 </div>
               ) : (
-                <></>
+                <div className="inline-flex justify-end ">
+                  <LoaderButton
+                    variant="default"
+                    size={"sm"}
+                    className="w-24"
+                    isLoading={isMembershipLoading}
+                  ></LoaderButton>
+                </div>
               )}
             </div>
           </div>

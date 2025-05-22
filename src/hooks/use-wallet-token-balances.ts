@@ -9,6 +9,7 @@ import {
 } from "@/utils/token-price";
 import { useEffect } from "react";
 import useNetwork from "./use-network";
+import { useWallet } from "@solana/wallet-adapter-react";
 interface UseTokenPriceOptions {
   enabled?: boolean;
   refetchInterval?: number;
@@ -20,6 +21,7 @@ export const useWalletTokenBalances = (options: UseTokenPriceOptions = {}) => {
   } = options;
 
   const { userId, isLoaded } = useAuth();
+  const { publicKey } = useWallet();
   const setMultipleTokenPrices = useCachedTokenPricesStore(
     (state) => state.setMultipleTokenPrices
   );
@@ -29,9 +31,12 @@ export const useWalletTokenBalances = (options: UseTokenPriceOptions = {}) => {
     TokenData[],
     Error
   >({
-    queryKey: ["userTokenList"],
+    queryKey: ["userTokenList", publicKey?.toString()],
     queryFn: async () => {
-      const userTokens = await getUserWalletBalance(useNetwork.getState().network);
+      const userTokens = await getUserWalletBalance(
+        useNetwork.getState().network,
+        publicKey?.toString() ?? ""
+      );
       if (userTokens.error) throw new Error(userTokens.error);
 
       const prices = await convertMultipleTokenDataToPrices(userTokens.success);
@@ -39,7 +44,7 @@ export const useWalletTokenBalances = (options: UseTokenPriceOptions = {}) => {
 
       return userTokens.success;
     },
-    enabled: isLoaded && !!userId && enabled,
+    enabled: enabled && !!publicKey,
   });
 
   useEffect(() => {

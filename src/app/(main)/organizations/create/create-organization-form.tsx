@@ -42,6 +42,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { WalletButton } from "@/components/wallet-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { useWalletAuthContext } from "@/features/auth/lib/wallet-auth-context";
 
 const WalletConnectionOverlay = () => {
   const walletModal = useWalletModal();
@@ -162,6 +163,8 @@ export function CreateOrganizationForm() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
+  const { handleSignIn } = useWalletAuthContext();
+
   const form = useForm<CreateOrganizationFormDataType>({
     resolver: zodResolver(createOrganizationSchema),
     defaultValues: {
@@ -178,7 +181,10 @@ export function CreateOrganizationForm() {
   const { watch } = form;
   const currentValues = watch();
 
-  const userData = queryClient.getQueryData<User>([`user-${userId}`]);
+  const userData = queryClient.getQueryData<User>([
+    `user-${publicKey?.toString()}`,
+  ]);
+
   const {
     data: walletTokensData,
     error,
@@ -186,7 +192,7 @@ export function CreateOrganizationForm() {
     refetch,
     isRefetching: isWalletTokensRefetching,
   } = useWalletTokenBalances({
-    enabled: !!userData && !!userData?.walletAddress,
+    enabled: !!publicKey,
   });
 
   const {
@@ -267,6 +273,11 @@ export function CreateOrganizationForm() {
     try {
       if (!publicKey || !signTransaction) return;
       toast.dismiss();
+
+      if (!userId) {
+        await handleSignIn();
+      }
+
       const transactionId = startTransaction(`Create organization`);
 
       const requiredTokenData = {

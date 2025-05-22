@@ -29,7 +29,6 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
   const { data: projectsData } = useOrganizationProjects(orgId, "active");
   const { data: tasksData } = useMemberTasks();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  
 
   //Get Total Earned in USDC
   function getTotalUSDCInTreasury() {
@@ -60,14 +59,26 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
 
         <SlimOrgSidebar orgId={organization!.accountAddress!} />
 
-        <div className={`${isMobile ? "w-20" : "w-64"} h-screen flex-shrink-0 flex flex-col`}>
+        <div
+          className={`${
+            isMobile ? "w-20" : "w-64"
+          } h-screen flex-shrink-0 flex flex-col`}
+        >
           {/* Header */}
           <div className="p-0 bg-white flex-shrink-0">
             <div
-              className={`flex flex-row border-b border-r border-stone-200 h-[50px] p-1 hover:bg-black ${dropdownOpen ? 'bg-black text-white' : ''} transition-all duration-300 hover:text-white hover:cursor-pointer`}
-              onClick={() => !isMobile ? setDropdownOpen(!dropdownOpen) : null}
+              className={`flex flex-row border-b border-r border-stone-200 h-[50px] p-1 hover:bg-black ${
+                dropdownOpen ? "bg-black text-white" : ""
+              } transition-all duration-300 hover:text-white hover:cursor-pointer`}
+              onClick={() =>
+                !isMobile ? setDropdownOpen(!dropdownOpen) : null
+              }
             >
-              <div className={`flex flex-col ${isMobile ? "w-full" : "w-1/5"} justify-center items-center`}>
+              <div
+                className={`flex flex-col ${
+                  isMobile ? "w-full" : "w-1/5"
+                } justify-center items-center`}
+              >
                 <Image
                   src={organization?.metadata?.logoUrl ?? organization?.logoUrl}
                   alt={organization.name}
@@ -83,7 +94,13 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                       {organization.name}
                     </span>
                     <div className="mt-2">
-                      <ChevronDown className={`h-6 w-6 transition-transform ms-1 ${dropdownOpen ? 'rotate-180 transition-all duration-300' : ''}`} />
+                      <ChevronDown
+                        className={`h-6 w-6 transition-transform ms-1 ${
+                          dropdownOpen
+                            ? "rotate-180 transition-all duration-300"
+                            : ""
+                        }`}
+                      />
                     </div>
                   </div>
                 </div>
@@ -92,9 +109,11 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
             {dropdownOpen && organization.metadata && !isMobile && (
               <div className="border-b border-r border-stone-200">
                 {organization.metadata.twitterUrl && (
-                  <Link 
-                    href={organization.metadata.twitterUrl} className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 text-stone-600 group hover:bg-stone-50 hover:text-black transition-all duration-300"
-                    target="_blank">
+                  <Link
+                    href={organization.metadata.twitterUrl}
+                    className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 text-stone-600 group hover:bg-stone-50 hover:text-black transition-all duration-300"
+                    target="_blank"
+                  >
                     <Icons.twitter
                       className="h-4 w-4 me-4 group-hover:fill-black transition-all duration-300"
                       fill="gray"
@@ -104,7 +123,8 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                 )}
                 {organization.metadata.discordUrl && (
                   <Link
-                    href={organization.metadata.discordUrl} className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 text-stone-600 group hover:bg-stone-50 hover:text-black transition-all duration-300"
+                    href={organization.metadata.discordUrl}
+                    className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 text-stone-600 group hover:bg-stone-50 hover:text-black transition-all duration-300"
                     target="_blank"
                   >
                     <Icons.discord
@@ -116,7 +136,8 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                 )}
                 {organization.metadata.websiteUrl && (
                   <Link
-                    href={organization.metadata.websiteUrl} className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 text-stone-600 group hover:bg-stone-50 hover:text-black transition-all duration-300"
+                    href={organization.metadata.websiteUrl}
+                    className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 text-stone-600 group hover:bg-stone-50 hover:text-black transition-all duration-300"
                     target="_blank"
                   >
                     <Globe
@@ -264,7 +285,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                   >
                     <item.icon
                       className={cn(
-                        "h-4 w-4", 
+                        "h-4 w-4",
                         isActive && "stroke-black",
                         !isMobile && "mr-3"
                       )}
@@ -275,7 +296,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
               })}
             </nav>
           </div>
-        </div >
+        </div>
       </>
     );
 }

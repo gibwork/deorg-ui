@@ -1,31 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import {
-  PlusCircle,
-  ThumbsDown,
-  ThumbsUp,
-  Clock,
-  ExternalLink,
-  CheckCircle,
-  Check,
-  ThumbsUpIcon,
-  X,
-  Loader2,
-  Circle,
-} from "lucide-react";
-import { CreateProposalModal } from "./create-proposal-modal";
+
+import { PlusCircle, Clock, Check, X, Circle } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getOrganizationProposals,
@@ -40,11 +24,11 @@ import dayjs from "dayjs";
 import DateComponent from "@/components/date-component";
 import { useTransactionStore } from "@/features/transaction-toast/use-transaction-store";
 import { useTransactionStatus } from "@/hooks/use-transaction-status";
-import { LoaderButton } from "@/components/loader-button";
 import { useOrganizationMembers } from "../../hooks/use-organization-members";
 import { cn, truncate } from "@/lib/utils";
 import Link from "next/link";
 import { Icons } from "@/components/icons";
+
 export function OrganizationProposals({
   organizationId,
 }: {
@@ -65,7 +49,6 @@ export function OrganizationProposals({
       if (proposals.error) throw new Error(proposals.error.message);
       return proposals.success;
     },
-    refetchInterval: 1000,
   });
 
   if (isLoading) return <div>Loading...</div>;
@@ -183,7 +166,6 @@ function ProposalCard({
 }: ProposalCardProps) {
   const queryClient = useQueryClient();
   const { publicKey } = useWallet();
-
   const { data: organizationMembers } = useOrganizationMembers(organizationId);
   const totalMembers =
     organizationMembers?.filter((member) => member.role === "CONTRIBUTOR")
@@ -350,7 +332,7 @@ function ProposalCard({
           >
             <ExternalLink className="size-4" />
           </Link> */}
-          {isActive && !hasVoted && (
+          {!!publicKey && isActive && !hasVoted && (
             <div className="flex gap-2">
               <Button
                 variant="default"

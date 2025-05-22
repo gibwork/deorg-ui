@@ -7,6 +7,7 @@ import { walletSignIn } from "@/actions/post/wallet-sign-in";
 import { useAuth, useSignIn, useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { useTransactionStatus } from "@/hooks/use-transaction-status";
+import { useMemberOrganizations } from "@/features/organizations/hooks/use-member-organizations";
 
 export const useWalletAuth = () => {
   const { publicKey, signMessage, connected, disconnect } = useWallet();
@@ -72,6 +73,9 @@ export const useWalletAuth = () => {
     }
   };
 
+  const { refetch: refetchMemberOrganizations, isRefetching } =
+    useMemberOrganizations();
+
   useEffect(() => {
     const body = document.body;
 
@@ -86,7 +90,7 @@ export const useWalletAuth = () => {
 
   useEffect(() => {
     if (connected && !!publicKey) {
-      handleSignIn();
+      refetchMemberOrganizations();
     }
   }, [publicKey]);
 
@@ -94,5 +98,6 @@ export const useWalletAuth = () => {
     isLoading,
     error,
     handleSignIn,
+    refetchMemberOrganizations,
   };
 };
