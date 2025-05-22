@@ -98,35 +98,35 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
               <div className="border-b border-r border-stone-200">
                 {organization.metadata.twitterUrl && (
                   <Link 
-                    href={organization.metadata.twitterUrl} className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 text-stone-600 group hover:bg-stone-50 hover:text-black transition-all duration-300"
+                    href={organization.metadata.twitterUrl} className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 group hover:bg-stone-50 transition-all duration-300"
                     target="_blank">
                     <Icons.twitter
-                      className="h-4 w-4 me-4 group-hover:fill-black transition-all duration-300"
-                      fill="gray"
+                      className="h-4 w-4 me-4"
+                      fill="black"
                     />
                     Follow on X
                   </Link>
                 )}
                 {organization.metadata.discordUrl && (
                   <Link
-                    href={organization.metadata.discordUrl} className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 text-stone-600 group hover:bg-stone-50 hover:text-black transition-all duration-300"
+                    href={organization.metadata.discordUrl} className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 group hover:bg-stone-50 transition-all duration-300"
                     target="_blank"
                   >
                     <Icons.discord
-                      className="h-4 w-4 me-4 group-hover:fill-black transition-all duration-300"
-                      fill="gray"
+                      className="h-4 w-4 me-4"
+                      fill="black"
                     />
                     Join Discord
                   </Link>
                 )}
                 {organization.metadata.websiteUrl && (
                   <Link
-                    href={organization.metadata.websiteUrl} className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 text-stone-600 group hover:bg-stone-50 hover:text-black transition-all duration-300"
+                    href={organization.metadata.websiteUrl} className="flex items-center px-4 py-3 text-sm font-medium border-b border-stone-200 group hover:bg-stone-50 transition-all duration-300"
                     target="_blank"
                   >
                     <Globe
-                      className="h-4 w-4 me-4 group-hover:stroke-black transition-all duration-300"
-                      stroke="gray"
+                      className="h-4 w-4 me-4"
+                      stroke="black"
                     />
                     Visit Website
                   </Link>
@@ -136,27 +136,27 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
             {!isMobile ? (
               <div className="flex flex-row text-center h-[70px] border-b border-r">
                 <div className="flex flex-col w-1/3 border-r group cursor-pointer">
-                  <div className="p-2 py-4 flex flex-col items-center justify-center font-light group-hover:bg-black group-hover:text-white transition-all duration-300">
+                  <div className="p-2 py-4 flex flex-col items-center justify-center group-hover:bg-black group-hover:text-white transition-all duration-300">
                     {organization.contributors?.length || 0}
-                    <span className="text-xs font-semibold group-hover:hidden">contributors</span>
-                    <span className="text-xs font-semibold hidden group-hover:block">view</span>
+                    <span className="text-xs font-light group-hover:hidden">contributors</span>
+                    <span className="text-xs font-light hidden group-hover:block">view</span>
                   </div>
                 </div>
                 <div className="flex flex-col w-1/3 border-r group cursor-pointer">
-                  <div className="p-2 py-4 flex flex-col items-center justify-center font-light group-hover:bg-black group-hover:text-white transition-all duration-300">
+                  <div className="p-2 py-4 flex flex-col items-center justify-center group-hover:bg-black group-hover:text-white transition-all duration-300">
                     {organization.members?.length || 0}
-                    <span className="text-xs font-semibold group-hover:hidden">followers</span>
-                    <span className="text-xs font-semibold hidden group-hover:block">follow</span>
+                    <span className="text-xs font-light group-hover:hidden">followers</span>
+                    <span className="text-xs font-light hidden group-hover:block">follow</span>
                   </div>
                 </div>
                 <div 
                   className="flex flex-col w-1/3 border-r group cursor-pointer"
                   onClick={() => organization && setShowDepositModal(true)}
                 >
-                  <div className="p-2 py-4 flex flex-col items-center justify-center font-light group-hover:bg-black group-hover:text-white transition-all duration-300">
+                  <div className="p-2 py-4 flex flex-col items-center justify-center group-hover:bg-black group-hover:text-white transition-all duration-300">
                     {getTotalUSDCInTreasury()}
-                    <span className="text-xs font-semibold group-hover:hidden">treasury</span>
-                    <span className="text-xs font-semibold hidden group-hover:block">deposit</span>
+                    <span className="text-xs font-light group-hover:hidden">treasury</span>
+                    <span className="text-xs font-light hidden group-hover:block">deposit</span>
                   </div>
                 </div>
               </div>
@@ -190,7 +190,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                           className={cn(
                             "h-4 w-4",
                             isProjectsActive && "stroke-black",
-                            !isMobile && "mr-3"
+                            !isMobile && "mr-4"
                           )}
                         />
                         {!isMobile && item.label}
@@ -217,7 +217,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                             <div className="flex items-center gap-2">
                               <item.icon
                                 className={cn(
-                                  "h-4 w-4 mr-1",
+                                  "h-4 w-4 mr-4",
                                   isProjectsActive && "stroke-black"
                                 )}
                               />
@@ -277,7 +277,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                       className={cn(
                         "h-4 w-4", 
                         isActive && "stroke-black",
-                        !isMobile && "mr-3"
+                        !isMobile && "mr-4"
                       )}
                     />
                     {!isMobile && item.label}
