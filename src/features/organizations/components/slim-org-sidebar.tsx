@@ -219,7 +219,7 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
         </div>        
       </ScrollArea>
 
-      <div className="mb-9 relative bg-black rounded-l-lg group">
+      {/* <div className="mb-9 relative bg-black rounded-l-lg group">
         {isSignedIn && publicKey ? (
           <div className="w-[50px] h-[55px] rounded-full p-2">
             <Image
@@ -249,7 +249,7 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
             </div>
           </div>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }
