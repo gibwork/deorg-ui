@@ -88,7 +88,7 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                       {organization.name}
                     </span>
                     <div className="mt-2">
-                      <ChevronDown className={`h-6 w-6 transition-transform ms-1 ${dropdownOpen ? 'rotate-180 transition-all duration-300' : ''}`} />
+                      <ChevronDown className={`h-4 w-4 transition-transform ms-1 ${dropdownOpen ? 'rotate-180 transition-all duration-300' : ''}`} />
                     </div>
                   </div>
                 </div>
@@ -210,11 +210,11 @@ export function OrganizationSidebar({ orgId }: { orgId: string }) {
                         <AccordionItem value="projects" className="border-none">
                           <AccordionTrigger
                             className={cn(
-                              "py-3 px-4 hover:bg-stone-100 text-sm",
+                              "py-3 ps-4 pe-1 hover:bg-stone-100 text-sm",
                               isProjectsActive && "bg-stone-100"
                             )}
                           >
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center">
                               <item.icon
                                 className={cn(
                                   "h-4 w-4 mr-4",
