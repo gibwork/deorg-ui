@@ -105,8 +105,7 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
                             <div className="w-full h-full">
                               <Avatar
                                 className={cn(
-                                  "h-10 w-10 rounded-sm border-none ",
-                                  isActive ? "opacity-100" : "opacity-75"
+                                  "h-10 w-10 rounded-sm border-none "
                                 )}
                               >
                                 <AvatarImage
@@ -160,8 +159,7 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
                             <div className="w-full h-full">
                               <Avatar
                                 className={cn(
-                                  "h-10 w-10 rounded-sm border-none ",
-                                  isActive ? "opacity-100" : "opacity-75"
+                                  "h-10 w-10 rounded-sm border-none "
                                 )}
                               >
                                 <AvatarImage
