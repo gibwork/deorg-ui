@@ -58,6 +58,8 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useOrganizationProjects } from "@/features/organizations/hooks/use-organization-projects";
 import { createTaskTransaction } from "@/features/organizations/actions/tasks/create-task-transaction";
 import { createTask } from "@/features/organizations/actions/tasks/create-task";
+import { useAuth } from "@clerk/nextjs";
+import { useWalletAuthContext } from "@/features/auth/lib/wallet-auth-context";
 const proposalFormSchema = z
   .object({
     proposalType: z.string().min(1, "Please select a proposal type"),
@@ -223,6 +225,8 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
   const transactionStatus = useTransactionStatus();
   const walletModal = useWalletModal();
   const { publicKey, signTransaction } = useWallet();
+  const { userId } = useAuth();
+  const { handleSignIn } = useWalletAuthContext();
   const {
     startTransaction,
     updateStep,
@@ -626,6 +630,11 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
 
   const onSubmit: SubmitHandler<ProposalFormDataType> = async (data) => {
     transactionStatus.onStart();
+
+    if (!userId) {
+      await handleSignIn();
+    }
+
     if (currentValues.proposalType === "member") {
       await handleCreateContributorProposal(data);
     }

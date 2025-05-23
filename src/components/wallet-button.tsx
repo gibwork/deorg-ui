@@ -23,6 +23,7 @@ import { WalletButtonPopover } from "./wallet-button-popover";
 import { useUserData } from "@/hooks/use-user-data";
 import { ButtonProps } from "@/components/ui/button";
 import { useWalletAuthContext } from "@/features/auth/lib/wallet-auth-context";
+import { usePathname } from "next/navigation";
 
 export function WalletButton({
   className,
@@ -33,6 +34,7 @@ export function WalletButton({
   const { isManualChange, toggleManualChange, isVerifying, toggleVerifying } =
     useWalletChange();
   const { isLoading } = useWalletAuthContext();
+  const pathname = usePathname();
 
   const { userId, signOut } = useAuth();
   const {
@@ -56,7 +58,7 @@ export function WalletButton({
       if (pubKey !== userData?.walletAddress) {
         disconnect();
         if (!isManualChange) {
-          signOut();
+          signOut({ redirectUrl: pathname });
         } else {
           toast.warning("Please connect wallet to continue!", {
             id: pubKey,
@@ -66,7 +68,7 @@ export function WalletButton({
       toggleManualChange(false);
     } else if (!publicKey && userData?.walletAddress && !isFirstRender) {
       if (!isManualChange) {
-        signOut();
+        signOut({ redirectUrl: pathname });
       }
     }
 

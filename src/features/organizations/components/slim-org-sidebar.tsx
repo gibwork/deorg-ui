@@ -28,10 +28,9 @@ import { useQuery } from "@tanstack/react-query";
 
 interface SlimOrgSidebarProps {
   className?: string;
-  orgId: string;
 }
 
-export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
+export function SlimOrgSidebar({ className }: SlimOrgSidebarProps) {
   const pathname = usePathname();
   const {
     data: memberOrganizations,
@@ -58,7 +57,9 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
     if (!solanaBalance) return "No Sol";
 
     //convert decimal places using tokenInfo.decimals
-    const balance = solanaBalance?.tokenInfo.balance / 10 ** solanaBalance?.tokenInfo.decimals;
+    const balance =
+      solanaBalance?.tokenInfo.balance /
+      10 ** solanaBalance?.tokenInfo.decimals;
     return balance;
   };
 
@@ -73,13 +74,13 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
         <div className="flex flex-col items-center gap-4 px-2">
           {!memberOrganizations && isLoading
             ? Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton
-                key={i}
-                className="h-10 w-10 rounded-sm bg-stone-200"
-              />
-            ))
-            : (isSignedIn && publicKey
-              ? memberOrganizations?.map((org) => {
+                <Skeleton
+                  key={i}
+                  className="h-10 w-10 rounded-sm bg-stone-200"
+                />
+              ))
+            : isSignedIn && publicKey
+            ? memberOrganizations?.map((org) => {
                 const isActive = pathname.includes(
                   `/organizations/${org.accountAddress}`
                 );
@@ -131,15 +132,15 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
                   </TooltipProvider>
                 );
               })
-              : organizations?.map((org: Organization) => {
-                  const isActive = pathname.includes(
-                    `/organizations/${org.accountAddress}`
-                  );
+            : organizations?.map((org: Organization) => {
+                const isActive = pathname.includes(
+                  `/organizations/${org.accountAddress}`
+                );
 
-                  return (
-                    <TooltipProvider key={org.id} delayDuration={300}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
+                return (
+                  <TooltipProvider key={org.id} delayDuration={300}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
                         <Link
                           href={`/organizations/${org.accountAddress}`}
                           className="group relative flex items-center"
@@ -185,7 +186,7 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
                     </Tooltip>
                   </TooltipProvider>
                 );
-              }))}
+              })}
         </div>
       </ScrollArea>
 
@@ -213,7 +214,10 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
         ) : (
           <div className="w-[50px] h-[55px] rounded-full p-2">
             <div className="absolute left-[50px] bottom-0 bg-black text-white py-2 px-4 rounded-r-lg h-[55px] w-[255px] z-40 flex flex-col justify-center whitespace-nowrap">
-              <div className="flex flex-col justify-between text-base font-bold hover:cursor-pointer hover:bg-black/10 transition-all p-2 rounded-md" onClick={() => walletModal.setVisible(true)}>
+              <div
+                className="flex flex-col justify-between text-base font-bold hover:cursor-pointer hover:bg-black/10 transition-all p-2 rounded-md"
+                onClick={() => walletModal.setVisible(true)}
+              >
                 CONNECT WALLET
               </div>
             </div>

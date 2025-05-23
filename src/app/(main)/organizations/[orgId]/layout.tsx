@@ -1,13 +1,8 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { OrganizationHeader } from "@/features/organizations/components/organization/organization-header";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { OrganizationNav } from "@/features/organizations/components/organization/organization-nav";
-import Sidebar from "@/components/layout/sidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+
 import { OrganizationSidebar } from "@/features/organizations/components/organization-sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { auth } from "@clerk/nextjs/server";
-import { Unauthorized } from "./unathorized";
 
 function OrganizationLayout({
   children,
@@ -16,8 +11,6 @@ function OrganizationLayout({
   children: React.ReactNode;
   params: { orgId: string };
 }) {
-  const { userId } = auth();
-
   return (
     <div className="flex min-h-screen w-full bg-white dark:bg-gray-900">
       <OrganizationSidebar orgId={params.orgId} />
