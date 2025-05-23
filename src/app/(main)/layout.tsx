@@ -22,17 +22,17 @@ export default async function MainLayout({
       },
     });
 
-    await queryClient.prefetchQuery({
-      queryKey: [`userTokenList`],
-      queryFn: async () => {
-        const userTokens = await getUserWalletBalance(
-          useNetwork.getState().network
-        );
-        if (userTokens.error) throw new Error(userTokens.error);
+    // await queryClient.prefetchQuery({
+    //   queryKey: [`userTokenList`],
+    //   queryFn: async () => {
+    //     const userTokens = await getUserWalletBalance(
+    //       useNetwork.getState().network
+    //     );
+    //     if (userTokens.error) throw new Error(userTokens.error);
 
-        return userTokens.success;
-      },
-    });
+    //     return userTokens.success;
+    //   },
+    // });
   }
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

@@ -1,6 +1,9 @@
 import React, { Suspense } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { OrganizationOverview } from "@/features/organizations/components/organization/organization-overview";
+import {
+  OrganizationOverview,
+  OrganizationOverviewSkeleton,
+} from "@/features/organizations/components/organization/organization-overview";
 import { getQueryClient } from "@/components/providers/query";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getOrganizationOverview } from "@/features/organizations/actions/get-organization-overview";
@@ -8,9 +11,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { getOrganizationDetails } from "@/features/organizations/actions/get-organization-details";
 import { Organization } from "@/types/types.organization";
 import { getOrganizationProposals } from "@/features/organizations/actions/proposals/get-organization-proposals";
+
 function page({ params }: { params: { orgId: string } }) {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<OrganizationOverviewSkeleton />}>
       <OrganizationOverviewPage params={params} />
     </Suspense>
   );

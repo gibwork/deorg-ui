@@ -9,16 +9,22 @@ import { auth } from "@clerk/nextjs/server";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import axios from "axios";
 
-export const getUserWalletBalance = async (network: string) => {
+export const getUserWalletBalance = async (
+  network: string,
+  userWalletAddress: string
+) => {
   try {
     const { getToken } = auth();
     const token = await getToken();
-    const { data } = await axios.get(`${process.env.API_URL}/users/balance?network=${network}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const { data } = await axios.get(
+      `${process.env.API_URL}/users/balance/${userWalletAddress}?network=${network}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     return { success: data };
   } catch (error) {

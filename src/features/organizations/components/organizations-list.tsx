@@ -27,10 +27,6 @@ const OrganizationsList = () => {
   const { isSignedIn } = useAuth();
   const { isLoading: isWalletAuthLoading, handleSignIn } =
     useWalletAuthContext();
-  const { userMemberships, setActive } =
-    useOrganizationList(UserMembershipParams);
-  const [selectedOrganization, setSelectedOrganization] =
-    useState<Organization | null>(null);
 
   const {
     data: organizations,
@@ -44,30 +40,6 @@ const OrganizationsList = () => {
       return organizations!.success;
     },
   });
-
-  const isUserMember = (externalId: string): boolean => {
-    return (
-      userMemberships?.data?.some(
-        (membership: { organization: { id: string } }) =>
-          membership.organization.id === externalId
-      ) || false
-    );
-  };
-
-  const handleJoinClick = (org: Organization) => {
-    setSelectedOrganization(org);
-  };
-
-  const handleJoinSuccess = () => {
-    if (!selectedOrganization || !setActive) return;
-
-    setActive({
-      organization: selectedOrganization.externalId,
-      beforeEmit: () => {
-        router.push(`/organizations/${selectedOrganization.id}`);
-      },
-    });
-  };
 
   if (error) {
     return (
@@ -192,32 +164,6 @@ const OrganizationsList = () => {
                       </div>
                     </div>
                   </div>
-
-                  <div className="hidden  gap-2 mt-4">
-                    {isUserMember(org.externalId) ? (
-                      <Button
-                        className="flex-1"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          router.push(`/organizations/${org.id}`);
-                        }}
-                      >
-                        View Details
-                      </Button>
-                    ) : (
-                      <Button
-                        className="flex-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleJoinClick(org);
-                        }}
-                        variant="default"
-                      >
-                        Join Organization
-                      </Button>
-                    )}
-                  </div>
                 </Card>
               ))}
             </div>
@@ -256,15 +202,6 @@ const OrganizationsList = () => {
                 </div>
               </div>
             </Card>
-          )}
-
-          {selectedOrganization && (
-            <JoinOrganizationDialog
-              organization={selectedOrganization}
-              isOpen={!!selectedOrganization}
-              onOpenChange={(open) => !open && setSelectedOrganization(null)}
-              onSuccess={handleJoinSuccess}
-            />
           )}
         </div>
       </div>

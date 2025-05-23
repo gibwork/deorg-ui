@@ -4,13 +4,13 @@ import axios, { AxiosError } from "axios";
 import { auth } from "@clerk/nextjs/server";
 import { ErrorResponse } from "@/types/types.error";
 
-export const getMemberTasks = async () => {
+export const getMemberTasks = async (userWalletAddress: string) => {
   try {
     const { getToken } = auth();
     const token = await getToken();
 
     const { data } = await axios.get(
-      `${process.env.API_URL}/users/tasks`,
+      `${process.env.API_URL}/users/tasks/${userWalletAddress}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

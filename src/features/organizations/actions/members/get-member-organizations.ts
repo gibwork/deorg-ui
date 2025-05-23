@@ -4,13 +4,13 @@ import axios, { AxiosError } from "axios";
 import { auth } from "@clerk/nextjs/server";
 import { ErrorResponse } from "@/types/types.error";
 
-export const getMemberOrganizations = async () => {
+export const getMemberOrganizations = async (userWalletAddress: string) => {
   try {
     const { getToken } = auth();
     const token = await getToken();
 
     const { data } = await axios.get(
-      `${process.env.API_URL}/users/organizations`,
+      `${process.env.API_URL}/users/organizations/${userWalletAddress}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

@@ -1,23 +1,18 @@
 "use server";
 
 import axios, { AxiosError } from "axios";
-import { auth } from "@clerk/nextjs/server";
 import { ErrorResponse } from "@/types/types.error";
 
-export const checkMembership = async (organizationId: string) => {
+export const checkMembership = async (
+  organizationId: string,
+  userWalletAddress: string
+) => {
   try {
-    const { getToken, userId } = auth();
-    const token = await getToken();
-
-    if (!userId) {
-      return { error: { message: "User not authenticated" } };
-    }
-
     const { data } = await axios.get(
-      `${process.env.API_URL}/organizations/${organizationId}/check-membership`,
+      `${process.env.API_URL}/organizations/${organizationId}/check-membership/${userWalletAddress}`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       }
     );

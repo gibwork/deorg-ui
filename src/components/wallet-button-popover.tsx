@@ -22,10 +22,11 @@ import { toast } from "sonner";
 import useNetwork from "@/hooks/use-network";
 import { useAuth } from "@clerk/nextjs";
 import { User } from "@/types/user.types";
+import { usePathname } from "next/navigation";
 
 export function WalletButtonPopover({ userData }: { userData?: User }) {
   const { publicKey, disconnect } = useWallet();
-
+  const pathname = usePathname();
   const { signOut } = useAuth();
   const network = useNetwork((state) => state.network);
 
@@ -93,7 +94,7 @@ export function WalletButtonPopover({ userData }: { userData?: User }) {
                 className="flex items-center gap-1"
                 onClick={() => {
                   disconnect();
-                  signOut();
+                  signOut({ redirectUrl: pathname });
                 }}
               >
                 <UnplugIcon className="h-4 w-4" />

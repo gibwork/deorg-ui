@@ -116,22 +116,12 @@ export function OrganizationProjects({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        {/* <div>
+        <div>
           <h2 className="text-2xl font-bold tracking-tight">Projects</h2>
           <p className="text-muted-foreground">
             Create and manage projects for your organization.
           </p>
-        </div> */}
-        <Link
-          href={`/organizations/${organizationId}/projects/new`}
-          className={cn(
-            buttonVariants({ variant: "default" }),
-            "flex items-center gap-2"
-          )}
-        >
-          <PlusCircle className="mr-2 h-4 w-4" />
-          New Project
-        </Link>
+        </div>
       </div>
 
       <Tabs defaultValue="active" className="w-full">
@@ -145,23 +135,61 @@ export function OrganizationProjects({
         </TabsList>
 
         <TabsContent value="active" className="space-y-4 mt-6">
-          {projects?.activeProjects.map((project) => (
-            <ProjectCard
-              key={project.uuid}
-              project={project}
-              onViewProject={handleViewProject}
-            />
-          ))}
+          {projects?.activeProjects.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-8">
+                <PlusCircle className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">
+                  No Active Projects
+                </h3>
+                <p className="text-muted-foreground text-center mb-4">
+                  Get started by creating your first project
+                </p>
+                <Link
+                  href={`/organizations/${organizationId}/proposals/new`}
+                  className={cn(
+                    buttonVariants({ variant: "default" }),
+                    "flex items-center gap-2"
+                  )}
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Create Project
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
+            projects?.activeProjects.map((project) => (
+              <ProjectCard
+                key={project.uuid}
+                project={project}
+                onViewProject={handleViewProject}
+              />
+            ))
+          )}
         </TabsContent>
 
         <TabsContent value="completed" className="space-y-4 mt-6">
-          {projects?.completedProjects.map((project) => (
-            <ProjectCard
-              key={project.uuid}
-              project={project}
-              onViewProject={handleViewProject}
-            />
-          ))}
+          {projects?.completedProjects.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-8">
+                <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">
+                  No Completed Projects
+                </h3>
+                <p className="text-muted-foreground text-center">
+                  Projects will appear here once they are completed
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            projects?.completedProjects.map((project) => (
+              <ProjectCard
+                key={project.uuid}
+                project={project}
+                onViewProject={handleViewProject}
+              />
+            ))
+          )}
         </TabsContent>
       </Tabs>
 

@@ -15,7 +15,6 @@ export const createProject = async (payload: {
   const token = await getToken();
 
   try {
-    console.log(`${process.env.API_URL}/projects`);
     const { data } = await axios.post(
       `${process.env.API_URL}/projects`,
       payload,

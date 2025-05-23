@@ -1,31 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import {
-  PlusCircle,
-  ThumbsDown,
-  ThumbsUp,
-  Clock,
-  ExternalLink,
-  CheckCircle,
-  Check,
-  ThumbsUpIcon,
-  X,
-  Loader2,
-  Circle,
-} from "lucide-react";
-import { CreateProposalModal } from "./create-proposal-modal";
+
+import { PlusCircle, Clock, Check, X, Circle, AlertCircle } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getOrganizationProposals,
@@ -40,11 +24,12 @@ import dayjs from "dayjs";
 import DateComponent from "@/components/date-component";
 import { useTransactionStore } from "@/features/transaction-toast/use-transaction-store";
 import { useTransactionStatus } from "@/hooks/use-transaction-status";
-import { LoaderButton } from "@/components/loader-button";
 import { useOrganizationMembers } from "../../hooks/use-organization-members";
 import { cn, truncate } from "@/lib/utils";
 import Link from "next/link";
 import { Icons } from "@/components/icons";
+import { useCheckMembership } from "../../hooks/use-check-membership";
+
 export function OrganizationProposals({
   organizationId,
 }: {
@@ -65,8 +50,10 @@ export function OrganizationProposals({
       if (proposals.error) throw new Error(proposals.error.message);
       return proposals.success;
     },
-    refetchInterval: 1000,
   });
+
+  const { data: membershipData, isLoading: isMembershipLoading } =
+    useCheckMembership(organizationId);
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -131,6 +118,7 @@ export function OrganizationProposals({
                   <ProposalCard
                     key={proposal.id}
                     proposal={proposal}
+                    membershipData={membershipData}
                     isActive={true}
                     organizationId={organizationId}
                   />
@@ -157,6 +145,7 @@ export function OrganizationProposals({
                   <ProposalCard
                     key={proposal.id}
                     proposal={proposal}
+                    membershipData={membershipData}
                     isActive={false}
                     organizationId={organizationId}
                   />
@@ -170,20 +159,25 @@ export function OrganizationProposals({
   );
 }
 
+interface MembershipType {
+  isMember: boolean;
+}
+
 interface ProposalCardProps {
   proposal: ProposalType;
   isActive: boolean;
+  membershipData: MembershipType;
   organizationId: string;
 }
 
 function ProposalCard({
   proposal,
   isActive,
+  membershipData,
   organizationId,
 }: ProposalCardProps) {
   const queryClient = useQueryClient();
   const { publicKey } = useWallet();
-
   const { data: organizationMembers } = useOrganizationMembers(organizationId);
   const totalMembers =
     organizationMembers?.filter((member) => member.role === "CONTRIBUTOR")
@@ -350,28 +344,43 @@ function ProposalCard({
           >
             <ExternalLink className="size-4" />
           </Link> */}
-          {isActive && !hasVoted && (
+          {!!publicKey && isActive && (
             <div className="flex gap-2">
-              <Button
-                variant="default"
-                size="sm"
-                disabled={transactionStatus.isProcessing}
-                className="text-white font-medium bg-[#2e9668] hover:bg-[#3ab981] dark:text-green-400 dark:border-green-900 dark:hover:bg-green-950 dark:hover:text-green-300"
-                onClick={() => handleVote(true)}
-              >
-                YES
-                {/* Vote For */}
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                disabled={transactionStatus.isProcessing}
-                onClick={() => handleVote(false)}
-                className="text-white font-medium bg-[#e11c48] hover:bg-[#f43f5e] border-red-200 dark:text-red-400 dark:border-red-900 dark:hover:bg-red-950 dark:hover:text-red-300"
-              >
-                NO
-                {/* Vote Against */}
-              </Button>
+              {!hasVoted && membershipData?.isMember ? (
+                // Show voting buttons for eligible members
+                <>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    disabled={transactionStatus.isProcessing}
+                    className="text-white font-medium bg-[#2e9668] hover:bg-[#3ab981] dark:text-green-400 dark:border-green-900 dark:hover:bg-green-950 dark:hover:text-green-300"
+                    onClick={() => handleVote(true)}
+                  >
+                    YES
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    disabled={transactionStatus.isProcessing}
+                    onClick={() => handleVote(false)}
+                    className="text-white font-medium bg-[#e11c48] hover:bg-[#f43f5e] border-red-200 dark:text-red-400 dark:border-red-900 dark:hover:bg-red-950 dark:hover:text-red-300"
+                  >
+                    NO
+                  </Button>
+                </>
+              ) : hasVoted ? (
+                // Show voted status
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Check className="h-4 w-4" />
+                  <span>You voted</span>
+                </div>
+              ) : !membershipData?.isMember ? (
+                // Show membership requirement for non-members
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>Members only</span>
+                </div>
+              ) : null}
             </div>
           )}
         </div>

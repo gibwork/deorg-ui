@@ -29,10 +29,9 @@ import { PlusCircleIcon, CompassIcon } from "lucide-react";
 
 interface SlimOrgSidebarProps {
   className?: string;
-  orgId: string;
 }
 
-export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
+export function SlimOrgSidebar({ className }: SlimOrgSidebarProps) {
   const pathname = usePathname();
   const {
     data: memberOrganizations,
@@ -59,7 +58,9 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
     if (!solanaBalance) return "No Sol";
 
     //convert decimal places using tokenInfo.decimals
-    const balance = solanaBalance?.tokenInfo.balance / 10 ** solanaBalance?.tokenInfo.decimals;
+    const balance =
+      solanaBalance?.tokenInfo.balance /
+      10 ** solanaBalance?.tokenInfo.decimals;
     return balance;
   };
 
@@ -74,13 +75,64 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
         <div className="flex flex-col items-center gap-4 px-2">
           {!memberOrganizations && isLoading
             ? Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton
-                key={i}
-                className="h-10 w-10 rounded-sm bg-stone-200"
-              />
-            ))
-            : (isSignedIn && publicKey
-              ? memberOrganizations?.map((org) => {
+                <Skeleton
+                  key={i}
+                  className="h-10 w-10 rounded-sm bg-stone-200"
+                />
+              ))
+            : isSignedIn && publicKey
+            ? memberOrganizations?.map((org) => {
+                const isActive = pathname.includes(
+                  `/organizations/${org.accountAddress}`
+                );
+
+                return (
+                  <TooltipProvider key={org.id} delayDuration={300}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link
+                          href={`/organizations/${org.accountAddress}`}
+                          className="group relative flex items-center"
+                        >
+                          {isActive && (
+                            <span className="absolute -right-0.5 -top-0.5 h-3 w-3 z-50 rounded-full border-2 border-background bg-primary" />
+                          )}
+                          <div
+                            className={cn(
+                              "relative group flex size-10 rounded-[6px] group-hover:rounded-[10px] transition-all overflow-hidden",
+                              isActive && "bg-primary/10 text-primary"
+                            )}
+                          >
+                            <div className="w-full h-full">
+                              <Avatar
+                                className={cn(
+                                  "h-10 w-10 rounded-sm border-none "
+                                )}
+                              >
+                                <AvatarImage
+                                  src={org?.metadata?.logoUrl ?? org?.logoUrl}
+                                  alt={org.name}
+                                />
+                                <AvatarFallback>
+                                  <Skeleton className="h-10 w-10 border-none bg-stone-200" />
+                                </AvatarFallback>
+                              </Avatar>
+                            </div>
+                          </div>
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="right"
+                        align="center"
+                        className="font-medium"
+                      >
+                        {truncate(org.accountAddress, 6, 4)}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                );
+              })
+            : organizations?.map((org: Organization) => {
                 const isActive = pathname.includes(
                   `/organizations/${org.accountAddress}`
                 );
@@ -133,88 +185,36 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
                     </Tooltip>
                   </TooltipProvider>
                 );
-              })
-              : organizations?.map((org: Organization) => {
-                  const isActive = pathname.includes(
-                    `/organizations/${org.accountAddress}`
-                  );
+              })}
 
-                  return (
-                    <TooltipProvider key={org.id} delayDuration={300}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                        <Link
-                          href={`/organizations/${org.accountAddress}`}
-                          className="group relative flex items-center"
-                        >
-                          {isActive && (
-                            <span className="absolute -right-0.5 -top-0.5 h-3 w-3 z-50 rounded-full border-2 border-background bg-primary" />
-                          )}
-                          <div
-                            className={cn(
-                              "relative group flex size-10 rounded-[6px] group-hover:rounded-[10px] transition-all overflow-hidden",
-                              isActive && "bg-primary/10 text-primary"
-                            )}
-                          >
-                            <div className="w-full h-full">
-                              <Avatar
-                                className={cn(
-                                  "h-10 w-10 rounded-sm border-none "
-                                )}
-                              >
-                                <AvatarImage
-                                  src={
-                                    org?.metadata?.logoUrl ??
-                                    org.token?.imageUrl!
-                                  }
-                                  alt={org.name}
-                                />
-                                <AvatarFallback>
-                                  <Skeleton className="h-10 w-10 border-none bg-stone-200" />
-                                </AvatarFallback>
-                              </Avatar>
-                            </div>
-                          </div>
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="right"
-                        align="center"
-                        className="font-medium"
-                      >
-                        {truncate(org.accountAddress, 6, 4)}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                );
-              }))}
-        
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link href="/organizations/create" className="group relative flex items-center group hover:bg-black transition-all shadow-md w-full h-10 rounded-md justify-center">                  
+                <Link
+                  href="/organizations/create"
+                  className="group relative flex items-center group hover:bg-black transition-all shadow-md w-full h-10 rounded-md justify-center"
+                >
                   <PlusCircleIcon className="h-6 w-6 stroke-black group-hover:stroke-white transition-all" />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent>
-                Create Organization
-              </TooltipContent>
+              <TooltipContent>Create Organization</TooltipContent>
             </Tooltip>
           </TooltipProvider>
 
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link href="/organizations" className="group relative flex items-center group hover:bg-black hover:border-none transition-all shadow-md w-full h-10 rounded-md justify-center">                  
+                <Link
+                  href="/organizations"
+                  className="group relative flex items-center group hover:bg-black hover:border-none transition-all shadow-md w-full h-10 rounded-md justify-center"
+                >
                   <CompassIcon className="h-6 w-6 stroke-black group-hover:stroke-white transition-all" />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent>
-                Explore Organizations
-              </TooltipContent>
+              <TooltipContent>Explore Organizations</TooltipContent>
             </Tooltip>
           </TooltipProvider>
-        </div>        
+        </div>
       </ScrollArea>
 
       {/* <div className="mb-9 relative bg-black rounded-l-lg group">
@@ -241,7 +241,10 @@ export function SlimOrgSidebar({ orgId, className }: SlimOrgSidebarProps) {
         ) : (
           <div className="w-[50px] h-[55px] rounded-full p-2">
             <div className="absolute left-[50px] bottom-0 bg-black text-white py-2 px-4 rounded-r-lg h-[55px] w-[255px] z-40 flex flex-col justify-center whitespace-nowrap">
-              <div className="flex flex-col justify-between text-base font-bold hover:cursor-pointer hover:bg-black/10 transition-all p-2 rounded-md" onClick={() => walletModal.setVisible(true)}>
+              <div
+                className="flex flex-col justify-between text-base font-bold hover:cursor-pointer hover:bg-black/10 transition-all p-2 rounded-md"
+                onClick={() => walletModal.setVisible(true)}
+              >
                 CONNECT WALLET
               </div>
             </div>
