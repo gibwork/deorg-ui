@@ -29,6 +29,8 @@ import { cn, truncate } from "@/lib/utils";
 import Link from "next/link";
 import { Icons } from "@/components/icons";
 import { useCheckMembership } from "../../hooks/use-check-membership";
+import { useAuth } from "@clerk/nextjs";
+import { useWalletAuthContext } from "@/features/auth/lib/wallet-auth-context";
 
 export function OrganizationProposals({
   organizationId,
@@ -178,6 +180,8 @@ function ProposalCard({
 }: ProposalCardProps) {
   const queryClient = useQueryClient();
   const { publicKey } = useWallet();
+  const { userId } = useAuth();
+  const { handleSignIn } = useWalletAuthContext();
   const { data: organizationMembers } = useOrganizationMembers(organizationId);
   const totalMembers =
     organizationMembers?.filter((member) => member.role === "CONTRIBUTOR")
@@ -216,6 +220,9 @@ function ProposalCard({
     }
 
     try {
+      if (!userId) {
+        await handleSignIn();
+      }
       transactionStatus.onStart();
       toast.dismiss();
       const transactionId = startTransaction(

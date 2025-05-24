@@ -65,8 +65,9 @@ export const useWalletAuth = () => {
         // console.error(JSON.stringify(signInAttempt, null, 2));
       }
     } catch (err) {
-      disconnect();
-      toast.error((err as Error).message);
+      // disconnect();
+      // toast.error((err as Error).message);
+      throw new Error("Authentication failed");
     } finally {
       setIsLoading(false);
       transaction.onEnd();
