@@ -134,15 +134,15 @@ export default function ProjectDetailsPage({
             Projects
           </Link>
           <span className="mx-2">/</span>
-          <span className="font-medium text-foreground">{project.title}</span>
+          <span className="font-medium text-foreground">{project?.title}</span>
         </div>
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {project.title}
+              {project?.title}
             </h1>
 
-            <p className="text-muted-foreground mt-1">{project.description}</p>
+            <p className="text-muted-foreground mt-1">{project?.description}</p>
           </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center ">

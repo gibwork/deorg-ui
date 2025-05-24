@@ -23,6 +23,8 @@ import {
 } from "../../actions/tasks/enable-task-withdraw";
 import { formatTokenAmount } from "@/utils/format-amount";
 import { truncate } from "@/lib/utils";
+import { useAuth } from "@clerk/nextjs";
+import { useWalletAuthContext } from "@/features/auth/lib/wallet-auth-context";
 
 interface KanbanBoardProps {
   columns: {
@@ -46,6 +48,8 @@ export function OrganizationTasksKanban({
   const [draggedTask, setDraggedTask] = useState<any>(null);
   const { publicKey, signTransaction } = useWallet();
   const queryClient = useQueryClient();
+  const { userId } = useAuth();
+  const { handleSignIn } = useWalletAuthContext();
   const transactionStatus = useTransactionStatus();
   const { startTransaction, updateStep, updateStatus, addWarning } =
     useTransactionStore.getState();
@@ -315,6 +319,10 @@ export function OrganizationTasksKanban({
     // Only perform transactions for manual drag operations
     if (!isSocketUpdate) {
       let success = false;
+
+      if (!userId) {
+        await handleSignIn();
+      }
 
       // Handle the transaction based on the destination
       if (destination.droppableId === "completed") {
