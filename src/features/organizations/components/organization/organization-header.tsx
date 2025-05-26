@@ -52,8 +52,8 @@ export function OrganizationHeader({
   };
 
   return (
-    <div className="space-y-2 border-b border-stone-200 h-[50px]">
-      <div className="flex flex-col md:flex-row md:items-start justify-end gap-4">
+    <div className="border-b border-stone-200 h-[50px] bg-white">
+      <div className="flex items-center justify-end h-full px-4 gap-3">
         {/* <div className="space-y-1">
             <div className="flex items-center justify-center gap-2">
               <Avatar className="h-10 w-10">
@@ -73,7 +73,7 @@ export function OrganizationHeader({
             <p className="text-muted-foreground">{organization.description}</p>
           </div> */}
 
-        <div className="flex items-center gap-3 py-2 me-3">
+        <div className="flex items-center gap-3">
           {/* {organization?.metadata?.twitterUrl && (
             <Button
               variant="outline"

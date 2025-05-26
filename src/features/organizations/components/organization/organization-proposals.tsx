@@ -60,10 +60,12 @@ export function OrganizationProposals({
   if (isLoading) return <div>Loading...</div>;
 
   return (
-    <div className="space-y-6 pb-20">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6 pb-20">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Proposals</h2>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+            Proposals
+          </h2>
           {/* <p className="text-muted-foreground">
             Create and vote on funding proposals for your organization.
           </p> */}
@@ -73,17 +75,20 @@ export function OrganizationProposals({
       <div className="flex flex-col">
         {proposals?.activeProposals.length === 0 &&
         proposals?.pastProposals.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
             <div className="rounded-full bg-muted p-3">
               <PlusCircle className="h-6 w-6 text-muted-foreground" />
             </div>
             <h3 className="mt-4 text-lg font-semibold">No proposals yet</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground px-4">
               Create a new proposal to get started
             </p>
             <Link
               href={`/organizations/${organizationId}/proposals/new`}
-              className={cn(buttonVariants({ variant: "default" }), "mt-4")}
+              className={cn(
+                buttonVariants({ variant: "default" }),
+                "mt-4 w-full sm:w-auto"
+              )}
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Create Proposal
@@ -91,24 +96,26 @@ export function OrganizationProposals({
           </div>
         ) : (
           <>
-            <div className="flex flex-col w-full gap-2 mb-8">
-              <p className="text-muted-foreground">ACTIVE</p>
+            <div className="flex flex-col w-full gap-2 mb-6 sm:mb-8">
+              <p className="text-xs sm:text-sm text-muted-foreground font-medium">
+                ACTIVE
+              </p>
               {proposals?.activeProposals.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center border rounded-lg">
+                <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center border rounded-lg">
                   <div className="rounded-full bg-muted p-3">
                     <Clock className="h-6 w-6 text-muted-foreground" />
                   </div>
                   <h3 className="mt-4 text-lg font-semibold">
                     No active proposals
                   </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="mt-2 text-sm text-muted-foreground px-4">
                     Create a new proposal to get started
                   </p>
                   <Link
                     href={`/organizations/${organizationId}/proposals/new`}
                     className={cn(
                       buttonVariants({ variant: "default" }),
-                      "mt-4"
+                      "mt-4 w-full sm:w-auto"
                     )}
                   >
                     <PlusCircle className="mr-2 h-4 w-4" />
@@ -129,16 +136,18 @@ export function OrganizationProposals({
             </div>
 
             <div className="flex flex-col w-full gap-2">
-              <p className="text-muted-foreground">PAST</p>
+              <p className="text-xs sm:text-sm text-muted-foreground font-medium">
+                PAST
+              </p>
               {proposals?.pastProposals.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center border rounded-lg">
+                <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center border rounded-lg">
                   <div className="rounded-full bg-muted p-3">
                     <Clock className="h-6 w-6 text-muted-foreground" />
                   </div>
                   <h3 className="mt-4 text-lg font-semibold">
                     No past proposals
                   </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="mt-2 text-sm text-muted-foreground px-4">
                     Past proposals will appear here once voting is complete
                   </p>
                 </div>
@@ -321,38 +330,39 @@ function ProposalCard({
 
   return (
     <Card>
-      <CardHeader className="p-3">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg font-medium whitespace-nowrap truncate ... w-[550px]">
-              <ProposalStatusBadge status={proposal.status} />{" "}
-              {proposal.title || "Untitled"}
+      <CardHeader className="p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-base sm:text-lg font-medium break-words max-w-xs md:max-w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <ProposalStatusBadge status={proposal.status} />
+                <span className="truncate">{proposal.title || "Untitled"}</span>
+              </div>
             </CardTitle>
-            <CardDescription className="mt-1">
-              Proposed by {truncate(proposal.proposer, 8, 4)}{" "}
-              {isActive && !hasVoted && (
+            <CardDescription className="mt-2 text-xs sm:text-sm break-words">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                <span>Proposed by {truncate(proposal.proposer, 6, 3)}</span>
+                {isActive && !hasVoted && (
+                  <span className="text-muted-foreground">
+                    <span className="hidden sm:inline"> | </span>
+                    <DateComponent
+                      datetime={dayjs.unix(proposal.expiresAt).toISOString()}
+                      type="toDate"
+                    />{" "}
+                    left to vote
+                  </span>
+                )}
                 <span className="text-muted-foreground">
-                  {" "}
-                  |{" "}
-                  <DateComponent
-                    datetime={dayjs.unix(proposal.expiresAt).toISOString()}
-                    type="toDate"
-                  />{" "}
-                  left to vote
+                  <span className="hidden sm:inline"> | </span>
+                  ADD {proposal.type}
                 </span>
-              )}{" "}
-              | ADD {proposal.type}
+              </div>
             </CardDescription>
           </div>
-          {/* <ProposalStatusBadge status={proposal.status} /> */}
-          {/* <Link
-            href={`https://explorer.solana.com/address/${proposal.accountAddress}?cluster=devnet`}
-            className="text-muted-foreground hover:text-primary ml-2"
-          >
-            <ExternalLink className="size-4" />
-          </Link> */}
+
+          {/* Voting buttons - responsive layout */}
           {!!publicKey && isActive && (
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto justify-end">
               {!hasVoted && membershipData?.isMember ? (
                 // Show voting buttons for eligible members
                 <>
@@ -360,7 +370,7 @@ function ProposalCard({
                     variant="default"
                     size="sm"
                     disabled={transactionStatus.isProcessing}
-                    className="text-white font-medium bg-[#2e9668] hover:bg-[#3ab981] dark:text-green-400 dark:border-green-900 dark:hover:bg-green-950 dark:hover:text-green-300"
+                    className="text-white font-medium bg-[#2e9668] hover:bg-[#3ab981] dark:text-green-400 dark:border-green-900 dark:hover:bg-green-950 dark:hover:text-green-300 flex-1 sm:flex-none"
                     onClick={() => handleVote(true)}
                   >
                     YES
@@ -370,22 +380,23 @@ function ProposalCard({
                     size="sm"
                     disabled={transactionStatus.isProcessing}
                     onClick={() => handleVote(false)}
-                    className="text-white font-medium bg-[#e11c48] hover:bg-[#f43f5e] border-red-200 dark:text-red-400 dark:border-red-900 dark:hover:bg-red-950 dark:hover:text-red-300"
+                    className="text-white font-medium bg-[#e11c48] hover:bg-[#f43f5e] border-red-200 dark:text-red-400 dark:border-red-900 dark:hover:bg-red-950 dark:hover:text-red-300 flex-1 sm:flex-none"
                   >
                     NO
                   </Button>
                 </>
               ) : hasVoted ? (
                 // Show voted status
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
                   <Check className="h-4 w-4" />
                   <span>You voted</span>
                 </div>
               ) : !membershipData?.isMember ? (
                 // Show membership requirement for non-members
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
                   <AlertCircle className="h-4 w-4" />
-                  <span>Members only</span>
+                  <span className="hidden sm:inline">Members only</span>
+                  <span className="sm:hidden">Members only</span>
                 </div>
               ) : null}
             </div>
@@ -394,97 +405,79 @@ function ProposalCard({
       </CardHeader>
 
       {isActive && (
-        <CardContent className="px-3">
+        <CardContent className="px-3 sm:px-4">
           {/* <p className="text-sm mb-4">{proposal.description}</p> */}
 
           <>
             <div className="space-y-2 mt-2">
               {isActive && (
-                <div className="flex justify-between text-xs text-muted-foreground gap-4">
+                <div className="flex flex-col sm:flex-row sm:justify-between text-xs text-muted-foreground gap-2 sm:gap-4">
                   <div className="flex">
                     <span className="flex items-center gap-1">
                       {proposal.type == "TASK" && (
-                        <div className="flex items-center opacity-85 gap-1">
-                          Results in <Icons.usdc className="size-3" />{" "}
-                          {(proposal.amount / 10 ** 6).toFixed(2)} reward after
-                          completion
+                        <div className="flex items-center opacity-85 gap-1 text-xs">
+                          <span className="hidden sm:inline">Results in</span>
+                          <span className="sm:hidden">Reward:</span>
+                          <Icons.usdc className="size-3" />{" "}
+                          {(proposal.amount / 10 ** 6).toFixed(2)}
+                          <span className="hidden sm:inline">
+                            reward after completion
+                          </span>
                         </div>
                       )}
                     </span>
                   </div>
-                  <div className="flex">
-                    <span className="flex items-center gap-1 me-2">
-                      {proposal.votesFor} YES
+                  <div className="flex gap-3 sm:gap-2">
+                    <span className="flex items-center gap-1">
+                      <span className="font-medium">{proposal.votesFor}</span>{" "}
+                      YES
                     </span>
                     <span className="flex items-center gap-1">
-                      {proposal.votesAgainst} NO
+                      <span className="font-medium">
+                        {proposal.votesAgainst}
+                      </span>{" "}
+                      NO
                     </span>
                     {/* <span>{remainingVotes} Members Haven&apos;t Voted</span> */}
                   </div>
                 </div>
               )}
-              <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
+              <div className="relative h-2 bg-secondary rounded-full overflow-hidden hidden">
                 <div
                   className="absolute h-full bg-stone-500 transition-all duration-300"
                   style={{
                     width: `${approvalPercentage + disapprovalPercentage}%`,
                   }}
                 />
-                {/* <div
-                  className="absolute h-full bg-stone-50 transition-all duration-300"
-                  style={{
-                    width: `${disapprovalPercentage}%`,
-                    left: `${approvalPercentage}%`,
-                  }}
-                /> */}
               </div>
             </div>
           </>
         </CardContent>
       )}
-
-      {/* {isActive && !hasVoted && (
-        <CardFooter className="flex  justify-between">
-          <div className="mt-4 p-3 bg-amber-50 text-amber-800 rounded-md text-sm dark:bg-amber-900/20 dark:text-amber-400">
-            <span className="font-medium">Time remaining:</span>{" "}
-            <DateComponent
-              datetime={dayjs.unix(proposal.expiresAt).toISOString()}
-              type="toDate"
-            />
-            {proposal.expiresAt &&
-                `${dayjs
-                  .unix(proposal.expiresAt)
-                  .format("MMM D, YYYY h:mm A")}`}
-          </div>
-
-
-        </CardFooter>
-      )} */}
     </Card>
   );
 }
 
 function ProposalStatusBadge({ status }: { status: string }) {
-  let className = "px-2.5 py-0.5 text-lg font-medium rounded-sm ";
+  let className =
+    "px-1 py-0.5 text-sm sm:text-base font-medium rounded-sm inline-flex items-center gap-1 w-fit ";
   let statusIcon;
 
   switch (status) {
     case "active":
-      statusIcon = (
-        <Circle className="size-2 inline-block animate-ping fill-stone-500" />
-      );
+      statusIcon = <Circle className="size-2 animate-ping fill-stone-500" />;
       className +=
         "bg-stone-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
       break;
     case "approved":
-      statusIcon = <Check className="size-4 inline-block" />;
+      statusIcon = <Check className="size-3 sm:size-4" />;
       className +=
-        "bg-[#2e9668] !px-4 align-middle text-white dark:bg-green-900/30 dark:text-green-400";
+        "px-2 sm:px-2.5 bg-[#2e9668] text-white dark:bg-green-900/30 dark:text-green-400";
       break;
     case "rejected":
-      statusIcon = <X className="size-4 inline-block" />;
+      statusIcon = <X className="size-3 sm:size-4" />;
       className +=
-        "bg-red-100 !px-4 align-middle text-red-800 dark:bg-red-900/30 dark:text-red-400";
+        "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
       break;
     default:
       className +=
@@ -494,8 +487,6 @@ function ProposalStatusBadge({ status }: { status: string }) {
   const statusText = status.charAt(0).toUpperCase() + status.slice(1);
 
   return (
-    <span className={className + " mr-2"}>
-      {statusIcon ? statusIcon : statusText}
-    </span>
+    <span className={className}>{statusIcon ? statusIcon : statusText}</span>
   );
 }

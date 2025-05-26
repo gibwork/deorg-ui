@@ -53,34 +53,34 @@ export function OrganizationOverview({
                 />
               </div>
 
-              <div className="flex flex-col  w-full">
-                <h1 className="text-2xl font-bold">{organization?.name}</h1>
+              <div className="flex flex-col md:flex-row justify-between gap-3 w-full">
+                <div className="flex flex-col  w-full">
+                  <h1 className="text-2xl font-bold">{organization?.name}</h1>
 
-                <div className="flex flex-row items-center gap-3 text-sm text-stone-500">
-                  <span className="flex items-center gap-1">
-                    {organization.contributors?.length || 0} contributors
-                  </span>
-                  •
-                  <span className="flex items-center gap-1">
-                    {organization.members?.length || 0} Followers
-                  </span>
+                  <div className="flex flex-row items-center gap-3 text-sm text-stone-500">
+                    <span className="flex items-center gap-1">
+                      {organization.contributors?.length || 0} contributors
+                    </span>
+                    •
+                    <span className="flex items-center gap-1">
+                      {organization.members?.length || 0} Followers
+                    </span>
+                  </div>
+                </div>
+
+                <div className="md:inline-flex md:justify-end ">
+                  {!isMembershipLoading ? (
+                    <FollowOrganizationButton organizationId={organizationId} />
+                  ) : (
+                    <LoaderButton
+                      variant="default"
+                      size={"sm"}
+                      className="w-36 md:w-24 "
+                      isLoading={isMembershipLoading}
+                    ></LoaderButton>
+                  )}
                 </div>
               </div>
-
-              {!isMembershipLoading ? (
-                <div className="inline-flex justify-end ">
-                  <FollowOrganizationButton organizationId={organizationId} />
-                </div>
-              ) : (
-                <div className="inline-flex justify-end ">
-                  <LoaderButton
-                    variant="default"
-                    size={"sm"}
-                    className="w-24"
-                    isLoading={isMembershipLoading}
-                  ></LoaderButton>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -102,17 +102,19 @@ export function OrganizationOverviewSkeleton() {
               <Skeleton className="w-20 h-20 rounded-lg" />
             </div>
 
-            <div className="flex flex-col w-full gap-2">
-              <Skeleton className="h-8 w-48" />
-              <div className="flex flex-row items-center gap-3">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-4 rounded-full" />
-                <Skeleton className="h-4 w-20" />
+            <div className="flex flex-col md:flex-row justify-between gap-3 w-full">
+              <div className="flex flex-col w-full">
+                <Skeleton className="h-8 w-48 mb-2" />
+                <div className="flex flex-row items-center gap-3">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-4 rounded-full" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
               </div>
-            </div>
 
-            <div className="inline-flex justify-end">
-              <Skeleton className="h-9 w-24 rounded-md" />
+              <div className="md:inline-flex md:justify-end">
+                <Skeleton className="h-9 w-24 rounded-md" />
+              </div>
             </div>
           </div>
         </div>
