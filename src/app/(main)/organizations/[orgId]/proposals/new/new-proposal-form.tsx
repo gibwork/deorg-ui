@@ -652,7 +652,7 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
 
   const isLastStep = currentStep === FORM_STEPS.length - 1;
   return (
-    <div className="max-w-3xl mx-auto py-6">
+    <div className="max-w-3xl mx-auto py-6 pb-20">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight">
           Create New Proposal
@@ -1181,7 +1181,7 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
                       <>
                         <div>
                           <h3 className="font-medium">Member</h3>
-                          <p className="text-muted-foreground">
+                          <p className="text-muted-foreground truncate max-w-[250px] sm:max-w-xs md:max-w-full">
                             {orgMembersData?.find(
                               (m) =>
                                 m.user.walletAddress ===
@@ -1209,9 +1209,11 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
 
                         <div>
                           <h3 className="font-medium">Team Members</h3>
-                          <p className="text-muted-foreground">
+                          <p className="text-muted-foreground  max-w-[250px] sm:max-w-xs md:max-w-full">
                             {currentValues.projectMembers?.map((member) => (
-                              <div key={member}>{member}</div>
+                              <div className="truncate" key={member}>
+                                {member}
+                              </div>
                             ))}
                           </p>
                         </div>
@@ -1229,14 +1231,14 @@ export default function NewProposalForm({ orgId }: { orgId: string }) {
 
                         <div>
                           <h3 className="font-medium">Project</h3>
-                          <p className="text-muted-foreground">
+                          <p className="text-muted-foreground truncate max-w-[250px] sm:max-w-xs md:max-w-full">
                             {currentValues.selectedProject}
                           </p>
                         </div>
 
                         <div>
                           <h3 className="font-medium">Assignee</h3>
-                          <p className="text-muted-foreground">
+                          <p className="text-muted-foreground truncate max-w-[250px] sm:max-w-xs md:max-w-full">
                             {currentValues.assignedMember}
                           </p>
                         </div>

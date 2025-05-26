@@ -35,7 +35,8 @@ function Banner() {
               <div className="flex items-center gap-2 lg:grid lg:grid-cols-12  ">
                 <p className=" lg:col-start-2 lg:col-span-10  text-center font-medium py-2 w-full text-xs md:text-sm  ">
                   <span className=" md:gap-2">
-                    🚀 Now Live on Devnet - Follow us on{" "}
+                    🚀 Now Live on Devnet -<br className="sm:hidden" /> Follow
+                    us on{" "}
                     <a
                       href="https://twitter.com/deorgdotxyz"
                       target="_blank"

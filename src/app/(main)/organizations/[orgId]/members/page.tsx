@@ -1,5 +1,8 @@
 import { Suspense } from "react";
-import { OrganizationMembers } from "@/features/organizations/components/organization/organization-members";
+import {
+  MembersLoadingSkeleton,
+  OrganizationMembers,
+} from "@/features/organizations/components/organization/organization-members";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "@/components/providers/query";
@@ -8,7 +11,7 @@ import { getOrganizationMembers } from "@/features/organizations/actions/members
 
 export default function page({ params }: { params: { orgId: string } }) {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<MembersLoadingSkeleton />}>
       <OrganizationMembersPage params={params} />
     </Suspense>
   );

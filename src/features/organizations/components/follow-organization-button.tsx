@@ -58,6 +58,7 @@ export const FollowOrganizationButton = ({
     <LoaderButton
       variant={`${membershipData?.isMember ? "outline" : "default"}`}
       size={"sm"}
+      className="w-36 md:w-24 "
       disabled={joinOrgMutation.isPending || membershipData?.isMember}
       onClick={handleJoin}
       isLoading={joinOrgMutation.isPending}
